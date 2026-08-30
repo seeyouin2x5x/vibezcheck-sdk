@@ -184,6 +184,56 @@ export async function handleThinkingPrompt(prompt: string, customerId: string) {
 
 ---
 
+## ⚛️ React & React Native Session Tracking (`vibezcheck/react`)
+
+Track live session tokens and dollar costs directly on the client side with **zero database required**:
+
+### 1. Wrap your chat app with `<VibezSessionProvider>`:
+```tsx
+import { VibezSessionProvider, VibezSessionWidget } from 'vibezcheck/react';
+
+export default function App() {
+  return (
+    <VibezSessionProvider persist="sessionStorage">
+      <ChatInterface />
+
+      {/* Drop-in floating pill widget showing live session tokens & cost */}
+      <VibezSessionWidget position="bottom-right" showReasoning theme="dark" />
+    </VibezSessionProvider>
+  );
+}
+```
+
+### 2. Auto-hook into Vercel AI SDK (`useChat`):
+```tsx
+import { useChat } from 'ai/react';
+import { useVibezSession, VibezSessionBadge } from 'vibezcheck/react';
+
+export function ChatInterface() {
+  const { recordTurn, sessionUsage, sessionCost } = useVibezSession();
+
+  const { messages, input, handleSubmit } = useChat({
+    onFinish: (message, { usage }) => {
+      // 1 line: accumulates tokens & calculates real-time USD costs in React state
+      recordTurn({ model: 'gpt-5.6-sol', usage });
+    },
+  });
+
+  return (
+    <div>
+      <header className="flex justify-between items-center">
+        <h2>AI Assistant</h2>
+        <VibezSessionBadge showTokens showCost />
+      </header>
+
+      <MessagesList messages={messages} />
+    </div>
+  );
+}
+```
+
+---
+
 ## 💰 Built-in Model Pricing Registry
 
 `vibezcheck` ships with default rates for all active frontier models:

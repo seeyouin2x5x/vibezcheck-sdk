@@ -9,6 +9,7 @@ export default defineConfig({
     'customers/index': 'src/customers/index.ts',
     'auth/index': 'src/auth/index.ts',
     'billing/index': 'src/billing/index.ts',
+    'react/index': 'src/react/index.ts',
   },
   format: ['cjs', 'esm'],
   dts: true,
@@ -23,5 +24,8 @@ export default defineConfig({
     '@google/generative-ai',
     'ai',
     '@ai-sdk/provider',
+    'react',
+    'react-dom',
+    'react-native',
   ],
 });

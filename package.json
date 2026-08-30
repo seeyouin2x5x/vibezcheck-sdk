@@ -64,6 +64,11 @@
       "types": "./dist/billing/index.d.ts",
       "import": "./dist/billing/index.mjs",
       "require": "./dist/billing/index.js"
+    },
+    "./react": {
+      "types": "./dist/react/index.d.ts",
+      "import": "./dist/react/index.mjs",
+      "require": "./dist/react/index.js"
     }
   },
   "files": [
@@ -92,9 +97,14 @@
     "@google/generative-ai": "^0.24.1",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.10.5",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
     "ai": "^5.0.76",
     "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
     "openai": "^6.6.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
     "tsup": "^8.3.5",
@@ -106,6 +116,8 @@
     "@google/generative-ai": "^0.21.0 || ^0.24.0",
     "ai": "^3.0.0 || ^4.0.0 || ^5.0.0",
     "openai": "^4.0.0 || ^6.0.0",
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0",
     "stripe": "^16.0.0 || ^17.0.0 || ^18.0.0"
   },
   "peerDependenciesMeta": {
@@ -122,6 +134,12 @@
       "optional": true
     },
     "openai": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
       "optional": true
     },
     "stripe": {
