@@ -71,8 +71,12 @@
       "require": "./dist/react/index.js"
     }
   },
+  "bin": {
+    "vibezcheck": "./bin/vibezcheck.js"
+  },
   "files": [
     "dist",
+    "bin",
     "README.md",
     "LICENSE",
     "package.json"

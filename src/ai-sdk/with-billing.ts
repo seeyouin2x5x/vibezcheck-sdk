@@ -1,8 +1,14 @@
-import type { CustomerParam, UsageEvent } from '../types';
+import type {
+  CustomerParam,
+  UsageEvent,
+  CircuitBreakerOptions,
+  BudgetExceededEvent,
+} from '../types';
+import { VibezCircuitBreakerError } from '../types';
 import { createMeter, VibezMeter } from '../meter/client';
 import { calculateUsageCost } from '../pricing/calculator';
 
-export interface WithBillingOptions {
+export interface WithBillingOptions extends CircuitBreakerOptions {
   /** Customer email, user ID, or Stripe customer ID */
   customer?: CustomerParam;
   /** Direct Stripe customer ID */
@@ -20,11 +26,11 @@ export interface WithBillingOptions {
 }
 
 /**
- * Wraps any Vercel AI SDK LanguageModel (v2 or v3) with automated Stripe billing and token metering.
+ * Wraps any Vercel AI SDK LanguageModel (v2 or v3) with automated Stripe billing, token metering, and agent circuit breakers.
  *
  * @param model - The Vercel AI SDK language model instance (e.g. openai('gpt-5.6-sol'), anthropic('claude-3-7-sonnet'))
  * @param options - Billing & customer configuration
- * @returns Decorated LanguageModel that automatically meters tokens and sends Stripe meter events
+ * @returns Decorated LanguageModel that automatically meters tokens, sends Stripe meter events, and enforces budget guardrails
  */
 export function withBilling<T extends object>(model: T, options: WithBillingOptions = {}): T {
   if (!model || typeof model !== 'object') {
@@ -46,7 +52,7 @@ export function withBilling<T extends object>(model: T, options: WithBillingOpti
   const modelId = (model as any).modelId || 'unknown-model';
   const provider = (model as any).provider?.replace(/^@ai-sdk\//, '') || 'ai-sdk';
 
-  // Helper to record usage
+  // Helper to record usage and enforce circuit breakers
   const handleUsage = (rawUsage: any) => {
     if (!rawUsage) return;
 
@@ -72,6 +78,45 @@ export function withBilling<T extends object>(model: T, options: WithBillingOpti
     };
 
     const cost = calculateUsageCost(modelId, usage);
+
+    // 🛡️ Agent Circuit Breakers Check
+    if (options.maxCostPerCallUSD && cost.totalUSD > options.maxCostPerCallUSD) {
+      const budgetEvent: BudgetExceededEvent = {
+        reason: 'cost_per_call_exceeded',
+        limit: options.maxCostPerCallUSD,
+        current: cost.totalUSD,
+        model: modelId,
+        customerId,
+        message: `[vibezcheck] Circuit Breaker tripped: Call cost ($${cost.totalUSD.toFixed(4)}) exceeded maxCostPerCallUSD threshold ($${options.maxCostPerCallUSD.toFixed(4)}).`,
+      };
+
+      if (options.onBudgetExceeded) {
+        options.onBudgetExceeded(budgetEvent);
+      }
+
+      if (options.throwOnBudgetExceeded) {
+        throw new VibezCircuitBreakerError(budgetEvent);
+      }
+    }
+
+    if (options.maxTokensPerCall && usage.totalTokens > options.maxTokensPerCall) {
+      const budgetEvent: BudgetExceededEvent = {
+        reason: 'max_tokens_exceeded',
+        limit: options.maxTokensPerCall,
+        current: usage.totalTokens,
+        model: modelId,
+        customerId,
+        message: `[vibezcheck] Circuit Breaker tripped: Token count (${usage.totalTokens}) exceeded maxTokensPerCall limit (${options.maxTokensPerCall}).`,
+      };
+
+      if (options.onBudgetExceeded) {
+        options.onBudgetExceeded(budgetEvent);
+      }
+
+      if (options.throwOnBudgetExceeded) {
+        throw new VibezCircuitBreakerError(budgetEvent);
+      }
+    }
 
     const event: UsageEvent = {
       timestamp: new Date().toISOString(),
@@ -100,12 +145,41 @@ export function withBilling<T extends object>(model: T, options: WithBillingOpti
     }
   };
 
-  // Create a Proxy around the LanguageModel to intercept doGenerate and doStream
-  return new Proxy(model, {
+  // Proxy to intercept LanguageModel calls
+  const handler: ProxyHandler<any> = {
     get(target, prop, receiver) {
       const originalValue = Reflect.get(target, prop, receiver);
 
-      // 1. Intercept doGenerate (synchronous generation)
+      // Intercept doStream (Vercel AI SDK v1/v2/v3)
+      if (prop === 'doStream' && typeof originalValue === 'function') {
+        return async function (...args: any[]) {
+          const result = await originalValue.apply(target, args);
+          if (!result || !result.stream) {
+            return result;
+          }
+
+          const originalStream = result.stream;
+
+          // Wrap stream to capture tokens upon finish chunk
+          const transformStream = new TransformStream({
+            transform(chunk, controller) {
+              controller.enqueue(chunk);
+
+              // AI SDK v1/v2/v3 stream finish chunk containing usage
+              if (chunk.type === 'finish' && chunk.usage) {
+                handleUsage(chunk.usage);
+              }
+            },
+          });
+
+          return {
+            ...result,
+            stream: originalStream.pipeThrough(transformStream),
+          };
+        };
+      }
+
+      // Intercept doGenerate (Vercel AI SDK v1/v2/v3)
       if (prop === 'doGenerate' && typeof originalValue === 'function') {
         return async function (...args: any[]) {
           const result = await originalValue.apply(target, args);
@@ -116,81 +190,14 @@ export function withBilling<T extends object>(model: T, options: WithBillingOpti
         };
       }
 
-      // 2. Intercept doStream (streaming generation)
-      if (prop === 'doStream' && typeof originalValue === 'function') {
-        return async function (...args: any[]) {
-          const result = await originalValue.apply(target, args);
-          if (!result || !result.stream) {
-            return result;
-          }
-
-          const originalStream = result.stream;
-
-          // If stream is a standard Web ReadableStream
-          if (typeof (originalStream as any).getReader === 'function') {
-            const reader = (originalStream as any).getReader();
-            const transformedStream = new ReadableStream({
-              async start(controller) {
-                try {
-                  while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) {
-                      controller.close();
-                      break;
-                    }
-
-                    // Inspect stream chunks for 'finish' usage
-                    if (value && typeof value === 'object') {
-                      if (value.type === 'finish' && value.usage) {
-                        handleUsage(value.usage);
-                      }
-                    }
-
-                    controller.enqueue(value);
-                  }
-                } catch (err) {
-                  controller.error(err);
-                }
-              },
-            });
-
-            return {
-              ...result,
-              stream: transformedStream,
-            };
-          }
-
-          // If stream is an AsyncIterable
-          if (Symbol.asyncIterator in originalStream) {
-            const wrappedAsyncIterable = {
-              async *[Symbol.asyncIterator]() {
-                for await (const chunk of originalStream) {
-                  if (chunk && typeof chunk === 'object') {
-                    if (chunk.type === 'finish' && chunk.usage) {
-                      handleUsage(chunk.usage);
-                    }
-                  }
-                  yield chunk;
-                }
-              },
-            };
-
-            return {
-              ...result,
-              stream: wrappedAsyncIterable,
-            };
-          }
-
-          return result;
-        };
-      }
-
       return originalValue;
     },
-  });
+  };
+
+  return new Proxy(model, handler);
 }
 
 /**
- * Alias for withBilling
+ * Convenient alias for withBilling
  */
 export const meteredModel = withBilling;
