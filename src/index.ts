@@ -1,8 +1,9 @@
 import Stripe from 'stripe';
 import type { MeterOptions, StreamWrapOptions, CustomerParam } from './types';
 import { VibezMeter, createMeter } from './meter/client';
-import { calculateCost } from './pricing/calculator';
+import { calculateCost, getModelPricing, registerModelPricing } from './pricing';
 import { withBilling, meteredModel } from './ai-sdk/with-billing';
+import { createVibezModel, type VibezCheckModelOptions } from './ai-sdk/declarative';
 import { CustomerManager, createCustomerManager } from './customers/manager';
 import { ApiKeyAuth, createApiKeyAuth, extractAuthToken } from './auth';
 import { BillingHelper, createBillingHelper } from './billing/sessions';
@@ -76,52 +77,12 @@ export class VibezCheckClient {
   }
 
   /**
-   * 1-Line Universal Stream Responder for API Routes (Next.js, Express, Hono)
+   * Declarative model resolver for Vercel AI SDK
    */
-  public async stream(params: {
-    model: string;
-    messages: Array<{ role: string; content: string }>;
-    customer?: CustomerParam;
-    temperature?: number;
-  }): Promise<Response> {
-    const OpenAI = (await import('openai')).default;
-    const openai = new OpenAI();
-
-    const responseStream = await openai.chat.completions.create({
-      model: params.model,
-      messages: params.messages as any,
-      stream: true,
-      stream_options: { include_usage: true },
-      temperature: params.temperature,
-    });
-
-    const meteredStream = this.wrapStream(responseStream, {
-      customer: params.customer,
-      model: params.model,
-    });
-
-    const encoder = new TextEncoder();
-    const readable = new ReadableStream({
-      async start(controller) {
-        try {
-          for await (const chunk of meteredStream) {
-            const text = (chunk as any).choices?.[0]?.delta?.content || '';
-            if (text) {
-              controller.enqueue(encoder.encode(text));
-            }
-          }
-          controller.close();
-        } catch (err) {
-          controller.error(err);
-        }
-      },
-    });
-
-    return new Response(readable, {
-      headers: {
-        'Content-Type': 'text/plain; charset=utf-8',
-        'Transfer-Encoding': 'chunked',
-      },
+  public model(modelOrId: any, options?: VibezCheckModelOptions): any {
+    return createVibezModel(modelOrId, {
+      ...options,
+      meter: this.meter,
     });
   }
 
@@ -148,21 +109,62 @@ export function createVibezCheck(config: VibezCheckConfig = {}): VibezCheckClien
 }
 
 /**
- * vibezcheck factory alias
+ * Declarative 1-line factory & model resolver for Vercel AI SDK
+ *
+ * @example
+ * ```typescript
+ * import { generateText, streamText } from 'ai';
+ * import { vibezcheck } from 'vibezcheck';
+ *
+ * // 1. Use string model identifier:
+ * const { text } = await generateText({
+ *   model: vibezcheck('openai/gpt-4o-mini', { customer: 'alex@example.com' }),
+ *   prompt: 'What is love?',
+ * });
+ *
+ * // 2. Use with streamText:
+ * const result = streamText({
+ *   model: vibezcheck('gpt-4o-mini', { customer: 'alex@example.com' }),
+ *   messages,
+ * });
+ *
+ * // 3. Wrap existing model instance:
+ * const result = streamText({
+ *   model: vibezcheck(openai('gpt-4o-mini'), { customer: 'alex@example.com' }),
+ *   messages,
+ * });
+ * ```
  */
-export const vibezcheck = createVibezCheck;
+export function vibezcheck(
+  modelOrId: any,
+  options?: VibezCheckModelOptions
+): any;
+export function vibezcheck(config?: VibezCheckConfig): VibezCheckClient;
+export function vibezcheck(
+  firstArg?: any,
+  secondArg?: any
+): any {
+  if (typeof firstArg === 'string' || (firstArg && (firstArg.specificationVersion || firstArg.doGenerate || firstArg.doStream))) {
+    return createVibezModel(firstArg, secondArg);
+  }
+  return new VibezCheckClient(firstArg || {});
+}
+
+// Attach static helper utilities to vibezcheck function
+vibezcheck.calculateCost = calculateCost;
+vibezcheck.getModelPricing = getModelPricing;
+vibezcheck.registerModelPricing = registerModelPricing;
+vibezcheck.create = createVibezCheck;
+vibezcheck.withBilling = withBilling;
+vibezcheck.createMeter = createMeter;
 
 /**
- * vibescheck alias (tolerates spelling difference)
+ * Singleton client instance
  */
-export const vibescheck = createVibezCheck;
+export const vibez = new VibezCheckClient();
 
 /**
- * Singleton instance initialized with process.env
+ * Aliases for developer typing convenience
  */
-export const vibez = createVibezCheck();
-
-/**
- * Singleton alias
- */
+export const vibescheck = vibezcheck;
 export const vibes = vibez;
