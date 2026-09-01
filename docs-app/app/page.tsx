@@ -2,12 +2,14 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { Header } from '../components/header';
 import { LandingMeter } from '../components/landing-meter';
 import { CostCalculator } from '../components/cost-calculator';
 import { WidgetSandbox } from '../components/widget-sandbox';
 import { CodeBlock } from '../components/code-block';
+import { EyeGuardianIllustration } from '../components/illustrations/eye-guardian';
+import { DeveloperDeskIllustration } from '../components/illustrations/developer-desk';
+import { TokenCoinsIllustration } from '../components/illustrations/token-coins';
 import {
   Sparkles,
   ArrowRight,
@@ -64,7 +66,7 @@ export default function LandingPage() {
             name: 'What is VibezCheck in simple terms?',
             acceptedAnswer: {
               '@type': 'Answer',
-              text: 'VibezCheck is like an electric meter for Artificial Intelligence. Just like an electric meter spins when you turn on the lights, VibezCheck counts every token and thinking thought when someone asks your AI a question, converting it into exact pennies with Stripe.',
+              text: 'VibezCheck is the smart electric meter for Artificial Intelligence. Just like an electric meter spins when you turn on the lights in your bedroom, VibezCheck counts every token and thinking thought when someone asks your AI a question, converting it into exact pennies with Stripe.',
             },
           },
           {
@@ -72,7 +74,7 @@ export default function LandingPage() {
             name: 'Does VibezCheck slow down my AI streaming responses?',
             acceptedAnswer: {
               '@type': 'Answer',
-              text: 'No. VibezCheck operates with 0ms added latency. It wraps the model stream directly with non-blocking lifecycle hooks without routing through intermediate proxy servers.',
+              text: 'No. VibezCheck operates with 0ms added latency. It wraps your model stream directly using non-blocking asynchronous hooks without routing traffic through intermediate proxy servers.',
             },
           },
           {
@@ -80,7 +82,7 @@ export default function LandingPage() {
             name: 'What are reasoning tokens and why do they matter?',
             acceptedAnswer: {
               '@type': 'Answer',
-              text: 'Reasoning models like OpenAI o3-mini and Claude 3.7 generate invisible thinking tokens before producing their final output. VibezCheck captures these hidden reasoning tokens to ensure your profit margins remain 100% accurate.',
+              text: 'Reasoning models like OpenAI o3-mini and Claude 3.7 generate invisible thinking tokens before producing their final output text. VibezCheck captures these hidden reasoning tokens to ensure your profit margins remain 100% accurate.',
             },
           },
         ],
@@ -171,21 +173,23 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* Hero Visual Mascot + Live Meter */}
-        <div className="max-w-5xl mx-auto px-6 mt-14">
+        {/* Hero Visual Doodled Feature Card + Live Speedometer */}
+        <div className="max-w-6xl mx-auto px-6 mt-14">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-            {/* Mano Banana Mascot Hero Card */}
-            <div className="lg:col-span-4 p-6 rounded-3xl bg-cream-100/70 border border-slate-200/80 flex flex-col items-center text-center shadow-sm">
-              <div className="relative w-44 h-44 rounded-2xl overflow-hidden mb-3 bg-white p-2 border border-slate-200/60 shadow-xs">
-                <img
-                  src="/images/banana-meter.jpg"
-                  alt="Mano Banana mascot holding the AI Smart Meter"
-                  className="w-full h-full object-cover rounded-xl"
-                />
+            {/* The Eye Guardian Character Card */}
+            <div className="lg:col-span-4 p-6 sm:p-7 rounded-3xl bg-cream-100/80 border border-slate-200/80 flex flex-col items-center text-center shadow-sm relative overflow-hidden">
+              {/* Floating Lime Sticky Note */}
+              <div className="absolute top-4 left-4 px-2.5 py-1 rounded-lg bg-lime-400 text-slate-950 font-bold text-[10px] border border-slate-900 shadow-2xs transform -rotate-3">
+                Looks out for you! 👁️
               </div>
-              <h3 className="font-bold text-sm text-slate-950">Meet the AI Smart Meter</h3>
+
+              <div className="w-full h-48 flex items-center justify-center mt-2">
+                <EyeGuardianIllustration />
+              </div>
+
+              <h3 className="font-bold text-base text-slate-950 mt-2">The Multi-Eye Guardian</h3>
               <p className="text-xs text-slate-600 mt-1 leading-normal">
-                Friendly, tireless, and accurate down to the single fraction of a token.
+                Tirelessly monitoring every prompt, token, and reasoning thought across all models.
               </p>
             </div>
 
@@ -213,7 +217,7 @@ export default function LandingPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Step 1 Card */}
+            {/* Step 1 Card: The Question */}
             <div className="p-6 rounded-3xl bg-white border border-slate-200/80 shadow-xs flex flex-col justify-between space-y-6 group hover:border-slate-300 transition">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
@@ -222,17 +226,23 @@ export default function LandingPage() {
                   </span>
                   <span className="text-[11px] font-semibold text-slate-400">The Question</span>
                 </div>
+
+                <div className="h-28 flex items-center justify-center overflow-hidden">
+                  <DeveloperDeskIllustration />
+                </div>
+
                 <h3 className="text-lg font-bold text-slate-950">Someone asks the AI a question</h3>
                 <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
                   Your user sends a message like "Write a bedtime story". Every word they type uses a small drop of computer energy called <strong>tokens</strong>.
                 </p>
               </div>
-              <div className="p-3.5 rounded-2xl bg-cream-100/60 border border-slate-200/60 text-xs font-mono text-slate-700">
+
+              <div className="p-3 rounded-2xl bg-cream-100/70 border border-slate-200/60 text-xs font-mono text-slate-700">
                 💬 "Explain black holes..."
               </div>
             </div>
 
-            {/* Step 2 Card */}
+            {/* Step 2 Card: The Smart Meter */}
             <div className="p-6 rounded-3xl bg-white border border-lime-300/80 shadow-xs flex flex-col justify-between space-y-6 relative group hover:border-lime-400 transition bg-gradient-to-b from-white to-lime-50/20">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
@@ -241,18 +251,24 @@ export default function LandingPage() {
                   </span>
                   <span className="text-[11px] font-bold text-slate-900">The Smart Meter</span>
                 </div>
+
+                <div className="h-28 flex items-center justify-center overflow-hidden">
+                  <EyeGuardianIllustration />
+                </div>
+
                 <h3 className="text-lg font-bold text-slate-950">VibezCheck counts every thought</h3>
                 <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
                   Like a digital speedometer, VibezCheck sits right next to the AI, counting regular words AND invisible thinking thoughts with <strong>0.00ms delay</strong>.
                 </p>
               </div>
-              <div className="p-3.5 rounded-2xl bg-slate-950 text-lime-400 border border-slate-800 text-xs font-mono flex items-center justify-between">
+
+              <div className="p-3 rounded-2xl bg-slate-950 text-lime-400 border border-slate-800 text-xs font-mono flex items-center justify-between">
                 <span>Tokens: 384</span>
                 <span className="text-white font-bold">$0.000576</span>
               </div>
             </div>
 
-            {/* Step 3 Card */}
+            {/* Step 3 Card: The Payment */}
             <div className="p-6 rounded-3xl bg-white border border-slate-200/80 shadow-xs flex flex-col justify-between space-y-6 group hover:border-stripe-indigo/40 transition">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
@@ -261,12 +277,18 @@ export default function LandingPage() {
                   </span>
                   <span className="text-[11px] font-semibold text-stripe-indigo">The Payment</span>
                 </div>
+
+                <div className="h-28 flex items-center justify-center overflow-hidden">
+                  <TokenCoinsIllustration />
+                </div>
+
                 <h3 className="text-lg font-bold text-slate-950">The cash register rings</h3>
                 <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
                   VibezCheck tells Stripe to collect the exact pennies from the user. You get paid for every question, and your bank account is 100% protected.
                 </p>
               </div>
-              <div className="p-3.5 rounded-2xl bg-cream-100/60 border border-slate-200/60 text-xs font-mono text-emerald-700 font-semibold flex items-center gap-1.5">
+
+              <div className="p-3 rounded-2xl bg-cream-100/70 border border-slate-200/60 text-xs font-mono text-emerald-700 font-semibold flex items-center gap-1.5">
                 <CheckCircle2 className="h-3.5 w-3.5" />
                 <span>Stripe Charged: $0.000576</span>
               </div>
@@ -304,12 +326,8 @@ export default function LandingPage() {
               </p>
             </div>
 
-            <div className="relative w-full h-48 rounded-2xl overflow-hidden border border-slate-200/80 bg-white">
-              <img
-                src="/images/banana-shield.jpg"
-                alt="Mano Banana Shield protecting against runaway AI bills"
-                className="w-full h-full object-cover"
-              />
+            <div className="relative w-full h-44 rounded-2xl overflow-hidden border border-slate-200/80 bg-white flex items-center justify-center">
+              <EyeGuardianIllustration />
             </div>
           </div>
 
@@ -327,12 +345,8 @@ export default function LandingPage() {
               </p>
             </div>
 
-            <div className="relative w-full h-48 rounded-2xl overflow-hidden border border-slate-200/80 bg-white">
-              <img
-                src="/images/banana-stripe.jpg"
-                alt="Mano Banana collecting tokens and ringing the Stripe cash register"
-                className="w-full h-full object-cover"
-              />
+            <div className="relative w-full h-44 rounded-2xl overflow-hidden border border-slate-200/80 bg-white flex items-center justify-center">
+              <TokenCoinsIllustration />
             </div>
           </div>
         </div>
@@ -579,11 +593,9 @@ export async function POST(req: Request) {
       <footer className="py-12 bg-white border-t border-slate-200 px-6 sm:px-8 text-xs text-slate-500">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-2">
-            <div className="h-6 w-6 rounded-md bg-slate-900 text-white flex items-center justify-center">
-              <Sparkles className="h-3 w-3 text-lime-400" />
-            </div>
-            <span className="font-bold text-slate-900">vibezcheck</span>
-            <span>• The Smart Meter for AI</span>
+            <BrandLogo showBadge={false} />
+            <span className="text-slate-400">|</span>
+            <span>The Electric Meter for AI</span>
           </div>
 
           <div className="flex items-center gap-6 font-medium text-slate-600">

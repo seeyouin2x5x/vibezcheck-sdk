@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { Search, Github, Sparkles, Menu, X, ExternalLink, Bot } from 'lucide-react';
+import { BrandLogo } from './brand-logo';
 import { SearchModal } from './search-modal';
 
 interface HeaderProps {
@@ -17,7 +18,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu, mobileMenuOp
     <>
       <header className="sticky top-0 z-50 w-full bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-4 py-2.5 sm:px-6">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-          {/* Left: Mobile Menu + Brand */}
+          {/* Left: Mobile Menu + Minimalist Brand Logo */}
           <div className="flex items-center gap-3">
             <button
               onClick={onToggleMobileMenu}
@@ -27,18 +28,8 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu, mobileMenuOp
               {mobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
             </button>
 
-            <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="h-7 w-7 rounded-lg bg-stripe-dark text-white flex items-center justify-center shadow-sm group-hover:bg-slate-950 transition relative">
-                <Sparkles className="h-3.5 w-3.5 text-lime-400" />
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-sm tracking-tight text-slate-950">
-                  vibezcheck
-                </span>
-                <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-lime-100 text-slate-900 border border-lime-300">
-                  v0.3.0
-                </span>
-              </div>
+            <Link href="/" className="hover:opacity-90 transition">
+              <BrandLogo />
             </Link>
           </div>
 
@@ -46,7 +37,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu, mobileMenuOp
           <div className="flex-1 max-w-md hidden sm:block">
             <button
               onClick={() => setSearchOpen(true)}
-              className="w-full flex items-center justify-between px-3 py-1.5 rounded-xl bg-cream-50 hover:bg-cream-100/80 border border-slate-200/80 text-xs text-slate-500 transition shadow-xs"
+              className="w-full flex items-center justify-between px-3.5 py-1.5 rounded-xl bg-cream-50 hover:bg-cream-100/80 border border-slate-200/80 text-xs text-slate-500 transition shadow-2xs"
             >
               <div className="flex items-center gap-2">
                 <Search className="h-3.5 w-3.5 text-slate-400" />
