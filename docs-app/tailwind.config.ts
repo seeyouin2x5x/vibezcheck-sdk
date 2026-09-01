@@ -16,15 +16,35 @@ const config: Config = {
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         primary: {
-          DEFAULT: '#000000',
+          DEFAULT: '#0A2540',
           foreground: '#ffffff',
+        },
+        lime: {
+          50: '#FBFFE6',
+          100: '#F2FFB3',
+          200: '#E7FF80',
+          300: '#DDFF4D',
+          400: '#D4FF32', // User's vibrant highlighter color
+          DEFAULT: '#D4FF32',
+          600: '#A3CC00',
+        },
+        stripe: {
+          indigo: '#635BFF',
+          dark: '#0A2540',
+          cyan: '#00D4FF',
+          purple: '#7A73FF',
+        },
+        cream: {
+          50: '#FAF8F5',
+          100: '#F4EFE6', // Soft warm sand/card background
+          200: '#ECE3D4',
         },
         muted: {
           DEFAULT: '#f4f4f5',
           foreground: '#71717a',
         },
         accent: {
-          DEFAULT: '#f4f4f5',
+          DEFAULT: '#D4FF32',
           foreground: '#09090b',
         },
       },

@@ -4,6 +4,7 @@ import { Header } from '../../../components/header';
 import { Sidebar } from '../../../components/sidebar';
 import { TableOfContents } from '../../../components/toc';
 import { MarkdownRenderer } from '../../../components/markdown-renderer';
+import { PageNavigation } from '../../../components/page-navigation';
 import { CostCalculator } from '../../../components/cost-calculator';
 import { WidgetSandbox } from '../../../components/widget-sandbox';
 import { getDocItemBySlug, getAllDocItems } from '../../../lib/docs-data';
@@ -76,7 +77,7 @@ export default async function DocPage({ params }: DocPageProps) {
             <span className="text-slate-900 font-semibold">{doc.title}</span>
           </div>
 
-          {/* Render Full Document Content Cleanly without duplication or string mangling */}
+          {/* Render Full Document Content Cleanly */}
           <div className="space-y-4">
             <MarkdownRenderer content={doc.content} />
           </div>
@@ -93,6 +94,9 @@ export default async function DocPage({ params }: DocPageProps) {
               <WidgetSandbox />
             </div>
           )}
+
+          {/* Next & Back Navigation Footer */}
+          <PageNavigation currentSlug={slug} />
         </main>
 
         {/* Right Table of Contents */}
