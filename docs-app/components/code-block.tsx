@@ -9,74 +9,104 @@ interface CodeBlockProps {
   filename?: string;
 }
 
+const KEYWORDS = new Set([
+  'import', 'export', 'from', 'const', 'let', 'var', 'return', 'async',
+  'await', 'function', 'default', 'type', 'interface', 'class', 'extends',
+  'new', 'if', 'else', 'switch', 'case', 'break', 'try', 'catch', 'finally'
+]);
+
+const SDK_FUNCTIONS = new Set([
+  'vibezcheck', 'streamText', 'generateText', 'generateObject', 'streamObject',
+  'createOpenAI', 'createAnthropic', 'useVibezChat', 'useVibezSession',
+  'useVibez', 'VibezSessionProvider', 'VibezSessionWidget', 'VibezBillingModal',
+  'toDataStreamResponse', 'toTextStreamResponse', 'getOrCreate', 'createCheckoutSession'
+]);
+
+const TYPES = new Set([
+  'Request', 'Response', 'Promise', 'Record', 'string', 'number', 'boolean',
+  'any', 'void', 'UsageEvent', 'DocItem', 'TokenUsage', 'InferenceCost', 'VibezChatMessage'
+]);
+
 /**
- * Lightweight, zero-dependency, ultra-fast syntax colorizer for TypeScript, Bash, JSON, and React.
+ * Tokenize a single line of code into safe React JSX tokens without dangerous regex HTML injection.
  */
-function highlightCode(code: string, language: string = 'typescript') {
-  if (language === 'bash' || language === 'sh') {
-    return code.split('\n').map((line, lineIdx) => {
-      if (line.startsWith('#')) {
-        return <span key={lineIdx} className="text-slate-500 italic">{line}</span>;
-      }
-      if (line.startsWith('npm') || line.startsWith('pnpm') || line.startsWith('npx')) {
-        const parts = line.split(' ');
-        return (
-          <span key={lineIdx}>
-            <span className="text-pink-400 font-bold">{parts[0]}</span>{' '}
-            <span className="text-sky-300">{parts[1]}</span>{' '}
-            <span className="text-emerald-300">{parts.slice(2).join(' ')}</span>
-          </span>
-        );
-      }
-      return <span key={lineIdx} className="text-slate-200">{line}</span>;
-    });
+function renderHighlightedLine(line: string, lineIndex: number): React.ReactNode {
+  const trimmed = line.trim();
+
+  // Full comment line
+  if (trimmed.startsWith('//') || trimmed.startsWith('#')) {
+    return (
+      <span key={lineIndex} className="text-slate-500 italic">
+        {line}
+      </span>
+    );
   }
 
-  // Tokenize line by line for vibrant developer colors
-  const lines = code.split('\n');
+  // Tokenize line using regex matcher for strings, words, numbers, and symbols
+  const tokenRegex = /('(?:\\'|[^'])*'|"(?:\\"|[^"])*"|`(?:\\`|[^`])*`|\b[a-zA-Z_$][a-zA-Z0-9_$]*\b|\b\d+(?:\.\d+)?\b|[^\s\w]+|\s+)/g;
+  const tokens: string[] = line.match(tokenRegex) || [line];
 
-  return lines.map((line, lineIdx) => {
-    // Single line comments
-    if (line.trim().startsWith('//')) {
-      return (
-        <div key={lineIdx} className="text-slate-500 italic">
-          {line}
-        </div>
-      );
-    }
+  return (
+    <span key={lineIndex}>
+      {tokens.map((token, tokenIdx) => {
+        // String literal
+        if (
+          (token.startsWith("'") && token.endsWith("'")) ||
+          (token.startsWith('"') && token.endsWith('"')) ||
+          (token.startsWith('`') && token.endsWith('`'))
+        ) {
+          return (
+            <span key={tokenIdx} className="text-emerald-400">
+              {token}
+            </span>
+          );
+        }
 
-    // Regex token replacement for syntax colors
-    const highlighted = line
-      // Strings in emerald
-      .replace(/(['"`])(.*?)\1/g, '<span class="text-emerald-400">$1$2$1</span>')
-      // Keywords in pink / purple
-      .replace(
-        /\b(import|export|from|const|let|var|return|async|await|function|default|type|interface|class|extends|new|if|else|switch|case|break)\b/g,
-        '<span class="text-pink-400 font-semibold">$1</span>'
-      )
-      // Special SDK functions & hooks in cyan
-      .replace(
-        /\b(vibezcheck|streamText|generateText|generateObject|streamObject|createOpenAI|createAnthropic|useVibezChat|useVibezSession|defineAdapter|getOrCreate|createCheckoutSession)\b/g,
-        '<span class="text-sky-400 font-semibold">$1</span>'
-      )
-      // Core types in teal
-      .replace(
-        /\b(Request|Response|Promise|Record|string|number|boolean|any|void|UsageEvent|DocItem|TokenUsage|InferenceCost)\b/g,
-        '<span class="text-teal-300">$1</span>'
-      )
-      // Booleans & Numbers in amber
-      .replace(/\b(true|false|null|undefined|\d+(\.\d+)?)\b/g, '<span class="text-amber-400">$1</span>')
-      // JSX Tags in violet
-      .replace(/(&lt;|<\/?)(\w+)(.*?)(&gt;|>)/g, '<span class="text-indigo-400 font-medium">$1$2$3$4</span>');
+        // Keywords
+        if (KEYWORDS.has(token)) {
+          return (
+            <span key={tokenIdx} className="text-pink-400 font-semibold">
+              {token}
+            </span>
+          );
+        }
 
-    return (
-      <div
-        key={lineIdx}
-        dangerouslySetInnerHTML={{ __html: highlighted || '&nbsp;' }}
-        className="text-slate-200"
-      />
-    );
-  });
+        // SDK Methods & Hooks
+        if (SDK_FUNCTIONS.has(token)) {
+          return (
+            <span key={tokenIdx} className="text-sky-400 font-semibold">
+              {token}
+            </span>
+          );
+        }
+
+        // Types
+        if (TYPES.has(token)) {
+          return (
+            <span key={tokenIdx} className="text-teal-300">
+              {token}
+            </span>
+          );
+        }
+
+        // Numbers & Booleans
+        if (/^\d+(\.\d+)?$/.test(token) || token === 'true' || token === 'false') {
+          return (
+            <span key={tokenIdx} className="text-amber-400">
+              {token}
+            </span>
+          );
+        }
+
+        // Default text / punctuation / whitespace
+        return (
+          <span key={tokenIdx} className="text-slate-200">
+            {token}
+          </span>
+        );
+      })}
+    </span>
+  );
 }
 
 export const CodeBlock: React.FC<CodeBlockProps> = ({
@@ -88,13 +118,15 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(code);
+      await navigator.clipboard.writeText(code.trim());
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error('Failed to copy code', err);
     }
   };
+
+  const lines = code.trim().split('\n');
 
   return (
     <div className="relative my-4 rounded-xl border border-slate-800 bg-[#090a0f] overflow-hidden text-sm font-mono shadow-md">
@@ -123,10 +155,21 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
         </button>
       </div>
 
-      {/* Code contents */}
+      {/* Code contents rendered safely with React JSX */}
       <div className="p-4 overflow-x-auto text-[13px] leading-relaxed font-mono">
         <pre className="!bg-transparent !p-0 !m-0 font-mono">
-          <code>{highlightCode(code.trim(), language)}</code>
+          <code>
+            {lines.map((line, idx) => (
+              <div key={idx} className="table-row">
+                <span className="table-cell select-none pr-4 text-slate-600 text-xs text-right opacity-60">
+                  {idx + 1}
+                </span>
+                <span className="table-cell whitespace-pre">
+                  {renderHighlightedLine(line, idx)}
+                </span>
+              </div>
+            ))}
+          </code>
         </pre>
       </div>
     </div>
