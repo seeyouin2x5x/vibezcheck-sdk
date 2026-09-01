@@ -24,7 +24,7 @@ export default function robots(): MetadataRoute.Robots {
         allow: '/',
       },
     ],
-    sitemap: 'https://docs.vibezcheck.xyz/sitemap.xml',
-    host: 'https://docs.vibezcheck.xyz',
+    sitemap: 'https://docs.vibezcheck.app/sitemap.xml',
+    host: 'https://docs.vibezcheck.app',
   };
 }

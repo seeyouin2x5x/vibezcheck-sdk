@@ -4,7 +4,7 @@ import { getAllDocItems } from '../lib/docs-data';
 export const dynamic = 'force-static';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://docs.vibezcheck.xyz';
+  const baseUrl = 'https://docs.vibezcheck.app';
   const docItems = getAllDocItems();
 
   const routes: MetadataRoute.Sitemap = [
@@ -18,7 +18,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: `${baseUrl}/docs/${item.slug}`,
       lastModified: new Date(),
       changeFrequency: 'weekly' as const,
-      priority: item.slug === 'overview' || item.slug === 'quickstart' ? 0.9 : 0.8,
+      priority: item.slug === 'overview' || item.slug === 'tutorial' || item.slug === 'quickstart' ? 0.9 : 0.8,
     })),
   ];
 

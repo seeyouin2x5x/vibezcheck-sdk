@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://docs.vibezcheck.xyz'),
+  metadataBase: new URL('https://docs.vibezcheck.app'),
   title: {
     default: 'vibezcheck Docs — 1-Line Stripe Billing & Token Metering for LLMs',
     template: '%s | vibezcheck Docs',
@@ -10,11 +10,11 @@ export const metadata: Metadata = {
   description:
     'The declarative 1-line Stripe Billing and Token Metering engine for LLMs and the Vercel AI SDK. Track tokens, extract reasoning thoughts, compute USD costs, and bill customers with 0ms added latency.',
   applicationName: 'vibezcheck',
-  authors: [{ name: 'vibezcheck team', url: 'https://vibezcheck.xyz' }],
+  authors: [{ name: 'vibezcheck team', url: 'https://vibezcheck.app' }],
   keywords: [
     'vibezcheck',
-    'vibezcheck.xyz',
-    'docs.vibezcheck.xyz',
+    'vibezcheck.app',
+    'docs.vibezcheck.app',
     'Stripe LLM billing',
     'Vercel AI SDK Stripe',
     'LLM token metering',
@@ -36,14 +36,14 @@ export const metadata: Metadata = {
   alternates: {
     canonical: '/',
     types: {
-      'text/markdown': 'https://docs.vibezcheck.xyz/llms.txt',
+      'text/markdown': 'https://docs.vibezcheck.app/llms.txt',
     },
   },
   openGraph: {
     title: 'vibezcheck Docs — 1-Line Stripe Billing & Token Metering for LLMs',
     description:
       'The declarative 1-line Stripe Billing and Token Metering engine for LLMs and the Vercel AI SDK with 0ms latency.',
-    url: 'https://docs.vibezcheck.xyz',
+    url: 'https://docs.vibezcheck.app',
     siteName: 'vibezcheck Documentation',
     locale: 'en_US',
     type: 'website',
@@ -53,7 +53,7 @@ export const metadata: Metadata = {
     title: 'vibezcheck Docs — 1-Line Stripe Billing & Token Metering for LLMs',
     description:
       'The declarative 1-line Stripe Billing and Token Metering engine for LLMs with 0ms latency.',
-    creator: '@vibezcheckxyz',
+    creator: '@vibezcheckapp',
   },
   robots: {
     index: true,
@@ -73,24 +73,24 @@ const JSON_LD_SCHEMA = {
   '@graph': [
     {
       '@type': 'Organization',
-      '@id': 'https://vibezcheck.xyz/#organization',
+      '@id': 'https://vibezcheck.app/#organization',
       name: 'vibezcheck',
-      url: 'https://vibezcheck.xyz',
-      logo: 'https://vibezcheck.xyz/logo.png',
+      url: 'https://vibezcheck.app',
+      logo: 'https://vibezcheck.app/logo.png',
       sameAs: ['https://github.com/seeyouin2x5x/vibezcheck-sdk'],
     },
     {
       '@type': 'WebSite',
-      '@id': 'https://docs.vibezcheck.xyz/#website',
-      url: 'https://docs.vibezcheck.xyz',
+      '@id': 'https://docs.vibezcheck.app/#website',
+      url: 'https://docs.vibezcheck.app',
       name: 'vibezcheck Documentation',
       description: 'The 1-Line Stripe Billing and Token Metering engine for LLMs.',
       publisher: {
-        '@id': 'https://vibezcheck.xyz/#organization',
+        '@id': 'https://vibezcheck.app/#organization',
       },
       potentialAction: {
         '@type': 'SearchAction',
-        target: 'https://docs.vibezcheck.xyz/docs/{search_term_string}',
+        target: 'https://docs.vibezcheck.app/docs/{search_term_string}',
         'query-input': 'required name=search_term_string',
       },
     },

@@ -26,12 +26,12 @@ export async function generateMetadata({ params }: DocPageProps) {
     title: doc.title,
     description: doc.description,
     alternates: {
-      canonical: `https://docs.vibezcheck.xyz/docs/${doc.slug}`,
+      canonical: `https://docs.vibezcheck.app/docs/${doc.slug}`,
     },
     openGraph: {
       title: `${doc.title} — vibezcheck Docs`,
       description: doc.description,
-      url: `https://docs.vibezcheck.xyz/docs/${doc.slug}`,
+      url: `https://docs.vibezcheck.app/docs/${doc.slug}`,
       type: 'article',
     },
     twitter: {

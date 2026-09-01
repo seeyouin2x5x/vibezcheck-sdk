@@ -8,7 +8,7 @@ import { TableOfContents } from '../components/toc';
 import { CodeBlock } from '../components/code-block';
 import { CostCalculator } from '../components/cost-calculator';
 import { WidgetSandbox } from '../components/widget-sandbox';
-import { Sparkles, ArrowRight, ShieldCheck, Zap, Bot, Cpu, CreditCard } from 'lucide-react';
+import { Sparkles, ArrowRight, ShieldCheck, Zap, Bot, Cpu, BookOpen } from 'lucide-react';
 import { getDocItemBySlug } from '../lib/docs-data';
 
 export default function DocsHomePage() {
@@ -56,6 +56,31 @@ export default function DocsHomePage() {
             </p>
           </div>
 
+          {/* Step-by-Step Tutorial Callout Card */}
+          <div className="p-5 rounded-2xl bg-gradient-to-r from-indigo-50/70 to-purple-50/50 border border-indigo-100/80 mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="h-9 w-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                <BookOpen className="h-4 w-4" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-slate-900">
+                  New to VibezCheck? Build your first app in 5 minutes
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Step-by-step tutorial from empty folder to full metered streaming chat.
+                </p>
+              </div>
+            </div>
+
+            <Link
+              href="/docs/tutorial"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 text-xs font-semibold transition shrink-0 shadow-xs"
+            >
+              <span>Start Tutorial</span>
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+
           {/* Quick Feature Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 my-8">
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
@@ -89,10 +114,8 @@ export default function DocsHomePage() {
             </div>
           </div>
 
-          <hr className="my-8 border-slate-100" />
-
           {/* 1-Line Example */}
-          <section className="space-y-4" id="why-vibezcheck">
+          <section className="space-y-4 my-10" id="why-vibezcheck">
             <h2 className="text-xl font-bold tracking-tight text-slate-900">
               The 1-Line Standard
             </h2>
@@ -124,10 +147,8 @@ export async function POST(req: Request) {
             />
           </section>
 
-          <hr className="my-8 border-slate-100" />
-
           {/* Interactive Calculator Section */}
-          <section className="space-y-4" id="core-philosophy">
+          <section className="space-y-4 my-10" id="core-philosophy">
             <h2 className="text-xl font-bold tracking-tight text-slate-900">
               Live Token & Cost Economics
             </h2>
@@ -138,10 +159,8 @@ export async function POST(req: Request) {
             <CostCalculator />
           </section>
 
-          <hr className="my-8 border-slate-100" />
-
           {/* Interactive Component Sandbox Section */}
-          <section className="space-y-4" id="architecture">
+          <section className="space-y-4 my-10" id="architecture">
             <h2 className="text-xl font-bold tracking-tight text-slate-900">
               Zero-Database React Suite
             </h2>
@@ -152,10 +171,8 @@ export async function POST(req: Request) {
             <WidgetSandbox />
           </section>
 
-          <hr className="my-8 border-slate-100" />
-
           {/* Quickstart CTA Banner */}
-          <div className="p-6 rounded-2xl bg-slate-950 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="p-6 rounded-2xl bg-slate-950 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 my-10">
             <div className="space-y-1">
               <h3 className="font-bold text-base">Ready to start metering?</h3>
               <p className="text-xs text-slate-400">
@@ -164,10 +181,10 @@ export async function POST(req: Request) {
             </div>
 
             <Link
-              href="/docs/quickstart"
+              href="/docs/tutorial"
               className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white text-slate-950 font-semibold text-xs hover:bg-slate-100 transition shrink-0"
             >
-              <span>Next.js Quickstart</span>
+              <span>5-Minute Tutorial</span>
               <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
