@@ -113,7 +113,7 @@ export const dynamic = 'force-dynamic';
 export async function POST(req: Request) {
   const { messages, customer = 'demo@example.com' } = await req.json();
 
-  // Wrap your model with vibezcheck in 1 line
+  // ⚡ 1-Line Model Meter
   return streamText({
     model: vibezcheck('openai/gpt-4o-mini', {
       customer,
@@ -123,80 +123,68 @@ export async function POST(req: Request) {
       },
     }),
     messages,
-  }).toTextStreamResponse();
+  }).toDataStreamResponse();
 }
 \`\`\`
 
 ## Step 4: Connect the React Chat & Counter
 
-Open \`app/page.tsx\` and paste this interactive chat interface:
+Open \`app/page.tsx\` and paste this simple 1-hook chat interface:
 
 \`\`\`tsx
 // app/page.tsx
 'use client';
-import { useState } from 'react';
+import { VibezSessionProvider, useVibezChat, VibezSessionWidget } from 'vibezcheck/react';
 
-export default function ChatPage() {
-  const [input, setInput] = useState('');
-  const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  const sendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim() || loading) return;
-
-    const userMessage = { role: 'user', content: input };
-    const newMessages = [...messages, userMessage];
-    setMessages(newMessages);
-    setInput('');
-    setLoading(true);
-
-    const response = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages: newMessages, customer: 'alex@company.com' }),
-    });
-
-    const reader = response.body?.getReader();
-    const decoder = new TextDecoder();
-    let aiText = '';
-
-    setMessages((prev) => [...prev, { role: 'assistant', content: '' }]);
-
-    while (reader) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      aiText += decoder.decode(value);
-      setMessages((prev) => [
-        ...prev.slice(0, -1),
-        { role: 'assistant', content: aiText },
-      ]);
-    }
-    setLoading(false);
-  };
+function Chat() {
+  const { messages, input, handleInputChange, handleSubmit, isLoading } = useVibezChat({
+    model: 'gpt-4o-mini',
+    customer: 'demo@example.com',
+  });
 
   return (
     <main className="max-w-xl mx-auto p-6 space-y-4">
-      <h1 className="text-xl font-bold">My Metered AI App</h1>
-      <div className="space-y-2 border rounded-xl p-4 min-h-[300px] bg-slate-50">
-        {messages.map((m, i) => (
-          <div key={i} className="text-sm">
-            <strong>{m.role === 'user' ? 'You' : 'AI'}:</strong> {m.content}
+      <h1 className="text-xl font-bold">My AI Chat</h1>
+
+      {/* Messages Feed */}
+      <div className="space-y-3 border border-slate-200 rounded-xl p-4 min-h-[300px] bg-slate-50">
+        {messages.map((m) => (
+          <div key={m.id} className="text-sm">
+            <strong>{m.role === 'user' ? 'You: ' : 'AI: '}</strong>
+            <span>{m.content}</span>
           </div>
         ))}
+        {isLoading && <div className="text-xs text-slate-400 italic">Thinking...</div>}
       </div>
-      <form onSubmit={sendMessage} className="flex gap-2">
+
+      {/* Input Form */}
+      <form onSubmit={handleSubmit} className="flex gap-2">
         <input
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={handleInputChange}
           placeholder="Ask a question..."
-          className="flex-1 px-3 py-2 border rounded-lg text-sm"
+          className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm"
         />
-        <button type="submit" disabled={loading} className="px-4 py-2 bg-black text-white rounded-lg text-sm">
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="px-4 py-2 bg-black text-white rounded-lg text-sm font-medium disabled:opacity-50"
+        >
           Send
         </button>
       </form>
+
+      {/* Floating real-time token & dollar counter */}
+      <VibezSessionWidget theme="light" position="bottom-right" />
     </main>
+  );
+}
+
+export default function App() {
+  return (
+    <VibezSessionProvider>
+      <Chat />
+    </VibezSessionProvider>
   );
 }
 \`\`\`
