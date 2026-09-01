@@ -7,6 +7,7 @@ interface CodeBlockProps {
   code: string;
   language?: string;
   filename?: string;
+  showLineNumbers?: boolean;
 }
 
 const KEYWORDS = new Set([
@@ -113,6 +114,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
   code,
   language = 'typescript',
   filename,
+  showLineNumbers = true,
 }) => {
   const [copied, setCopied] = useState(false);
 
@@ -129,9 +131,9 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
   const lines = code.trim().split('\n');
 
   return (
-    <div className="relative my-4 rounded-xl border border-slate-800 bg-[#090a0f] overflow-hidden text-sm font-mono shadow-md">
+    <div className="relative my-5 rounded-xl border border-slate-800 bg-[#090a0f] overflow-hidden text-sm font-mono shadow-md">
       {/* Header bar */}
-      <div className="flex items-center justify-between px-4 py-2 border-b border-slate-800/80 bg-[#0e1017] text-xs text-slate-400">
+      <div className="flex items-center justify-between px-4 py-2 border-b border-slate-800/80 bg-[#0e1017] text-xs text-slate-400 select-none">
         <div className="flex items-center gap-2">
           <Terminal className="h-3.5 w-3.5 text-sky-400" />
           <span className="text-slate-300 font-medium font-mono">{filename || language}</span>
@@ -155,18 +157,27 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
         </button>
       </div>
 
-      {/* Code contents rendered safely with React JSX */}
-      <div className="p-4 overflow-x-auto text-[13px] leading-relaxed font-mono">
-        <pre className="!bg-transparent !p-0 !m-0 font-mono">
+      {/* Code contents with separate unselectable gutter */}
+      <div className="p-4 overflow-x-auto text-[13px] leading-relaxed font-mono flex">
+        {showLineNumbers && (
+          <div
+            aria-hidden="true"
+            className="select-none pr-4 mr-3 text-right text-slate-600 border-r border-slate-800/80 text-xs font-mono select-none"
+            style={{ userSelect: 'none' }}
+          >
+            {lines.map((_, idx) => (
+              <div key={idx} className="leading-relaxed opacity-50">
+                {idx + 1}
+              </div>
+            ))}
+          </div>
+        )}
+
+        <pre className="!bg-transparent !p-0 !m-0 font-mono flex-1 overflow-x-auto">
           <code>
             {lines.map((line, idx) => (
-              <div key={idx} className="table-row">
-                <span className="table-cell select-none pr-4 text-slate-600 text-xs text-right opacity-60">
-                  {idx + 1}
-                </span>
-                <span className="table-cell whitespace-pre">
-                  {renderHighlightedLine(line, idx)}
-                </span>
+              <div key={idx} className="leading-relaxed whitespace-pre">
+                {renderHighlightedLine(line, idx)}
               </div>
             ))}
           </code>
