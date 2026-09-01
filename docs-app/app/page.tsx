@@ -10,6 +10,7 @@ import { CodeBlock } from '../components/code-block';
 import { EyeGuardianIllustration } from '../components/illustrations/eye-guardian';
 import { DeveloperDeskIllustration } from '../components/illustrations/developer-desk';
 import { TokenCoinsIllustration } from '../components/illustrations/token-coins';
+import { BrandLogo } from '../components/brand-logo';
 import {
   Sparkles,
   ArrowRight,
