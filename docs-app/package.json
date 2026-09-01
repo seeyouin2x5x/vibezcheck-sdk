@@ -3,9 +3,9 @@
   "version": "0.3.0",
   "private": true,
   "scripts": {
-    "dev": "node ./node_modules/next/dist/bin/next dev --port 3001",
-    "build": "node ./node_modules/next/dist/bin/next build",
-    "start": "node ./node_modules/next/dist/bin/next start --port 3001"
+    "dev": "next dev --port 3001",
+    "build": "next build",
+    "start": "next start --port 3001"
   },
   "dependencies": {
     "clsx": "^2.1.1",
@@ -13,8 +13,7 @@
     "next": "^15.1.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "tailwind-merge": "^2.6.0",
-    "vibezcheck": "file:../stripeai/packages/vibezcheck"
+    "tailwind-merge": "^2.6.0"
   },
   "devDependencies": {
     "@types/node": "^22.10.5",
