@@ -1,4 +1,4 @@
-import type { InferenceCost, TokenUsage } from '../types';
+import type { InferenceCost, TokenUsage, InlineRateConfig, ModelPricingRates } from '../types';
 import { getModelPricing } from './table';
 
 export interface CalculateCostParams {
@@ -9,13 +9,28 @@ export interface CalculateCostParams {
   cachedTokens?: number;
   cacheWriteTokens?: number;
   markupMultiplier?: number;
+  minimumChargeUSD?: number;
+  customRate?: InlineRateConfig;
 }
 
 /**
  * Calculates exact inference cost for an LLM call or usage breakdown in USD.
  */
 export function calculateCost(params: CalculateCostParams): InferenceCost {
-  const rates = getModelPricing(params.model);
+  let rates: ModelPricingRates;
+
+  if (params.customRate) {
+    const outRate = params.customRate.out ?? params.customRate.output ?? 0;
+    rates = {
+      inputPer1M: params.customRate.in,
+      outputPer1M: outRate,
+      reasoningPer1M: params.customRate.reasoning ?? outRate,
+      cachedInputPer1M: params.customRate.cached ?? params.customRate.in * 0.15,
+      currency: 'USD',
+    };
+  } else {
+    rates = getModelPricing(params.model);
+  }
 
   const inputTokens = params.inputTokens ?? 0;
   const outputTokens = params.outputTokens ?? 0;
@@ -27,7 +42,7 @@ export function calculateCost(params: CalculateCostParams): InferenceCost {
 
   // Input costs
   const regularInputCost = (regularInputTokens / 1_000_000) * rates.inputPer1M;
-  const cachedRate = rates.cachedInputPer1M ?? rates.inputPer1M * 0.5;
+  const cachedRate = rates.cachedInputPer1M ?? rates.inputPer1M * 0.15; // 85% discount default for cached
   const cachedInputCost = (cachedTokens / 1_000_000) * cachedRate;
   const inputCostUSD = regularInputCost + cachedInputCost;
 
@@ -43,11 +58,18 @@ export function calculateCost(params: CalculateCostParams): InferenceCost {
   const cachedDiscountUSD = Math.max(0, standardCacheCost - cachedInputCost);
 
   // Total base cost
-  const totalUSD = inputCostUSD + outputCostUSD;
+  let totalUSD = inputCostUSD + outputCostUSD;
 
   // Retail price calculation (if markup multiplier provided)
   const markup = params.markupMultiplier ?? 1.0;
-  const retailUSD = markup !== 1.0 ? totalUSD * markup : undefined;
+  let retailUSD: number | undefined = undefined;
+
+  if (markup !== 1.0 || params.minimumChargeUSD !== undefined) {
+    retailUSD = totalUSD * markup;
+    if (params.minimumChargeUSD !== undefined && retailUSD < params.minimumChargeUSD) {
+      retailUSD = params.minimumChargeUSD;
+    }
+  }
 
   return {
     inputCostUSD: Number(inputCostUSD.toFixed(8)),
@@ -55,7 +77,7 @@ export function calculateCost(params: CalculateCostParams): InferenceCost {
     reasoningCostUSD: reasoningTokens > 0 ? Number(reasoningCostUSD.toFixed(8)) : undefined,
     cachedDiscountUSD: cachedTokens > 0 ? Number(cachedDiscountUSD.toFixed(8)) : undefined,
     totalUSD: Number(totalUSD.toFixed(8)),
-    retailUSD: retailUSD ? Number(retailUSD.toFixed(8)) : undefined,
+    retailUSD: retailUSD !== undefined ? Number(retailUSD.toFixed(8)) : undefined,
     currency: rates.currency || 'USD',
   };
 }
@@ -66,8 +88,13 @@ export function calculateCost(params: CalculateCostParams): InferenceCost {
 export function calculateUsageCost(
   model: string,
   usage: TokenUsage,
-  markupMultiplier?: number
+  optionsOrMarkup?: number | { markupMultiplier?: number; minimumChargeUSD?: number; customRate?: InlineRateConfig }
 ): InferenceCost {
+  const options =
+    typeof optionsOrMarkup === 'number'
+      ? { markupMultiplier: optionsOrMarkup }
+      : optionsOrMarkup || {};
+
   return calculateCost({
     model,
     inputTokens: usage.inputTokens,
@@ -75,6 +102,8 @@ export function calculateUsageCost(
     reasoningTokens: usage.reasoningTokens,
     cachedTokens: usage.cachedTokens,
     cacheWriteTokens: usage.cacheWriteTokens,
-    markupMultiplier,
+    markupMultiplier: options.markupMultiplier,
+    minimumChargeUSD: options.minimumChargeUSD,
+    customRate: options.customRate,
   });
 }

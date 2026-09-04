@@ -1,12 +1,30 @@
-import type { CustomerParam, UsageEvent } from '../types';
+import type { CustomerParam, UsageEvent, ToolMeterOptions } from '../types';
 import { withBilling, type WithBillingOptions } from './with-billing';
 import { calculateCost } from '../pricing/calculator';
+import { createMeter, VibezMeter } from '../meter/client';
 
 export interface VibezCheckModelOptions extends WithBillingOptions {
   /** OpenAI / AI Gateway API Key override */
   apiKey?: string;
   /** AI Gateway / OpenAI Base URL override */
   baseURL?: string;
+}
+
+export interface VibezSessionOptions {
+  customer?: CustomerParam;
+  stripeApiKey?: string;
+  pricing?: WithBillingOptions['pricing'];
+  billing?: WithBillingOptions['billing'];
+  metadata?: Record<string, string | number | boolean>;
+}
+
+export interface VibezSession {
+  /** Creates a metered model bound to this session customer */
+  model: (modelOrId: any, options?: VibezCheckModelOptions) => any;
+  /** Tracks a non-LLM tool execution cost (e.g. search, scraper, image gen) */
+  trackTool: (name: string, options: { costUSD: number; metadata?: Record<string, any> }) => Promise<void>;
+  /** Underlying meter instance */
+  meter: VibezMeter;
 }
 
 /**
@@ -25,14 +43,10 @@ export interface VibezCheckModelOptions extends WithBillingOptions {
  *
  * // 2. Works with all Vercel AI SDK primitives (streamText, generateObject, streamObject):
  * const result = streamText({
- *   model: vibezcheck('gpt-4o', { customer: 'alex@example.com' }),
- *   messages,
- * });
- *
- * // 3. Wrap existing provider instances:
- * import { openai } from '@ai-sdk/openai';
- * const result = streamText({
- *   model: vibezcheck(openai('gpt-4o-mini'), { customer: 'alex@example.com' }),
+ *   model: vibezcheck('gpt-4o', {
+ *     customer: 'alex@example.com',
+ *     pricing: { margin: 1.5 }, // 50% profit margin
+ *   }),
  *   messages,
  * });
  * ```
@@ -109,3 +123,77 @@ export function createVibezModel(
 
   return modelOrId;
 }
+
+/**
+ * Creates a scoped session for unified multi-call and tool tracking.
+ */
+export function createVibezSession(sessionOptions: VibezSessionOptions = {}): VibezSession {
+  const meter = createMeter({
+    apiKey: sessionOptions.stripeApiKey,
+  });
+
+  const customerId =
+    typeof sessionOptions.customer === 'string'
+      ? sessionOptions.customer
+      : sessionOptions.customer?.id;
+
+  return {
+    meter,
+    model: (modelOrId: any, callOptions: VibezCheckModelOptions = {}) => {
+      return createVibezModel(modelOrId, {
+        customer: sessionOptions.customer,
+        pricing: sessionOptions.pricing,
+        billing: sessionOptions.billing,
+        meter,
+        metadata: {
+          ...sessionOptions.metadata,
+          ...callOptions.metadata,
+        },
+        ...callOptions,
+      });
+    },
+    trackTool: async (name: string, { costUSD, metadata }: { costUSD: number; metadata?: Record<string, any> }) => {
+      // Record non-LLM tool usage as a custom usage event
+      const event: UsageEvent = {
+        timestamp: new Date().toISOString(),
+        model: `tool:${name}`,
+        provider: 'tool',
+        usage: {
+          inputTokens: 0,
+          outputTokens: 0,
+          totalTokens: 0,
+        },
+        cost: {
+          inputCostUSD: 0,
+          outputCostUSD: costUSD,
+          totalUSD: costUSD,
+          currency: 'USD',
+        },
+        customerId,
+        metadata: {
+          ...sessionOptions.metadata,
+          ...metadata,
+          tool: name,
+        },
+      };
+
+      meter.recordUsage({
+        model: `tool:${name}`,
+        provider: 'tool',
+        inputTokens: 0,
+        outputTokens: 0,
+        customerId,
+        metadata: event.metadata,
+      });
+
+      await meter.flush();
+    },
+  };
+}
+
+// Attach session helper to createVibezModel function
+export const vibezcheck: typeof createVibezModel & {
+  session: typeof createVibezSession;
+} = Object.assign(createVibezModel, {
+  session: createVibezSession,
+});

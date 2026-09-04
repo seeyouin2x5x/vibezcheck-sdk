@@ -174,16 +174,67 @@ export class VibezCircuitBreakerError extends Error {
  * Circuit Breaker / Budget Guardrail Configuration
  */
 export interface CircuitBreakerOptions {
-  /** Maximum allowed USD cost for a single generation or stream (e.g. 0.50) */
+  /** Maximum allowed USD cost for a single generation or stream (default: 0.50) */
   maxCostPerCallUSD?: number;
   /** Cumulative budget limit for customer/session in USD (e.g. 5.00) */
   maxBudgetUSD?: number;
   /** Hard ceiling on total tokens per generation (e.g. 10000) */
   maxTokensPerCall?: number;
+  /** Model to gracefully fall back to if budget limit is exceeded instead of hard erroring */
+  fallbackModelOnBudget?: string;
   /** Callback fired when circuit breaker trips */
   onBudgetExceeded?: (event: BudgetExceededEvent) => void | Promise<void>;
   /** Whether to throw a VibezCircuitBreakerError if limit exceeded (default: false) */
   throwOnBudgetExceeded?: boolean;
+}
+
+/**
+ * Billing Configuration (Postpaid metered invoice vs Prepaid credit wallet)
+ */
+export interface BillingConfig {
+  /** 'postpaid' = Invoiced at month's end; 'prepaid' = Deducted from credit wallet, locks at $0 */
+  mode?: 'postpaid' | 'prepaid';
+  /** Available prepaid credit balance in USD */
+  balanceUSD?: number;
+  /** Action when balance is low: 'warn' logs/sends event, 'throw' throws CreditExhaustedError */
+  onLowBalance?: 'warn' | 'throw';
+}
+
+/**
+ * Profit Pricing & Markup Configuration
+ */
+export interface PricingConfig {
+  /** Profit margin multiplier (e.g. 1.5 = Cost + 50% profit margin automatically added) */
+  margin?: number;
+  /** Minimum charge in USD for any single call (e.g. 0.01 = at least 1 cent) */
+  minimumChargeUSD?: number;
+}
+
+/**
+ * Inline Rate Card Configuration for 1-line custom/newly released model pricing
+ */
+export interface InlineRateConfig {
+  /** Input tokens price per 1 Million tokens in USD */
+  in: number;
+  /** Output tokens price per 1 Million tokens in USD */
+  out?: number;
+  output?: number;
+  /** Reasoning/thinking tokens price per 1 Million tokens in USD (optional) */
+  reasoning?: number;
+  /** Cached input tokens price per 1 Million tokens in USD (optional) */
+  cached?: number;
+}
+
+/**
+ * Non-LLM Tool execution metering options
+ */
+export interface ToolMeterOptions {
+  /** Fixed cost in USD for this tool execution (e.g. 0.01 for search, 0.04 for image) */
+  costUSD: number;
+  /** Customer identifier to attribute tool cost to */
+  customer?: CustomerParam;
+  /** Additional metadata */
+  metadata?: Record<string, string | number | boolean>;
 }
 
 /**
@@ -225,6 +276,16 @@ export interface StreamWrapOptions extends CircuitBreakerOptions {
   model?: string;
   /** Provider override if not automatically detectable */
   provider?: string;
+  /** Billing mode configuration (postpaid vs prepaid) */
+  billing?: BillingConfig;
+  /** Profit margin & minimum charge configuration */
+  pricing?: PricingConfig;
+  /** 1-line inline pricing rate card */
+  rate?: InlineRateConfig;
+  /** Whether to capture tokens if the client aborts or closes tab mid-stream (default: true) */
+  captureOnAbort?: boolean;
+  /** Execution runtime environment (default: 'auto') */
+  runtime?: 'auto' | 'serverless' | 'edge' | 'node';
   /** Custom metadata attached to the usage event */
   metadata?: Record<string, string | number | boolean>;
   /** Custom usage callback for this specific stream */

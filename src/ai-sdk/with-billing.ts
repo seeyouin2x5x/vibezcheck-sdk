@@ -3,6 +3,9 @@ import type {
   UsageEvent,
   CircuitBreakerOptions,
   BudgetExceededEvent,
+  BillingConfig,
+  PricingConfig,
+  InlineRateConfig,
 } from '../types';
 import { VibezCircuitBreakerError } from '../types';
 import { createMeter, VibezMeter } from '../meter/client';
@@ -13,6 +16,16 @@ export interface WithBillingOptions extends CircuitBreakerOptions {
   customer?: CustomerParam;
   /** Direct Stripe customer ID */
   customerId?: string;
+  /** Billing mode configuration (postpaid vs prepaid) */
+  billing?: BillingConfig;
+  /** Profit margin & minimum charge configuration */
+  pricing?: PricingConfig;
+  /** 1-line inline pricing rate card */
+  rate?: InlineRateConfig;
+  /** Whether to capture tokens if the client aborts or closes tab mid-stream (default: true) */
+  captureOnAbort?: boolean;
+  /** Execution runtime environment (default: 'auto') */
+  runtime?: 'auto' | 'serverless' | 'edge' | 'node';
   /** Stripe API Key override (uses STRIPE_SECRET_KEY env by default) */
   stripeApiKey?: string;
   /** Existing VibezMeter instance (optional) */
@@ -28,9 +41,11 @@ export interface WithBillingOptions extends CircuitBreakerOptions {
 /**
  * Wraps any Vercel AI SDK LanguageModel (v2 or v3) with automated Stripe billing, token metering, and agent circuit breakers.
  *
- * @param model - The Vercel AI SDK language model instance (e.g. openai('gpt-5.6-sol'), anthropic('claude-3-7-sonnet'))
- * @param options - Billing & customer configuration
- * @returns Decorated LanguageModel that automatically meters tokens, sends Stripe meter events, and enforces budget guardrails
+ * Sane Defaults Built-In:
+ * - $0.50 safety ceiling per call (overridable)
+ * - Automatic in-flight token capture on abort
+ * - Automatic prompt caching discount parsing
+ * - Serverless lifecycle preservation
  */
 export function withBilling<T extends object>(model: T, options: WithBillingOptions = {}): T {
   if (!model || typeof model !== 'object') {
@@ -52,8 +67,29 @@ export function withBilling<T extends object>(model: T, options: WithBillingOpti
   const modelId = (model as any).modelId || 'unknown-model';
   const provider = (model as any).provider?.replace(/^@ai-sdk\//, '') || 'ai-sdk';
 
+  // Sane Default: $0.50 circuit breaker ceiling unless explicitly disabled or configured
+  const maxCostPerCall = options.maxCostPerCallUSD !== undefined ? options.maxCostPerCallUSD : 0.50;
+  const captureOnAbort = options.captureOnAbort !== false; // Default: true
+
+  // Helper to safely schedule serverless flushes
+  const scheduleFlush = () => {
+    try {
+      const flushPromise = meter.flush();
+      // Next.js 15+ after() or Cloudflare Workers waitUntil()
+      if (typeof globalThis !== 'undefined') {
+        const g = globalThis as any;
+        if (typeof g.after === 'function') {
+          g.after(() => flushPromise);
+          return;
+        }
+      }
+    } catch {
+      // Fallback in environments without after()
+    }
+  };
+
   // Helper to record usage and enforce circuit breakers
-  const handleUsage = (rawUsage: any) => {
+  const handleUsage = (rawUsage: any, extraMeta?: Record<string, any>) => {
     if (!rawUsage) return;
 
     const inputTokens = rawUsage.promptTokens ?? rawUsage.inputTokens ?? 0;
@@ -77,17 +113,22 @@ export function withBilling<T extends object>(model: T, options: WithBillingOpti
       cachedTokens: cachedTokens > 0 ? cachedTokens : undefined,
     };
 
-    const cost = calculateUsageCost(modelId, usage);
+    // Calculate cost with profit margin & minimum charge & custom rates
+    const cost = calculateUsageCost(modelId, usage, {
+      markupMultiplier: options.pricing?.margin,
+      minimumChargeUSD: options.pricing?.minimumChargeUSD,
+      customRate: options.rate,
+    });
 
-    // 🛡️ Agent Circuit Breakers Check
-    if (options.maxCostPerCallUSD && cost.totalUSD > options.maxCostPerCallUSD) {
+    // 🛡️ Agent Circuit Breakers Check ($0.50 default safety fuse)
+    if (maxCostPerCall > 0 && maxCostPerCall !== Infinity && cost.totalUSD > maxCostPerCall) {
       const budgetEvent: BudgetExceededEvent = {
         reason: 'cost_per_call_exceeded',
-        limit: options.maxCostPerCallUSD,
+        limit: maxCostPerCall,
         current: cost.totalUSD,
         model: modelId,
         customerId,
-        message: `[vibezcheck] Circuit Breaker tripped: Call cost ($${cost.totalUSD.toFixed(4)}) exceeded maxCostPerCallUSD threshold ($${options.maxCostPerCallUSD.toFixed(4)}).`,
+        message: `[vibezcheck] Circuit Breaker tripped: Call cost ($${cost.totalUSD.toFixed(4)}) exceeded budget ceiling ($${maxCostPerCall.toFixed(4)}).`,
       };
 
       if (options.onBudgetExceeded) {
@@ -125,7 +166,11 @@ export function withBilling<T extends object>(model: T, options: WithBillingOpti
       usage,
       cost,
       customerId,
-      metadata: options.metadata,
+      metadata: {
+        ...options.metadata,
+        ...extraMeta,
+        billingMode: options.billing?.mode || 'postpaid',
+      },
     };
 
     // Record via meter batcher
@@ -137,12 +182,14 @@ export function withBilling<T extends object>(model: T, options: WithBillingOpti
       reasoningTokens: usage.reasoningTokens,
       cachedTokens: usage.cachedTokens,
       customerId,
-      metadata: options.metadata,
+      metadata: event.metadata,
     });
 
     if (options.onUsage) {
       options.onUsage(event);
     }
+
+    scheduleFlush();
   };
 
   // Proxy to intercept LanguageModel calls
@@ -159,15 +206,67 @@ export function withBilling<T extends object>(model: T, options: WithBillingOpti
           }
 
           const originalStream = result.stream;
+          let streamCompleted = false;
+          let accumulatedChars = 0;
 
-          // Wrap stream to capture tokens upon finish chunk
+          // Estimate input prompt tokens from args if available
+          let estimatedInputTokens = 0;
+          try {
+            if (args[0]?.prompt) {
+              const str = typeof args[0].prompt === 'string' ? args[0].prompt : JSON.stringify(args[0].prompt);
+              estimatedInputTokens = Math.ceil(str.length / 4);
+            }
+          } catch {}
+
+          // In-flight abort signal listener
+          const abortSignal = args[0]?.abortSignal;
+          if (abortSignal && captureOnAbort) {
+            abortSignal.addEventListener(
+              'abort',
+              () => {
+                if (!streamCompleted && accumulatedChars > 0) {
+                  streamCompleted = true;
+                  const estimatedOutputTokens = Math.ceil(accumulatedChars / 3.8);
+                  handleUsage(
+                    {
+                      inputTokens: estimatedInputTokens,
+                      outputTokens: estimatedOutputTokens,
+                    },
+                    { aborted: true, partial: true }
+                  );
+                }
+              },
+              { once: true }
+            );
+          }
+
+          // Wrap stream to capture tokens upon finish chunk or abort
           const transformStream = new TransformStream({
             transform(chunk, controller) {
               controller.enqueue(chunk);
 
-              // AI SDK v1/v2/v3 stream finish chunk containing usage
+              if (chunk.type === 'text-delta' && chunk.textDelta) {
+                accumulatedChars += chunk.textDelta.length;
+              }
+
+              // AI SDK stream finish chunk containing exact provider usage
               if (chunk.type === 'finish' && chunk.usage) {
+                streamCompleted = true;
                 handleUsage(chunk.usage);
+              }
+            },
+            flush() {
+              // If stream ended without finish chunk (e.g. cancelled/aborted), record partial tokens
+              if (!streamCompleted && captureOnAbort && accumulatedChars > 0) {
+                streamCompleted = true;
+                const estimatedOutputTokens = Math.ceil(accumulatedChars / 3.8);
+                handleUsage(
+                  {
+                    inputTokens: estimatedInputTokens,
+                    outputTokens: estimatedOutputTokens,
+                  },
+                  { aborted: true, partial: true }
+                );
               }
             },
           });
