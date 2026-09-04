@@ -252,20 +252,48 @@ export default function Chat() {
       },
       {
         slug: 'cli',
-        title: 'CLI Scaffolder',
-        description: 'Command line tools for project initialization and rate inspection.',
+        title: 'CLI Suite & Audit',
+        description: 'Command line tools for codebase token audits, initialization, and rate inspection.',
+        badge: 'New Audit',
         category: 'Getting Started',
         headings: [
+          { id: 'cli-audit', title: 'npx vibezcheck audit (Token Leak Scanner)', level: 2 },
           { id: 'cli-init', title: 'npx vibezcheck init', level: 2 },
           { id: 'cli-prices', title: 'npx vibezcheck prices', level: 2 },
           { id: 'cli-doctor', title: 'npx vibezcheck doctor', level: 2 },
         ],
         content: `
-# CLI Scaffolder
+# CLI Suite & Audit
 
-VibezCheck includes helpful terminal commands to initialize templates, inspect live rate cards, and verify your environment.
+VibezCheck includes kind, zero-overhead terminal commands to scan your codebase for token leaks, scaffold templates, and inspect live rate cards.
 
-## npx vibezcheck init
+## 1. npx vibezcheck audit (Codebase Scanner)
+
+A kind, sub-100ms audit scanner that inspects your Next.js (\`app/api\`, \`pages/api\`) and Node routes for unmetered LLM calls and missing runaway loop circuit breakers.
+
+\`\`\`bash
+npx vibezcheck audit
+\`\`\`
+
+### The "Kind" Philosophy:
+* **⚡ Zero-Overhead (< 80ms)**: Zero heavy AST dependencies like Babel or TypeScript compiler; pure native Node.js scanning.
+* **🛡️ Runaway Fuse Verification**: Verifies that every route has the default \`$0.50\` safety circuit breaker active.
+* **Non-Condescending Output**: If everything is protected, prints a calm 2-line confirmation. If unmetered routes exist, shows the exact 1-line before/after diff with line numbers.
+* **Non-Destructive Auto-Fix**: Run with \`--fix\` to automatically wrap raw calls in \`vibezcheck()\` with automatic \`.bak\` safety backups.
+* **GitHub Actions CI/CD**: Run with \`--ci\` to prevent PRs from introducing unmetered public routes into production.
+
+\`\`\`bash
+# Automatically patch all unmetered routes with safety backups
+npx vibezcheck audit --fix
+
+# Run in CI/CD pipeline (exits 1 if unmetered routes detected)
+npx vibezcheck audit --ci
+
+# Output JSON for custom internal dashboards
+npx vibezcheck audit --json
+\`\`\`
+
+## 2. npx vibezcheck init
 
 Scaffolds a production-ready Next.js + Stripe AI template in seconds:
 
@@ -273,7 +301,7 @@ Scaffolds a production-ready Next.js + Stripe AI template in seconds:
 npx vibezcheck init
 \`\`\`
 
-## npx vibezcheck prices
+## 3. npx vibezcheck prices
 
 Displays current provider token rates, reasoning multipliers, and cache discounts in your terminal:
 
@@ -281,7 +309,7 @@ Displays current provider token rates, reasoning multipliers, and cache discount
 npx vibezcheck prices
 \`\`\`
 
-## npx vibezcheck doctor
+## 4. npx vibezcheck doctor
 
 Verifies Node.js version, environment keys (\`STRIPE_SECRET_KEY\`), and tests connectivity:
 

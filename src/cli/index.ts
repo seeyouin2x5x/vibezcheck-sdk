@@ -4,13 +4,14 @@ import fs from 'fs';
 import path from 'path';
 import readline from 'readline';
 import { MODEL_PRICING_TABLE } from '../pricing/table';
+import { runAudit, displayAuditReport } from './audit';
 
 const args = process.argv.slice(2);
 const command = args[0] || 'init';
 
 function printBanner() {
   console.log(`
-\x1b[36m⚡ \x1b[1mvibezcheck CLI\x1b[0m \x1b[90mv0.3.0\x1b[0m
+\x1b[38;2;212;255;50m✦\x1b[0m \x1b[1mvibezcheck CLI\x1b[0m \x1b[90mv0.4.0\x1b[0m
 \x1b[90mThe 1-line Stripe Billing & Token Metering Engine for LLMs\x1b[0m
 `);
 }
@@ -169,8 +170,31 @@ function handleDoctor() {
   console.log(`\n\x1b[32m✓ VibezCheck engine is healthy and ready to meter!\x1b[0m\n`);
 }
 
+/**
+ * Command: npx vibezcheck audit [--fix] [--ci] [--json] [--dir <path>]
+ */
+async function handleAudit() {
+  const fix = args.includes('--fix') || args.includes('-f');
+  const ci = args.includes('--ci') || args.includes('-s') || args.includes('--strict');
+  const json = args.includes('--json') || args.includes('-j');
+
+  let dir = process.cwd();
+  const dirIndex = args.indexOf('--dir') !== -1 ? args.indexOf('--dir') : args.indexOf('-d');
+  if (dirIndex !== -1 && args[dirIndex + 1]) {
+    dir = args[dirIndex + 1];
+  }
+
+  const summary = await runAudit({ dir, fix, ci, json });
+  await displayAuditReport(summary, { dir, fix, ci, json });
+}
+
 // Router
 switch (command) {
+  case 'audit':
+  case 'check':
+  case 'scan':
+    handleAudit();
+    break;
   case 'init':
     handleInit();
     break;
@@ -187,6 +211,7 @@ switch (command) {
 Unknown command: \x1b[31m${command}\x1b[0m
 
 Available commands:
+  \x1b[36mvibezcheck audit\x1b[0m     Scan project for unmetered AI routes and runaway loop risks
   \x1b[36mvibezcheck init\x1b[0m      Interactive project setup wizard
   \x1b[36mvibezcheck prices\x1b[0m    Display supported model pricing table
   \x1b[36mvibezcheck doctor\x1b[0m    Diagnose environment and API configurations
