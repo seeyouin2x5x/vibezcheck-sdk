@@ -72,7 +72,7 @@
     }
   },
   "bin": {
-    "vibezcheck": "./bin/vibezcheck.js"
+    "vibezcheck": "bin/vibezcheck.js"
   },
   "files": [
     "dist",
