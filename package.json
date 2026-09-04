@@ -1,12 +1,12 @@
 {
   "name": "vibezcheck",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "The 1-line Stripe Billing and Token Metering engine for LLMs. Track tokens, compute real-time dollar costs, and bill customers with 0ms added latency.",
   "author": "VibezCheck <dev@vibezcheck.xyz> (https://vibezcheck.xyz)",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/seeyouin2x5x/vibezcheck-sdk.git"
+    "url": "git+https://github.com/seeyouin2x5x/vibezcheck-sdk.git"
   },
   "keywords": [
     "stripe",
