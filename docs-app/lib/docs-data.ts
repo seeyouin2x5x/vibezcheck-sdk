@@ -113,11 +113,13 @@ export const dynamic = 'force-dynamic';
 export async function POST(req: Request) {
   const { messages, customer = 'demo@example.com' } = await req.json();
 
-  // ⚡ 1-Line Model Meter
+  // ⚡ 1-Line Model Meter with Sane Defaults ($0.50 fuse, abort trapper, 0ms lag)
   return streamText({
     model: vibezcheck('openai/gpt-4o-mini', {
       customer,
-      maxCostPerCallUSD: 0.10, // Safety ceiling: abort if single call exceeds $0.10
+      pricing: {
+        margin: 1.5, // 50% profit margin automatically added!
+      },
       onUsage: (event) => {
         console.log(\`✅ Tokens: \${event.usage.totalTokens} | Cost: $\${event.cost.totalUSD.toFixed(6)}\`);
       },
@@ -129,81 +131,71 @@ export async function POST(req: Request) {
 
 ## Step 4: Connect the React Chat & Counter
 
-Open \`app/page.tsx\` and paste this simple 1-hook chat interface:
+Open \`app/page.tsx\` and paste this simple 1-hook chat interface with live receipt:
 
 \`\`\`tsx
 // app/page.tsx
 'use client';
-import { VibezSessionProvider, useVibezChat, VibezSessionWidget } from 'vibezcheck/react';
+import { useVibezChat, VibezReceipt, VibezSessionWidget } from 'vibezcheck/react';
 
-function Chat() {
+export default function ChatPage() {
   const { messages, input, handleInputChange, handleSubmit, isLoading } = useVibezChat({
-    model: 'gpt-4o-mini',
+    api: '/api/chat',
     customer: 'demo@example.com',
   });
 
   return (
-    <main className="max-w-xl mx-auto p-6 space-y-4">
-      <h1 className="text-xl font-bold">My AI Chat</h1>
+    <main className="max-w-xl mx-auto py-10 px-4 space-y-6">
+      {/* 1. Floating live token & dollar counter */}
+      <VibezSessionWidget position="bottom-right" />
 
-      {/* Messages Feed */}
-      <div className="space-y-3 border border-slate-200 rounded-xl p-4 min-h-[300px] bg-slate-50">
+      {/* 2. Messages List with verified AI receipts */}
+      <div className="space-y-4">
         {messages.map((m) => (
-          <div key={m.id} className="text-sm">
-            <strong>{m.role === 'user' ? 'You: ' : 'AI: '}</strong>
-            <span>{m.content}</span>
+          <div key={m.id} className="p-4 rounded-2xl bg-white border border-slate-200">
+            <p className="text-slate-900 text-sm">{m.content}</p>
+
+            {/* Micro-Receipt under assistant answers */}
+            {m.role === 'assistant' && <VibezReceipt message={m} />}
           </div>
         ))}
-        {isLoading && <div className="text-xs text-slate-400 italic">Thinking...</div>}
       </div>
 
-      {/* Input Form */}
       <form onSubmit={handleSubmit} className="flex gap-2">
         <input
           value={input}
           onChange={handleInputChange}
           placeholder="Ask a question..."
-          className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm"
+          className="flex-1 px-4 py-2 rounded-xl border border-slate-200 text-sm"
         />
         <button
           type="submit"
           disabled={isLoading}
-          className="px-4 py-2 bg-black text-white rounded-lg text-sm font-medium disabled:opacity-50"
+          className="px-5 py-2 rounded-xl bg-slate-950 text-white font-bold text-sm"
         >
-          Send
+          {isLoading ? 'Thinking...' : 'Send'}
         </button>
       </form>
-
-      {/* Floating real-time token & dollar counter */}
-      <VibezSessionWidget theme="light" position="bottom-right" />
     </main>
-  );
-}
-
-export default function App() {
-  return (
-    <VibezSessionProvider>
-      <Chat />
-    </VibezSessionProvider>
   );
 }
 \`\`\`
 
 ## Step 5: Run and Test Locally
 
-Start your development server:
+Start your development server on port 3002:
 
 \`\`\`bash
-npm run dev
+npm run dev -- -p 3002
 \`\`\`
 
-Open **http://localhost:3000** in your browser, type a message, and check your terminal. You will see real-time token counts and dollar amounts logged instantly with 0 database setup required!
+Visit \`http://localhost:3002\` and ask a question. Notice how the speedometer counts tokens and displays the micro-receipt with zero latency!
 `,
       },
       {
         slug: 'quickstart',
         title: 'Quickstart Guide',
-        description: 'Instant 30-second setup for existing Next.js and Node.js projects.',
+        description: 'Fast 3-minute setup guide to add VibezCheck to an existing project.',
         category: 'Getting Started',
         headings: [
           { id: 'quick-install', title: '1. Install Package', level: 2 },
@@ -213,50 +205,45 @@ Open **http://localhost:3000** in your browser, type a message, and check your t
         content: `
 # Quickstart Guide
 
-Add token metering and cost tracking to your existing AI app in 30 seconds.
+Add VibezCheck to any existing Next.js application in less than 3 minutes.
 
 ## 1. Install Package
 
 \`\`\`bash
-npm install vibezcheck ai stripe
+npm install vibezcheck ai @ai-sdk/openai stripe
 \`\`\`
 
 ## 2. Wrap Model in API Route
 
 \`\`\`typescript
+// app/api/chat/route.ts
 import { streamText } from 'ai';
 import { vibezcheck } from 'vibezcheck';
 
 export async function POST(req: Request) {
-  const { messages, customer = 'user@example.com' } = await req.json();
+  const { messages, userEmail = 'user@example.com' } = await req.json();
 
   return streamText({
-    model: vibezcheck('openai/gpt-4o-mini', {
-      customer,
-      onUsage: ({ usage, cost }) => {
-        console.log(\`Tokens: \${usage.totalTokens} | Cost: $\${cost.totalUSD}\`);
-      },
-    }),
+    model: vibezcheck('openai/gpt-4o-mini', { customer: userEmail }),
     messages,
-  }).toTextStreamResponse();
+  }).toDataStreamResponse();
 }
 \`\`\`
 
 ## 3. Add Telemetry Hook
 
 \`\`\`tsx
+// app/page.tsx
 'use client';
-import { VibezSessionProvider, VibezSessionWidget, useVibezChat } from 'vibezcheck/react';
+import { useVibezChat, VibezSessionWidget } from 'vibezcheck/react';
 
 export default function Chat() {
-  const { messages, input, handleInputChange, handleSubmit } = useVibezChat({
-    model: 'gpt-4o-mini',
-  });
+  const { messages, input, handleInputChange, handleSubmit } = useVibezChat();
 
   return (
     <div>
-      {/* Your chat UI */}
-      <VibezSessionWidget theme="light" position="bottom-right" />
+      <VibezSessionWidget />
+      {/* Your chat messages and input form */}
     </div>
   );
 }
@@ -266,7 +253,7 @@ export default function Chat() {
       {
         slug: 'cli',
         title: 'CLI Scaffolder',
-        description: 'Inspect live model rates, scaffold routes, and run health diagnostics.',
+        description: 'Command line tools for project initialization and rate inspection.',
         category: 'Getting Started',
         headings: [
           { id: 'cli-init', title: 'npx vibezcheck init', level: 2 },
@@ -274,35 +261,33 @@ export default function Chat() {
           { id: 'cli-doctor', title: 'npx vibezcheck doctor', level: 2 },
         ],
         content: `
-# CLI Scaffolder (\`npx vibezcheck\`)
+# CLI Scaffolder
 
-The \`vibezcheck\` CLI gives you interactive tools to set up projects and check live provider rates right in your command line.
+VibezCheck includes helpful terminal commands to initialize templates, inspect live rate cards, and verify your environment.
 
-## Project Setup Wizard
+## npx vibezcheck init
+
+Scaffolds a production-ready Next.js + Stripe AI template in seconds:
 
 \`\`\`bash
 npx vibezcheck init
 \`\`\`
 
-* Automatically detects your framework (Next.js App Router, Pages Router, or Express).
-* Prompts for your API keys and writes \`.env.local\`.
-* Generates a fully-typed streaming route handler.
+## npx vibezcheck prices
 
-## Live Model Pricing Table
+Displays current provider token rates, reasoning multipliers, and cache discounts in your terminal:
 
 \`\`\`bash
 npx vibezcheck prices
 \`\`\`
 
-Prints an ASCII table of official input, output, and caching rates across 50+ frontier models.
+## npx vibezcheck doctor
 
-## Environment Diagnostics
+Verifies Node.js version, environment keys (\`STRIPE_SECRET_KEY\`), and tests connectivity:
 
 \`\`\`bash
 npx vibezcheck doctor
 \`\`\`
-
-Verifies Node.js version, environment keys (\`STRIPE_SECRET_KEY\`, \`AI_GATEWAY_API_KEY\`), and tests Stripe connectivity.
 `,
       },
     ],
@@ -314,11 +299,12 @@ Verifies Node.js version, environment keys (\`STRIPE_SECRET_KEY\`, \`AI_GATEWAY_
       {
         slug: 'declarative-api',
         title: 'Declarative 1-Line API',
-        description: 'Universal wrapper supporting string model IDs, provider instances, and AI gateways.',
+        description: 'Universal wrapper supporting string model IDs, provider instances, and inline rate cards.',
         category: 'Core Concepts',
         headings: [
           { id: 'string-identifiers', title: 'Using String Model IDs', level: 2 },
           { id: 'provider-instances', title: 'Using Custom Provider Instances', level: 2 },
+          { id: 'inline-rates', title: 'Inline Custom Rates (Zero Wait for npm)', level: 2 },
           { id: 'ai-primitives', title: 'Compatibility with AI Primitives', level: 2 },
         ],
         content: `
@@ -359,6 +345,16 @@ const model = vibezcheck(openai('gpt-4o-mini'), {
 });
 \`\`\`
 
+## Inline Custom Rates (Zero Wait for npm)
+
+When a brand-new model launches today, pass its pricing inline with zero wait for package updates:
+
+\`\`\`typescript
+model: vibezcheck('deepseek/deepseek-r2-preview', {
+  rate: { in: 0.20, out: 0.80 }, // $0.20/M in, $0.80/M out
+})
+\`\`\`
+
 ## Compatibility with AI Primitives
 
 \`vibezcheck\` works seamlessly with every Vercel AI SDK method:
@@ -367,6 +363,171 @@ const model = vibezcheck(openai('gpt-4o-mini'), {
 * \`generateObject()\` — Structured JSON generation with Zod
 * \`streamObject()\` — Streaming structured JSON
 * Function calls & multi-step tool loops
+`,
+      },
+      {
+        slug: 'profit-margins',
+        title: 'Profit Margins & Sane Defaults',
+        description: 'Turn wholesale provider costs into guaranteed net profit with zero configuration.',
+        badge: 'New',
+        category: 'Core Concepts',
+        headings: [
+          { id: 'the-margin-engine', title: '1-Line Profit Margin Engine', level: 2 },
+          { id: 'the-sane-defaults', title: 'The 6 Sane Defaults', level: 2 },
+          { id: 'minimum-charge', title: 'Minimum Charge Floor', level: 2 },
+        ],
+        content: `
+# Profit Margins & Sane Defaults
+
+> *"Don't just show me what OpenAI charges me. Make sure I pocket a 50% profit margin on every single question."*
+
+## 1-Line Profit Margin Engine
+
+By default, billing tools calculate raw wholesale provider costs. VibezCheck lets you declare your desired profit margin in one line:
+
+\`\`\`typescript
+model: vibezcheck('openai/gpt-4o-mini', {
+  customer: 'sarah@acme.com',
+  pricing: {
+    margin: 1.5,           // 👈 Automatically adds a 50% profit margin!
+    minimumChargeUSD: 0.01, // 👈 Minimum charge 1 cent per question
+  },
+})
+\`\`\`
+
+When this runs:
+* **OpenAI Wholesale Cost:** \$0.0020
+* **Billed to Customer:** \$0.0030 (via Stripe)
+* **Net Profit:** \$0.0010 (50% margin)
+
+## The 6 Sane Defaults (Active by Default)
+
+When you write \`vibezcheck('model')\`, six critical protections are **active automatically**:
+
+1. **🛡️ $0.50 Safety Fuse Box**: Automatically prevents runaway loops without requiring manual ceilings.
+2. **🛟 In-Flight Abort Trapper**: Captures and bills partial tokens even if a user closes their browser tab mid-stream.
+3. **🏷️ Automatic 85% Cache Discounts**: Passes real prompt caching savings through to preserve true margins.
+4. **🚀 Serverless Lifecycle Protection**: Automatically enqueues flushes via \`after()\` or \`waitUntil()\` so containers never freeze mid-billing.
+5. **🔒 Zero Double-Billing**: Generates deterministic SHA-256 idempotency keys on every network event.
+6. **🟢 Free Local Vibe Mode**: Works locally with zero Stripe keys without crashing.
+
+## Minimum Charge Floor
+
+Use \`minimumChargeUSD\` to round up tiny fractions of a cent so every interaction covers your payment processing minimums:
+
+\`\`\`typescript
+pricing: {
+  minimumChargeUSD: 0.01 // Every call is at least 1¢
+}
+\`\`\`
+`,
+      },
+      {
+        slug: 'prepaid-postpaid',
+        title: 'Prepaid vs. Postpaid Billing',
+        description: 'Choose between monthly metered invoices and zero-debt credit wallets with 1 line.',
+        badge: 'New',
+        category: 'Core Concepts',
+        headings: [
+          { id: 'the-difference', title: 'Which Model Should You Choose?', level: 2 },
+          { id: 'prepaid-mode', title: 'Setting Up Prepaid Credit Wallets', level: 2 },
+          { id: 'postpaid-mode', title: 'Setting Up Postpaid Invoices', level: 2 },
+        ],
+        content: `
+# Prepaid vs. Postpaid Billing
+
+VibezCheck supports both billing paradigms with a single configuration toggle:
+
+## Which Model Should You Choose?
+
+| Model | Best For | How It Works | Financial Risk |
+| :--- | :--- | :--- | :--- |
+| **Postpaid** | B2B SaaS, enterprise contracts, internal tools | Monthly metered invoice sent at cycle end. | Possible card decline at month end. |
+| **Prepaid** | B2C apps, public signups, self-serve tools | Users buy a \$10 credit pack upfront; deducts in real time; locks at \$0. | **Zero risk.** You get cash before they use 1 token. |
+
+## Setting Up Prepaid Credit Wallets
+
+\`\`\`typescript
+model: vibezcheck('openai/gpt-4o-mini', {
+  customer: 'alex@gmail.com',
+  billing: {
+    mode: 'prepaid', // 👈 Real-time deduction; locks cleanly at $0
+  },
+  // Gracefully switch to eco-mode when balance is low:
+  fallbackModelOnBudget: 'openai/gpt-4o-mini',
+})
+\`\`\`
+
+## Setting Up Postpaid Invoices
+
+\`\`\`typescript
+model: vibezcheck('openai/gpt-4o', {
+  customer: 'org_acme_corp',
+  billing: {
+    mode: 'postpaid', // 👈 Standard Stripe Metered Billing invoice
+  },
+})
+\`\`\`
+`,
+      },
+      {
+        slug: 'agent-tools',
+        title: 'Agentic Tool Call Metering',
+        description: 'Meter external tools (web search, scrapers, sandboxes) and prompts into one invoice.',
+        badge: 'New',
+        category: 'Core Concepts',
+        headings: [
+          { id: 'the-agent-problem', title: 'The Multi-Step Agent Problem', level: 2 },
+          { id: 'session-envelope', title: 'Using vibezcheck.session()', level: 2 },
+        ],
+        content: `
+# Agentic Tool Call Metering
+
+Autonomous AI agents do more than stream text—they search the web, scrape websites, and run Python sandboxes.
+
+## The Multi-Step Agent Problem
+
+A single user request might use \$0.001 in LLM tokens, but execute:
+* 1 Google Search (\$0.010)
+* 1 Web Scraper (\$0.005)
+* 1 Python Sandbox execution (\$0.020)
+
+Total real cost: **\$0.036**. If you only meter the LLM tokens, you lose money on the tools.
+
+## Using vibezcheck.session()
+
+Create a scoped customer session to bill prompts and tools together into one customer balance:
+
+\`\`\`typescript
+import { generateText, tool } from 'ai';
+import { vibezcheck } from 'vibezcheck';
+import { z } from 'zod';
+
+export async function POST(req: Request) {
+  const { prompt, customer = 'alex@company.com' } = await req.json();
+
+  // ⚡ 1. Create a unified customer session
+  const session = vibezcheck.session({ customer });
+
+  const result = await generateText({
+    model: session.model('openai/gpt-4o-mini'),
+    tools: {
+      searchWeb: tool({
+        description: 'Live Google Web Search',
+        parameters: z.object({ query: z.string() }),
+        execute: async ({ query }) => {
+          // ⚡ 2. Bill external tool cost ($0.01) into the same balance
+          await session.trackTool('google_search', { costUSD: 0.01 });
+          return \`Results for: \${query}\`;
+        },
+      }),
+    },
+    prompt,
+  });
+
+  return Response.json(result);
+}
+\`\`\`
 `,
       },
       {
@@ -444,6 +605,8 @@ When building AI agents that call tools or execute multi-step recursive loops, a
 
 Just like an electrical circuit breaker trips when a wire gets overloaded, a **VibezCheck Circuit Breaker** monitors your active inference call and halts execution immediately if your cost or token limit is reached.
 
+By default, every VibezCheck call includes a **$0.50 safety ceiling** out of the box.
+
 ## How to Set Up Budget Ceilings
 
 \`\`\`typescript
@@ -479,6 +642,63 @@ When a budget ceiling is reached, \`vibezcheck\` safely closes the stream, fires
     id: 'react-suite',
     title: 'React Suite',
     items: [
+      {
+        slug: 'receipt',
+        title: '<VibezReceipt />',
+        description: 'Drop-in micro-badge for assistant chat bubbles showing verified token counts and costs.',
+        badge: 'New',
+        category: 'React Suite',
+        headings: [
+          { id: 'receipt-overview', title: 'Overview', level: 2 },
+          { id: 'receipt-usage', title: 'Adding to Assistant Messages', level: 2 },
+          { id: 'receipt-props', title: 'Available Props', level: 2 },
+        ],
+        content: `
+# \`<VibezReceipt />\`
+
+A clean, verified micro-badge rendered directly below AI assistant responses. It gives your users radical transparency into the compute power, reasoning time, and exact cost of their answer.
+
+## Adding to Assistant Messages
+
+\`\`\`tsx
+import { useVibezChat, VibezReceipt } from 'vibezcheck/react';
+
+export default function Chat() {
+  const { messages } = useVibezChat();
+
+  return (
+    <div className="space-y-4">
+      {messages.map((m) => (
+        <div key={m.id} className="p-4 rounded-2xl bg-white border border-slate-200">
+          <p className="text-slate-900 text-sm">{m.content}</p>
+
+          {/* ⚡ Micro-Receipt on assistant responses */}
+          {m.role === 'assistant' && (
+            <VibezReceipt
+              message={m}
+              variant="minimal"
+            />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+\`\`\`
+
+## Available Props
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :---: | :--- |
+| \`message\` | \`object\` | \`undefined\` | AI SDK message object with usage annotations |
+| \`model\` | \`string\` | \`'ai-model'\` | Explicit model name override |
+| \`tokens\` | \`number\` | \`undefined\` | Explicit token count override |
+| \`costUSD\` | \`number\` | \`undefined\` | Explicit cost in USD override |
+| \`reasoningTokens\` | \`number\` | \`undefined\` | Hidden thinking tokens count |
+| \`latencyMs\` | \`number\` | \`undefined\` | Latency in milliseconds |
+| \`variant\` | \`'minimal' \| 'pill' \| 'card'\` | \`'minimal'\` | Visual style variant |
+`,
+      },
       {
         slug: 'session-widget',
         title: '<VibezSessionWidget />',

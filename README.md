@@ -1,213 +1,203 @@
 # ⚡ vibezcheck
 
-> **The Declarative 1-Line Stripe Billing & Token Metering Engine for LLMs.**  
-> Track tokens, compute real-time USD costs, and bill customers with 0ms added latency across any LLM provider.
+> **Give your AI app a financial mind.**  
+> The declarative 1-line Stripe Billing and Token Metering engine for LLMs. Measure tokens, compute real-time dollar costs, and bill customers with **0ms added latency**.
 
 [![npm version](https://img.shields.io/npm/v/vibezcheck.svg)](https://npmjs.org/package/vibezcheck)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Strict-blue.svg)](https://www.typescriptlang.org/)
+[![Tests](https://img.shields.io/badge/Tests-31%20Passed-brightgreen.svg)]()
 
 ---
 
-## 🚀 Why vibezcheck?
+## 🍌 The Electric Meter for Artificial Intelligence
 
-* **⚡ 0ms Added Latency**: Streams pass straight through to the browser with zero buffering or middleware delay.
-* **🧠 Thinking & Reasoning Token Aware**: Accurately extracts hidden reasoning tokens in GPT-5, o1/o3-mini, Claude 3.7 Thinking, and Gemini 2.0 Flash Thinking.
-* **💰 Built-in Cost Calculation**: Real-time USD inference pricing out of the box with prompt caching discounts.
-* **🆓 Zero-Config Local Mode**: Works 100% free in development with no database or Stripe account required.
-* **💳 1-Line Stripe Billing**: Turn an AI prototype into a revenue-generating SaaS with autonomous customer provisioning and meter events.
-* **⚛️ React & React Native Ready**: Live floating widgets, badges, and checkout paywall modals (`<VibezBillingModal />`).
+When you turn on the lights in your bedroom, your electric meter spins. When users prompt your AI, **VibezCheck** is the smart meter that counts every word and hidden thought — converting it into pennies with Stripe so your app actually looks out for your margins.
+
+### 🛡️ Sane Defaults (Zero Configuration Required)
+* **⚡ 0ms Added Latency**: Streams pass directly to your user's browser with zero intermediate proxy buffering.
+* **🛡️ Default $0.50 Fuse Box**: Automatically prevents runaway loops without requiring manual ceilings.
+* **🛟 In-Flight Abort Trapper**: Captures and bills partial tokens even if a user closes their browser tab mid-stream.
+* **🏷️ Automatic 85% Prompt Cache Discounts**: Detects cache hits on Claude 3.7, GPT-4o, and DeepSeek and passes real savings through.
+* **🚀 Serverless Lifecycle Protection**: Seamlessly keeps serverless containers alive until telemetry is acknowledged.
+* **💰 1-Line Profit Margins**: Turn wholesale provider costs into guaranteed net profit with `pricing: { margin: 1.5 }`.
+* **💳 Prepaid & Postpaid**: Choose between monthly metered invoices or zero-debt credit wallets.
+* **🧠 Reasoning Token Aware**: Captures hidden thinking tokens in o3-mini and Claude 3.7 Thinking.
+* **🆓 Free Vibe Mode**: Works 100% out of the box in local development with no Stripe account required.
 
 ---
 
 ## 📦 Installation
 
 ```bash
-npm install vibezcheck stripe
-# or
-pnpm add vibezcheck stripe
+npm install vibezcheck ai @ai-sdk/openai stripe
 ```
 
 ---
 
-## ⚡ 1. Declarative Vercel AI SDK Integration
+## ⚡ 1. The 60-Second Quickstart
 
-`vibezcheck` wraps any model string or provider instance into a fully compliant Vercel AI SDK model:
-
-### A. Single-Turn Generation (`generateText` & Server Actions)
+### Backend API Route (`app/api/chat/route.ts`)
 ```typescript
-import { generateText } from "ai";
-import { vibezcheck } from "vibezcheck";
-
-const { text, usage } = await generateText({
-  model: vibezcheck("openai/gpt-4o-mini", {
-    customer: "alex@example.com", // Auto-creates or matches Stripe customer
-  }),
-  prompt: "What is love?",
-});
-```
-
-### B. Streaming AI Route (`streamText`)
-```typescript
-// app/api/chat/route.ts
-import { streamText } from "ai";
-import { vibezcheck } from "vibezcheck";
+import { streamText } from 'ai';
+import { vibezcheck } from 'vibezcheck';
 
 export async function POST(req: Request) {
-  const { messages } = await req.json();
+  const { messages, userEmail = 'alex@company.com' } = await req.json();
 
   return streamText({
-    model: vibezcheck("gpt-4o-mini", { customer: "alex@example.com" }),
+    // ⚡ 1 Line. All 6 sane defaults run automatically.
+    model: vibezcheck('openai/gpt-4o-mini', { customer: userEmail }),
     messages,
-  }).toTextStreamResponse();
+  }).toDataStreamResponse();
 }
 ```
 
-### C. Direct `createOpenAI` Connection
-You can pass custom OpenAI / Gateway instances directly into `vibezcheck()`:
-```typescript
-import { createOpenAI } from "@ai-sdk/openai";
-import { streamText } from "ai";
-import { vibezcheck } from "vibezcheck";
-
-const openai = createOpenAI({
-  apiKey: process.env.AI_GATEWAY_API_KEY,
-  baseURL: "https://ai-gateway.vercel.sh/v1", // Vercel AI Gateway or Cloudflare
-});
-
-export async function POST(req: Request) {
-  const { messages } = await req.json();
-
-  return streamText({
-    model: vibezcheck(openai("gpt-4o-mini"), { customer: "alex@example.com" }),
-    messages,
-  }).toTextStreamResponse();
-}
-```
-
----
-
-## ⚛️ 2. Declarative React UI & Hooks (`vibezcheck/react`)
-
-### A. 1-Line Streaming Chat Hook (`useVibezChat`)
-Automatically connects to your API route and syncs tokens, reasoning thoughts, and costs with the session widget:
-
+### Frontend Chat UI (`app/page.tsx`)
 ```tsx
 'use client';
-import { useVibezChat, VibezSessionWidget, VibezBillingModal } from 'vibezcheck/react';
+import { useVibezChat, VibezReceipt, VibezSessionWidget } from 'vibezcheck/react';
 
 export default function ChatPage() {
-  const { messages, input, handleInputChange, handleSubmit, isLoading } = useVibezChat({
-    model: 'gpt-4o-mini',
-    customer: 'alex@example.com',
-  });
+  const { messages, input, handleInputChange, handleSubmit } = useVibezChat();
 
   return (
-    <main className="p-6 max-w-3xl mx-auto">
-      {messages.map((m) => (
-        <div key={m.id}>
-          <strong>{m.role}:</strong> {m.content}
-        </div>
-      ))}
+    <main className="max-w-xl mx-auto py-10 px-4 space-y-6">
+      {/* 1. Floating live token & dollar counter */}
+      <VibezSessionWidget position="bottom-right" />
 
-      <form onSubmit={handleSubmit}>
-        <input value={input} onChange={handleInputChange} placeholder="Ask..." />
-        <button type="submit" disabled={isLoading}>Send</button>
+      {/* 2. Messages with micro-receipts */}
+      <div className="space-y-4">
+        {messages.map((m) => (
+          <div key={m.id} className="p-4 rounded-2xl bg-white border border-slate-200">
+            <p className="text-slate-900 text-sm">{m.content}</p>
+
+            {/* Micro-Receipt under assistant answers */}
+            {m.role === 'assistant' && <VibezReceipt message={m} />}
+          </div>
+        ))}
+      </div>
+
+      <form onSubmit={handleSubmit} className="flex gap-2">
+        <input
+          value={input}
+          onChange={handleInputChange}
+          placeholder="Ask a question..."
+          className="flex-1 px-4 py-2 rounded-xl border border-slate-200 text-sm"
+        />
+        <button type="submit" className="px-5 py-2 rounded-xl bg-slate-950 text-white font-bold text-sm">
+          Send
+        </button>
       </form>
-
-      {/* Live Token & Dollar Tracker Widget */}
-      <VibezSessionWidget theme="light" position="bottom-right" />
     </main>
   );
 }
 ```
 
-### B. Autonomous Paywall & Top-Up Modal (`<VibezBillingModal />`)
-Pops up an in-app Stripe Checkout modal whenever a customer reaches their credit limit:
-
-```tsx
-<VibezBillingModal
-  isOpen={limitReached}
-  onClose={() => setLimitReached(false)}
-  notice={{
-    status: 'limit_reached',
-    tokensUsed: 150000,
-    costUSD: 5.00,
-    message: 'Free credit limit reached. Top up to keep streaming!',
-  }}
-  theme="light"
-  testMode={true} // Supports Stripe Sandbox testing
-/>
-```
-
 ---
 
-## 💳 3. Stripe Sandbox & Customer Provisioning
+## 🛠️ Real-World Implementation Patterns
 
-### A. Auto Customer Provisioning in 1 Line:
+### Pattern A: 50% Profit Margin Engine
+Turn wholesale provider costs into guaranteed net profit:
+
 ```typescript
-import { vibezcheck } from "vibezcheck";
-
-const vz = vibezcheck();
-
-// Automatically finds existing customer by email or creates a new one in Stripe
-const customer = await vz.customers.getOrCreate({
-  email: "alex@company.com",
-  name: "Alex Rivera",
-});
-console.log(customer.id); // "cus_R3K7h9Qv..."
-```
-
-### B. 1-Line Stripe Checkout Session:
-```typescript
-const checkoutUrl = await vz.billing.createCheckoutSession({
-  customerId: customer.id,
-  priceId: "price_metered_tokens", // Your Stripe metered price ID
-  returnUrl: "https://myapp.com/dashboard",
-});
-```
-
----
-
-## 📊 Live Telemetry Payload Structure
-
-Every inference event emitted by `onUsage` captures complete token and cost economics:
-
-```json
-{
-  "timestamp": "2026-08-31T11:00:00.000Z",
-  "model": "openai/gpt-4o-mini",
-  "provider": "openai",
-  "customerId": "cus_R3K7h9Qv",
-  "usage": {
-    "inputTokens": 850,
-    "outputTokens": 420,
-    "totalTokens": 1270,
-    "reasoningTokens": 280,
-    "cachedTokens": 500
+model: vibezcheck('openai/gpt-4o-mini', {
+  customer: 'sarah@acme.com',
+  pricing: {
+    margin: 1.5,           // 👈 Cost + 50% margin automatically billed to Stripe!
+    minimumChargeUSD: 0.01, // 👈 Minimum charge 1 cent per question
   },
-  "cost": {
-    "inputUSD": 0.000127,
-    "outputUSD": 0.000252,
-    "totalUSD": 0.000379
-  }
+})
+```
+
+---
+
+### Pattern B: Prepaid Credit Wallets (Zero Debt Risk)
+User pre-purchases $10; stream cleanly halts when balance hits $0 without invoice debt:
+
+```typescript
+model: vibezcheck('openai/gpt-4o-mini', {
+  customer: 'alex@gmail.com',
+  billing: {
+    mode: 'prepaid', // 👈 Deducts from prepaid credit balance in real time
+  },
+  // Gracefully downshift when credits run low instead of crashing
+  fallbackModelOnBudget: 'openai/gpt-4o-mini',
+})
+```
+
+---
+
+### Pattern C: Frontier Reasoning Models (Claude 3.7 & o3-mini)
+Automatically extracts hidden thinking tokens and applies 85% prompt cache discounts:
+
+```typescript
+model: vibezcheck('anthropic/claude-3-7-sonnet', {
+  customer: 'alex@company.com',
+  maxCostPerCallUSD: 0.75, // Extended ceiling for multi-minute deep reasoning
+})
+```
+
+---
+
+### Pattern D: Unified Agent Tool Call Metering
+Bill external tools (web searches, scrapers, Python sandboxes) and LLM streams into one invoice:
+
+```typescript
+// app/api/agent/route.ts
+import { generateText, tool } from 'ai';
+import { vibezcheck } from 'vibezcheck';
+import { z } from 'zod';
+
+export async function POST(req: Request) {
+  const { prompt, customer = 'alex@company.com' } = await req.json();
+
+  // Create unified customer session
+  const session = vibezcheck.session({ customer });
+
+  const result = await generateText({
+    model: session.model('openai/gpt-4o-mini'),
+    tools: {
+      searchGoogle: tool({
+        description: 'Live Google Search',
+        parameters: z.object({ query: z.string() }),
+        execute: async ({ query }) => {
+          // ⚡ Bill non-LLM tool execution ($0.01) into the same customer balance
+          await session.trackTool('google_search', { costUSD: 0.01 });
+          return `Search results for: ${query}`;
+        },
+      }),
+    },
+    prompt,
+  });
+
+  return Response.json(result);
 }
 ```
 
 ---
 
-## 📜 Supported Models (Auto-Priced)
+### Pattern E: Brand-New Model (1-Line Inline Rate Card)
+Use newly released or fine-tuned models with zero wait for package updates:
 
-| Model Family | Examples | Reasoning Aware | Caching Discounts |
-| :--- | :--- | :---: | :---: |
-| **OpenAI** | `gpt-4o`, `gpt-4o-mini`, `o1`, `o3-mini`, `gpt-5.6-sol` | ✅ | ✅ |
-| **Anthropic** | `claude-3-7-sonnet`, `claude-3-5-sonnet`, `claude-3-5-haiku` | ✅ | ✅ |
-| **Google** | `gemini-2.0-flash`, `gemini-1.5-pro` | ✅ | ✅ |
-| **DeepSeek** | `deepseek-chat`, `deepseek-reasoner` | ✅ | ✅ |
-| **Custom** | Register any custom model with `registerModelPricing()` | ✅ | ✅ |
+```typescript
+model: vibezcheck('deepseek/deepseek-r2', {
+  rate: { in: 0.20, out: 0.80 }, // $0.20/M in, $0.80/M out
+})
+```
+
+---
+
+## 🎨 React UI Suite (`vibezcheck/react`)
+
+* **`useVibezChat`**: 1-hook drop-in chat streaming with live session cost sync.
+* **`<VibezReceipt />`**: Micro-badge rendered below assistant responses (*"⚡ gpt-4o-mini • 342 tokens • $0.0005 • Verified by VibezCheck"*).
+* **`<VibezSessionWidget />`**: Floating live token & dollar speedometer in the screen corner.
+* **`<VibezBillingModal />`**: Drop-in 1-click Stripe Checkout top-up modal.
 
 ---
 
 ## 📄 License
 
-MIT © [seeyouin2x5x](https://github.com/seeyouin2x5x)
+MIT © [VibezCheck](https://vibezcheck.app)
