@@ -11,7 +11,7 @@ const command = args[0] || 'init';
 
 function printBanner() {
   console.log(`
-\x1b[38;2;212;255;50m✦\x1b[0m \x1b[1mvibezcheck CLI\x1b[0m \x1b[90mv0.4.0\x1b[0m
+\x1b[38;2;212;255;50m✦\x1b[0m \x1b[1mvibezcheck CLI\x1b[0m \x1b[90mv0.4.1\x1b[0m
 \x1b[90mThe 1-line Stripe Billing & Token Metering Engine for LLMs\x1b[0m
 `);
 }
