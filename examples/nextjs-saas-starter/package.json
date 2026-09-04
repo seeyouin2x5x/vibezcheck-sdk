@@ -1,0 +1,34 @@
+{
+  "name": "vibezcheck-nextjs-saas-starter",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Production-ready Next.js 15 AI SaaS starter with 1-line Stripe token metering, <VibezReceipt />, and 0ms latency.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "audit": "npx vibezcheck audit"
+  },
+  "dependencies": {
+    "@ai-sdk/openai": "^2.0.118",
+    "ai": "^5.0.244",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.469.0",
+    "next": "^15.1.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "stripe": "^17.7.0",
+    "tailwind-merge": "^2.6.0",
+    "vibezcheck": "^0.4.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.8.3"
+  }
+}
