@@ -4,11 +4,14 @@
 > The declarative 1-line Stripe Billing and Token Metering engine for LLMs. Measure tokens, compute real-time dollar costs, and bill customers with **0ms added latency**.
 
 [![npm version](https://img.shields.io/npm/v/vibezcheck.svg)](https://npmjs.org/package/vibezcheck)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fseeyouin2x5x%2Fvibezcheck-sdk%2Ftree%2Fmain%2Fexamples%2Fnextjs-saas-starter&env=OPENAI_API_KEY,STRIPE_SECRET_KEY,NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY&envDescription=API%20Keys%20for%20OpenAI%20and%20Stripe&project-name=vibezcheck-ai-saas)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Strict-blue.svg)](https://www.typescriptlang.org/)
-[![Tests](https://img.shields.io/badge/Tests-31%20Passed-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/Tests-36%20Passed-brightgreen.svg)]()
 
 ---
+
+> 🚀 **Want a ready-to-ship template?** Fork our [1-Click Next.js 15 AI SaaS Starter](https://github.com/seeyouin2x5x/vibezcheck-sdk/tree/main/examples/nextjs-saas-starter) with Stripe Checkout, `<VibezReceipt />`, and `<VibezSessionWidget />` pre-configured.
 
 ## 🍌 The Electric Meter for Artificial Intelligence
 
@@ -195,6 +198,20 @@ model: vibezcheck('deepseek/deepseek-r2', {
 * **`<VibezReceipt />`**: Micro-badge rendered below assistant responses (*"⚡ gpt-4o-mini • 342 tokens • $0.0005 • Verified by VibezCheck"*).
 * **`<VibezSessionWidget />`**: Floating live token & dollar speedometer in the screen corner.
 * **`<VibezBillingModal />`**: Drop-in 1-click Stripe Checkout top-up modal.
+
+---
+
+## 🌿 Codebase Token Leak Scanner (`npx vibezcheck audit`)
+
+Audit your project in under 50ms for unmetered AI endpoints and missing runaway loop fuses:
+
+```bash
+npx vibezcheck audit
+```
+
+* **Kind & Minimalist**: Zero heavy AST dependencies; outputs calm clarity instead of intimidating lint errors.
+* **Safe `--fix`**: Automatically wraps raw provider calls in `vibezcheck()` with `.bak` backups.
+* **GitHub Actions Ready**: Run `npx vibezcheck audit --ci` to fail PRs that accidentally introduce unmetered routes.
 
 ---
 

@@ -323,8 +323,11 @@ export async function displayAuditReport(
 
   // Case 2: All routes protected (The Calm State)
   if (summary.unmeteredCount === 0) {
-    const routeWord = summary.protectedCount === 1 ? 'route' : 'routes';
-    console.log(`  \x1b[32m✓ All ${summary.protectedCount} AI ${routeWord} are metered with $0.50 safety fuses.\x1b[0m`);
+    const message =
+      summary.protectedCount === 1
+        ? '✓ The AI route is metered with a $0.50 safety fuse.'
+        : `✓ All ${summary.protectedCount} AI routes are metered with $0.50 safety fuses.`;
+    console.log(`  \x1b[32m${message}\x1b[0m`);
     console.log(`  \x1b[90mYour wallet is protected. You're good to ship.\x1b[0m\n`);
     return;
   }
