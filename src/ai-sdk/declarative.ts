@@ -4,9 +4,9 @@ import { calculateCost } from '../pricing/calculator';
 import { createMeter, VibezMeter } from '../meter/client';
 
 export interface VibezCheckModelOptions extends WithBillingOptions {
-  /** OpenAI / AI Gateway API Key override */
+  /** OpenAI / Anthropic / AI Gateway API Key override */
   apiKey?: string;
-  /** AI Gateway / OpenAI Base URL override */
+  /** AI Gateway / Provider Base URL override */
   baseURL?: string;
 }
 
@@ -30,23 +30,33 @@ export interface VibezSession {
 /**
  * Creates or resolves an AI SDK compatible LanguageModel with built-in VibezCheck billing & metering.
  *
+ * Supports:
+ * - Direct instances: `vibezcheck(openai('gpt-4o'))`, `vibezcheck(anthropic('claude-3-7-sonnet'))`
+ * - String identifiers: `vibezcheck('openai/gpt-4o-mini')`, `vibezcheck('anthropic/claude-3-5-sonnet')`, `vibezcheck('gpt-4o')`
+ * - Vercel AI SDK primitives: `generateText`, `streamText`, `generateObject`, `streamObject`
+ *
  * @example
  * ```typescript
- * import { generateText, streamText } from 'ai';
+ * import { streamText } from 'ai';
+ * import { openai } from '@ai-sdk/openai';
+ * import { anthropic } from '@ai-sdk/anthropic';
  * import { vibezcheck } from 'vibezcheck';
  *
- * // 1. Declarative string model identifier:
- * const { text } = await generateText({
- *   model: vibezcheck('openai/gpt-4o-mini', { customer: 'alex@example.com' }),
- *   prompt: 'What is love?',
+ * // 1. Pass wrapped OpenAI instance:
+ * const result = streamText({
+ *   model: vibezcheck(openai('gpt-4o-mini'), { customer: 'alex@example.com' }),
+ *   messages,
  * });
  *
- * // 2. Works with all Vercel AI SDK primitives (streamText, generateObject, streamObject):
- * const result = streamText({
- *   model: vibezcheck('gpt-4o', {
- *     customer: 'alex@example.com',
- *     pricing: { margin: 1.5 }, // 50% profit margin
- *   }),
+ * // 2. Pass wrapped Anthropic instance:
+ * const result2 = streamText({
+ *   model: vibezcheck(anthropic('claude-3-7-sonnet'), { customer: 'alex@example.com' }),
+ *   messages,
+ * });
+ *
+ * // 3. Use 1-line string identifier:
+ * const result3 = streamText({
+ *   model: vibezcheck('openai/gpt-4o-mini', { customer: 'alex@example.com' }),
  *   messages,
  * });
  * ```
@@ -55,12 +65,12 @@ export function createVibezModel(
   modelOrId: any,
   options: VibezCheckModelOptions = {}
 ): any {
-  // If an existing LanguageModel instance is passed, wrap directly
+  // If an existing LanguageModel instance is passed (from openai(), anthropic(), etc.), wrap directly
   if (typeof modelOrId === 'object' && modelOrId !== null) {
     return withBilling(modelOrId, options);
   }
 
-  // If a string model identifier is passed (e.g. "openai/gpt-4o-mini" or "gpt-4o-mini")
+  // If a string model identifier is passed (e.g. "openai/gpt-4o-mini", "anthropic/claude-3-7-sonnet", or "gpt-4o-mini")
   if (typeof modelOrId === 'string') {
     const rawId = modelOrId;
     let providerName = 'openai';
@@ -70,14 +80,18 @@ export function createVibezModel(
       const parts = rawId.split('/');
       providerName = parts[0].toLowerCase();
       cleanModelId = parts.slice(1).join('/');
+    } else if (rawId.startsWith('claude-')) {
+      providerName = 'anthropic';
+    } else if (rawId.startsWith('gemini-')) {
+      providerName = 'google';
     }
 
     const apiKey =
       options.apiKey ||
       process.env.AI_GATEWAY_API_KEY ||
-      process.env.OPENAI_API_KEY ||
-      process.env.ANTHROPIC_API_KEY ||
-      process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+      (providerName === 'anthropic' ? process.env.ANTHROPIC_API_KEY : undefined) ||
+      (providerName === 'google' ? process.env.GOOGLE_GENERATIVE_AI_API_KEY : undefined) ||
+      process.env.OPENAI_API_KEY;
 
     const baseURL =
       options.baseURL ||
@@ -88,18 +102,38 @@ export function createVibezModel(
 
     try {
       if (providerName === 'openai' || providerName === 'gateway' || !providerName) {
-        // Try dynamic import or require of @ai-sdk/openai
-        const { createOpenAI } = require('@ai-sdk/openai');
-        const openaiProvider = createOpenAI({ apiKey, baseURL });
-        baseModelInstance = openaiProvider(cleanModelId);
+        const mod = require('@ai-sdk/openai');
+        const factory = mod.createOpenAI || mod.openai || mod.default?.createOpenAI || mod.default?.openai;
+        if (typeof factory === 'function') {
+          if (mod.createOpenAI) {
+            const provider = factory({ apiKey, baseURL });
+            baseModelInstance = provider(cleanModelId);
+          } else {
+            baseModelInstance = factory(cleanModelId);
+          }
+        }
       } else if (providerName === 'anthropic') {
-        const { createAnthropic } = require('@ai-sdk/anthropic');
-        const anthropicProvider = createAnthropic({ apiKey, baseURL });
-        baseModelInstance = anthropicProvider(cleanModelId);
+        const mod = require('@ai-sdk/anthropic');
+        const factory = mod.createAnthropic || mod.anthropic || mod.default?.createAnthropic || mod.default?.anthropic;
+        if (typeof factory === 'function') {
+          if (mod.createAnthropic) {
+            const provider = factory({ apiKey, baseURL });
+            baseModelInstance = provider(cleanModelId);
+          } else {
+            baseModelInstance = factory(cleanModelId);
+          }
+        }
       } else if (providerName === 'google') {
-        const { createGoogleGenerativeAI } = require('@ai-sdk/google');
-        const googleProvider = createGoogleGenerativeAI({ apiKey, baseURL });
-        baseModelInstance = googleProvider(cleanModelId);
+        const mod = require('@ai-sdk/google');
+        const factory = mod.createGoogleGenerativeAI || mod.google || mod.default?.createGoogleGenerativeAI || mod.default?.google;
+        if (typeof factory === 'function') {
+          if (mod.createGoogleGenerativeAI) {
+            const provider = factory({ apiKey, baseURL });
+            baseModelInstance = provider(cleanModelId);
+          } else {
+            baseModelInstance = factory(cleanModelId);
+          }
+        }
       }
     } catch {
       // Fallback object implementing LanguageModel shape if provider package not installed
