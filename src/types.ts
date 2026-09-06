@@ -102,6 +102,12 @@ export interface InferenceCost {
   cachedDiscountUSD?: number;
   /** Total computed base inference cost in USD */
   totalUSD: number;
+  /** Wholesale provider cost in USD */
+  wholesaleTotalUSD?: number;
+  /** Amount billed to customer in USD */
+  billedUSD?: number;
+  /** Net developer profit in USD */
+  profitUSD?: number;
   /** Retail price after developer markup (if markup applied) */
   retailUSD?: number;
   /** Currency (defaults to 'USD') */

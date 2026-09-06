@@ -1,12 +1,15 @@
 import Stripe from 'stripe';
 import type { MeterOptions, StreamWrapOptions, CustomerParam } from './types';
 import { VibezMeter, createMeter } from './meter/client';
-import { calculateCost, getModelPricing, registerModelPricing } from './pricing';
+import { calculateCost, calculateUsageCost, getModelPricing, registerModelPricing } from './pricing';
 import { withBilling, meteredModel } from './ai-sdk/with-billing';
 import { createVibezModel, createVibezSession, type VibezCheckModelOptions } from './ai-sdk/declarative';
+import { vibezcheckMiddleware } from './ai-sdk/middleware';
 import { CustomerManager, createCustomerManager } from './customers/manager';
 import { ApiKeyAuth, createApiKeyAuth, extractAuthToken } from './auth';
 import { BillingHelper, createBillingHelper } from './billing/sessions';
+import { AgentSession, createAgentSession } from './billing/session';
+import { wrapTool, instrumentToolKit } from './billing/tools';
 
 export * from './types';
 export * from './meter';
@@ -152,12 +155,20 @@ export function vibezcheck(
 
 // Attach static helper utilities to vibezcheck function
 vibezcheck.calculateCost = calculateCost;
+vibezcheck.calculateUsageCost = calculateUsageCost;
 vibezcheck.getModelPricing = getModelPricing;
 vibezcheck.registerModelPricing = registerModelPricing;
 vibezcheck.create = createVibezCheck;
 vibezcheck.withBilling = withBilling;
 vibezcheck.createMeter = createMeter;
-vibezcheck.session = createVibezSession;
+vibezcheck.session = createAgentSession;
+vibezcheck.Session = AgentSession;
+vibezcheck.wrapTool = wrapTool;
+vibezcheck.instrumentToolKit = instrumentToolKit;
+vibezcheck.middleware = vibezcheckMiddleware;
+vibezcheck.Billing = BillingHelper;
+vibezcheck.Auth = ApiKeyAuth;
+vibezcheck.Customers = CustomerManager;
 
 /**
  * Singleton client instance

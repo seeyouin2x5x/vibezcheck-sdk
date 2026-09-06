@@ -1,34 +1,38 @@
-# ⚡ vibezcheck
+# ✦ VibezCheck
 
-> **Give your AI app a financial mind.**  
-> The declarative 1-line Stripe Billing and Token Metering engine for LLMs. Measure tokens, compute real-time dollar costs, and bill customers with **0ms added latency**.
+> **The 1-Line Token Meter & Real-Time Billing Engine for AI.**  
+> Track tokens, compute real-time dollar costs, set profit margins, and bill customers with **0ms added latency**.
 
 [![npm version](https://img.shields.io/npm/v/vibezcheck.svg)](https://npmjs.org/package/vibezcheck)
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fseeyouin2x5x%2Fvibezcheck-sdk%2Ftree%2Fmain%2Fexamples%2Fnextjs-saas-starter&env=OPENAI_API_KEY,STRIPE_SECRET_KEY,NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY&envDescription=API%20Keys%20for%20OpenAI%20and%20Stripe&project-name=vibezcheck-ai-saas)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Strict-blue.svg)](https://www.typescriptlang.org/)
-[![Tests](https://img.shields.io/badge/Tests-50%20Passed-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/Tests-62%20Passed-brightgreen.svg)]()
 
 ---
 
-> 🚀 **Want a ready-to-ship template?** Fork our [1-Click Next.js 15 AI SaaS Starter](https://github.com/seeyouin2x5x/vibezcheck-sdk/tree/main/examples/nextjs-saas-starter) with Stripe Checkout, `<VibezReceipt />`, and `<VibezSessionWidget />` pre-configured.
+### The 2-Line Promise
 
-## 🍌 The Electric Meter for Artificial Intelligence
+```typescript
+// 1. Server: Wrap your model with automated billing
+const model = vibezcheck('openai/gpt-4o', { customer: 'cus_alex' });
 
-When you turn on the lights in your bedroom, your electric meter spins. When users prompt your AI, **VibezCheck** is the smart meter that counts every word and hidden thought — converting it into pennies with Stripe so your app actually looks out for your margins.
+// 2. Client: Drop in the financial HUD
+<VibezCheck messages={messages} />
+```
 
-### 🛡️ Sane Defaults (Zero Configuration Required)
-* **⚡ 0ms Added Latency**: Streams pass directly to your user's browser with zero intermediate proxy buffering.
-* **🛡️ Default $0.50 Fuse Box**: Automatically prevents runaway loops without requiring manual ceilings.
-* **🛟 In-Flight Abort Trapper**: Captures and bills partial tokens even if a user closes their browser tab mid-stream.
-* **🏷️ Automatic 85% Prompt Cache Discounts**: Detects cache hits on Claude 3.7, GPT-4o, and DeepSeek and passes real savings through.
-* **🚀 Serverless Lifecycle Protection**: Seamlessly keeps serverless containers alive until telemetry is acknowledged (`after()` / `waitUntil()`).
-* **💰 1-Line Profit Margins**: Turn wholesale provider costs into guaranteed net profit with `pricing: { margin: 1.5 }`.
-* **🏢 B2B Multi-Tenancy & Customer Metadata**: Pass structured customer profiles with `orgId`, `teamId`, `plan`, `tier`, `role`, and custom metadata.
-* **🗄️ Duck-Typed Database Sinks**: Direct auto-syncing to Supabase (`database: supabase`) with zero blast radius.
-* **💳 Pluggable Payment Gateways**: Works out of the box with Stripe, Polar (`provider: 'polar'`), or custom internal wallets.
-* **🧠 Reasoning Token Aware**: Captures hidden thinking tokens in o3-mini and Claude 3.7 Thinking.
-* **🆓 Free Vibe Mode**: Works 100% out of the box in local development with no Stripe account required.
+---
+
+## 🚀 Features
+
+* **⚡ 0ms Added Latency**: Direct transparent proxy stream; no external server redirects or buffering.
+* **🛡️ Built-in $0.50 Circuit Breaker**: Prevents infinite loops and runaway bills automatically.
+* **🛟 In-Flight Abort Trapper**: Catches and bills tokens even if the customer closes their tab mid-stream.
+* **🪙 BigInt Nano-USD Precision**: Sub-cent financial math ($1 = $10^9$ Nano-USD) eliminating IEEE 754 float drift.
+* **💰 1-Line Profit Margins**: Turn wholesale API costs into retail profits with `pricing: { margin: 1.5 }` (+50% profit).
+* **🆓 Zero-DB Dev Mode**: Run locally on `localhost:3000` with NO database and NO Stripe keys required.
+* **💳 Pluggable SaaS Billing**: Top-ups, checkout sessions, customer portal, and user API keys (`vz_live_...`).
+* **🤖 Multi-Tool Agent Sessions**: Cumulative session budgets across models, Python sandboxes, and web scrapers.
+* **🔄 100% Drop-In Polyfills**: Direct replacement for `@stripe/ai-sdk/meter`, `@stripe/ai-sdk/provider`, and `@stripe/token-meter`.
 
 ---
 
@@ -40,56 +44,49 @@ npm install vibezcheck ai @ai-sdk/openai stripe
 
 ---
 
-## ⚡ 1. The 60-Second Quickstart
+## ⚡ Quickstart: Zero-DB Dev Mode to Production
 
-### Backend API Route (`app/api/chat/route.ts`)
+### 1. Next.js 15 API Route (`app/api/chat/route.ts`)
+
 ```typescript
 import { streamText } from 'ai';
+import { openai } from '@ai-sdk/openai';
 import { vibezcheck } from 'vibezcheck';
-import { supabase } from '@/lib/supabase';
 
 export async function POST(req: Request) {
-  const { messages, user } = await req.json();
+  const { messages } = await req.json();
 
-  return streamText({
-    // ⚡ 1 Line. All 10 sane defaults run automatically.
-    model: vibezcheck('openai/gpt-4o-mini', {
-      customer: {
-        id: user.stripeCustomerId,
-        userId: user.id,
-        email: user.email,
-        orgId: user.organizationId,
-        plan: 'pro',
-      },
-      pricing: { margin: 1.4 },   // 40% profit margin
-      database: supabase,         // Auto-persists token receipts with 0ms latency
+  const result = streamText({
+    // Wrap any AI SDK model or use string identifier
+    model: vibezcheck(openai('gpt-4o-mini'), {
+      customer: 'user_alex@example.com', // Stripe customer ID or user email
+      pricing: { margin: 1.3 },         // +30% profit margin
+      maxCostPerCallUSD: 0.50,          // Safety fuse box
     }),
     messages,
-  }).toDataStreamResponse();
+  });
+
+  return result.toDataStreamResponse();
 }
 ```
 
-### Frontend Chat UI (`app/page.tsx`)
+### 2. Frontend React Client (`app/page.tsx`)
+
 ```tsx
 'use client';
-import { useVibezChat, VibezReceipt, VibezSessionWidget } from 'vibezcheck/react';
+import { useChat } from 'ai/react';
+import { VibezCheck } from 'vibezcheck/ui';
 
 export default function ChatPage() {
-  const { messages, input, handleInputChange, handleSubmit } = useVibezChat();
+  const { messages, input, handleInputChange, handleSubmit } = useChat();
 
   return (
-    <main className="max-w-xl mx-auto py-10 px-4 space-y-6">
-      {/* 1. Floating live token & dollar speedometer */}
-      <VibezSessionWidget position="bottom-right" />
-
-      {/* 2. Messages with micro-receipts */}
-      <div className="space-y-4">
+    <main className="max-w-2xl mx-auto p-6 space-y-4">
+      <div className="space-y-3">
         {messages.map((m) => (
-          <div key={m.id} className="p-4 rounded-2xl bg-white border border-slate-200">
-            <p className="text-slate-900 text-sm">{m.content}</p>
-
-            {/* Micro-Receipt under assistant answers */}
-            {m.role === 'assistant' && <VibezReceipt message={m} />}
+          <div key={m.id} className="p-3 rounded-lg bg-slate-100 dark:bg-slate-800">
+            <strong>{m.role}: </strong>
+            <span>{m.content}</span>
           </div>
         ))}
       </div>
@@ -98,13 +95,16 @@ export default function ChatPage() {
         <input
           value={input}
           onChange={handleInputChange}
-          placeholder="Ask a question..."
-          className="flex-1 px-4 py-2 rounded-xl border border-slate-200 text-sm"
+          placeholder="Ask anything..."
+          className="flex-1 p-2 border rounded-lg"
         />
-        <button type="submit" className="px-5 py-2 rounded-xl bg-slate-950 text-white font-bold text-sm">
+        <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg">
           Send
         </button>
       </form>
+
+      {/* ✦ 1-Line HUD: Works with zero database & zero Stripe in Dev Mode */}
+      <VibezCheck messages={messages} model="gpt-4o-mini" margin={1.3} />
     </main>
   );
 }
@@ -112,159 +112,116 @@ export default function ChatPage() {
 
 ---
 
-## 🛠️ Real-World Implementation Patterns
+## 💳 Commercial SaaS Use Cases
 
-### Pattern A: 50% Profit Margin Engine
-Turn wholesale provider costs into guaranteed net profit:
-
-```typescript
-model: vibezcheck('openai/gpt-4o-mini', {
-  customer: 'sarah@acme.com',
-  pricing: {
-    margin: 1.5,           // 👈 Cost + 50% margin automatically billed to Stripe!
-    minimumChargeUSD: 0.01, // 👈 Minimum charge 1 cent per question
-  },
-})
-```
-
----
-
-### Pattern B: B2B Multi-Tenancy & Rich Customer Metadata
-Track usage by company, workspace, role, and subscription tier:
+### 1. Credit Wallet Top-Ups & Checkout (`BillingHelper`)
 
 ```typescript
-model: vibezcheck('openai/gpt-4o', {
-  customer: {
-    id: 'cus_stripe_888',
-    userId: 'usr_123',
-    email: 'alex@acme.corp',
-    name: 'Alex Developer',
-    orgId: 'org_acme_corp',
-    teamId: 'team_ai_agents',
-    role: 'admin',
-    plan: 'enterprise',
-    tier: 'unlimited',
-    metadata: {
-      cost_center: 90210,
-      department: 'R&D',
-    },
-  },
-})
-```
+import { BillingHelper } from 'vibezcheck';
 
----
+const billing = new BillingHelper({ apiKey: process.env.STRIPE_SECRET_KEY });
 
-### Pattern C: Duck-Typed Database Sinks (Supabase / PostgreSQL)
-Save full usage events into your database with **Zero Blast Radius** (DB downtime never crashes the user's stream):
-
-```typescript
-// Pass initialized Supabase client directly:
-model: vibezcheck('gpt-4o', {
-  customer: user.id,
-  database: supabase, // Inserts to `vibez_usage` table automatically
-})
-
-// Or specify custom table:
-model: vibezcheck('gpt-4o', {
-  customer: user.id,
-  database: { client: supabase, table: 'custom_ai_logs' },
-})
-```
-
----
-
-### Pattern D: Pluggable Payment Providers (Stripe, Polar, Custom)
-Switch billing gateways or connect custom internal wallets:
-
-```typescript
-// Polar.sh provider
-model: vibezcheck('gpt-4o', {
-  customer: user.id,
-  billing: { provider: 'polar' },
-})
-
-// Custom in-house wallet / coin ledger
-model: vibezcheck('gpt-4o', {
-  customer: user.id,
-  billing: {
-    charge: async (costUSD, event) => {
-      await userWallet.deduct(event.customerId, costUSD);
-    },
-  },
-})
-```
-
----
-
-### Pattern E: Frontier Reasoning Models (Claude 3.7 & o3-mini)
-Automatically extracts hidden thinking tokens and applies 85% prompt cache discounts:
-
-```typescript
-model: vibezcheck('anthropic/claude-3-7-sonnet', {
-  customer: 'alex@company.com',
-  maxCostPerCallUSD: 0.75, // Extended ceiling for multi-minute deep reasoning
-})
-```
-
----
-
-### Pattern F: Unified Agent Tool Call Metering
-Bill external tools (web searches, scrapers, Python sandboxes) and LLM streams into one customer invoice:
-
-```typescript
-// app/api/agent/route.ts
-import { generateText, tool } from 'ai';
-import { vibezcheck } from 'vibezcheck';
-import { z } from 'zod';
-
+// Customer purchases $20 in AI usage credits
 export async function POST(req: Request) {
-  const { prompt, customer = 'alex@company.com' } = await req.json();
+  const { customerId } = await req.json();
 
-  // Create unified customer session
-  const session = vibezcheck.session({ customer });
-
-  const result = await generateText({
-    model: session.model('openai/gpt-4o-mini'),
-    tools: {
-      searchGoogle: tool({
-        description: 'Live Google Search',
-        parameters: z.object({ query: z.string() }),
-        execute: async ({ query }) => {
-          // ⚡ Bill non-LLM tool execution ($0.01) into the same customer balance
-          await session.trackTool('google_search', { costUSD: 0.01 });
-          return `Search results for: ${query}`;
-        },
-      }),
-    },
-    prompt,
+  const checkoutUrl = await billing.createTopUpSession({
+    customerId,
+    amountCents: 2000, // $20.00
+    returnUrl: 'https://myapp.com/dashboard',
   });
 
-  return Response.json(result);
+  return Response.json({ url: checkoutUrl });
 }
 ```
 
+### 2. Customer API Keys (`ApiKeyAuth`)
+
+Issue customer API keys (`vz_live_...`) backed by Stripe customer metadata—zero database required:
+
+```typescript
+import { ApiKeyAuth } from 'vibezcheck';
+import Stripe from 'stripe';
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+const auth = new ApiKeyAuth(stripe);
+
+// 1. Generate key for customer
+const { apiKey } = await auth.createKey({
+  customerId: 'cus_123',
+  name: 'Production Worker Key',
+});
+// => "vz_live_9f83b2..."
+
+// 2. Authenticate API requests in middleware
+export async function middleware(req: Request) {
+  const token = req.headers.get('Authorization')?.replace('Bearer ', '');
+  const verification = await auth.verifyKey(token);
+
+  if (!verification.valid) {
+    return new Response('Unauthorized', { status: 401 });
+  }
+
+  // verification.customerId is verified against Stripe!
+}
+```
+
+### 3. Multi-Tool Agent Sessions (`AgentSession`)
+
+Set a hard $1.00 session budget across multiple LLM steps and external tools:
+
+```typescript
+import { AgentSession, wrapTool } from 'vibezcheck';
+import { openai } from '@ai-sdk/openai';
+
+const session = new AgentSession({
+  customer: 'cus_agent_user',
+  sessionBudgetUSD: 1.00, // Hard ceiling for entire session
+});
+
+// Wrap external tools with financial tracking
+const webSearchTool = wrapTool({
+  name: 'web_search',
+  costUSD: 0.01,
+  execute: async ({ query }) => fetchSearch(query),
+});
+
+// Run LLM model bound to this session
+const sessionModel = session.model(openai('gpt-4o'));
+```
+
 ---
 
-## 🎨 React UI Suite (`vibezcheck/react`)
+## 🔄 100% Drop-In Compatibility with `@stripe/ai-sdk`
 
-* **`useVibezChat`**: 1-hook drop-in chat streaming with live session cost sync.
-* **`<VibezReceipt />`**: Micro-badge rendered below assistant responses (*"⚡ gpt-4o-mini • 342 tokens • $0.0005 • Verified by VibezCheck"*).
-* **`<VibezSessionWidget />`**: Floating live token & dollar speedometer in the screen corner.
-* **`<VibezBillingModal />`**: Drop-in 1-click Stripe Checkout top-up modal.
+If you are migrating from `@stripe/ai-sdk` or `@stripe/token-meter`, swap your imports:
+
+```typescript
+// Replace: import { meteredModel } from '@stripe/ai-sdk/meter';
+import { meteredModel } from 'vibezcheck/stripe/meter';
+
+// Replace: import { stripe } from '@stripe/ai-sdk/provider';
+import { stripe } from 'vibezcheck/stripe/provider';
+
+// Replace: import { createTokenMeter } from '@stripe/token-meter';
+import { createTokenMeter } from 'vibezcheck/stripe/token-meter';
+```
 
 ---
 
-## 🌿 Codebase Token Leak Scanner (`npx vibezcheck audit`)
+## 🛡️ Route Auditor CLI
 
-Audit your project in under 50ms for unmetered AI endpoints and missing runaway loop fuses:
+Audit your codebase to detect unmetered AI endpoints before shipping to production:
 
 ```bash
 npx vibezcheck audit
 ```
 
-* **Kind & Minimalist**: Zero heavy AST dependencies; outputs calm clarity instead of intimidating lint errors.
-* **Safe `--fix`**: Automatically wraps raw provider calls in `vibezcheck()` with `.bak` backups.
-* **GitHub Actions Ready**: Run `npx vibezcheck audit --ci` to fail PRs that accidentally introduce unmetered routes.
+### CI/CD Mode
+Fail the build if unmetered AI routes are detected:
+```bash
+npx vibezcheck audit --ci
+```
 
 ---
 

@@ -69,6 +69,31 @@
       "types": "./dist/react/index.d.ts",
       "import": "./dist/react/index.mjs",
       "require": "./dist/react/index.js"
+    },
+    "./ui": {
+      "types": "./dist/react/index.d.ts",
+      "import": "./dist/react/index.mjs",
+      "require": "./dist/react/index.js"
+    },
+    "./middleware": {
+      "types": "./dist/ai-sdk/middleware.d.ts",
+      "import": "./dist/ai-sdk/middleware.mjs",
+      "require": "./dist/ai-sdk/middleware.js"
+    },
+    "./stripe/meter": {
+      "types": "./dist/compat/stripe-meter.d.ts",
+      "import": "./dist/compat/stripe-meter.mjs",
+      "require": "./dist/compat/stripe-meter.js"
+    },
+    "./stripe/provider": {
+      "types": "./dist/compat/stripe-provider.d.ts",
+      "import": "./dist/compat/stripe-provider.mjs",
+      "require": "./dist/compat/stripe-provider.js"
+    },
+    "./stripe/token-meter": {
+      "types": "./dist/compat/token-meter.d.ts",
+      "import": "./dist/compat/token-meter.mjs",
+      "require": "./dist/compat/token-meter.js"
     }
   },
   "bin": {

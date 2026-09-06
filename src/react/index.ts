@@ -5,3 +5,4 @@ export * from './widget';
 export * from './badge';
 export * from './receipt';
 export * from './billing-modal';
+export * from './vibezcheck-ui';
