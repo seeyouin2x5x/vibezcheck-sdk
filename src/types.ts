@@ -109,6 +109,51 @@ export interface InferenceCost {
 }
 
 /**
+ * Structured Customer Information with rich metadata, multi-tenancy & billing attributes
+ */
+export interface CustomerInfo {
+  /** Internal user ID or Stripe customer ID ('cus_xxx', 'usr_123') */
+  id?: string;
+  /** Explicit user ID */
+  userId?: string;
+  /** Customer email */
+  email?: string;
+  /** Customer full name or business display name */
+  name?: string;
+  /** Phone number */
+  phone?: string;
+  /** Multi-tenant Organization or Company ID */
+  orgId?: string;
+  /** Organization / Company name */
+  orgName?: string;
+  /** Multi-tenant Organization ID alias */
+  organizationId?: string;
+  /** Team / Workspace identifier */
+  teamId?: string;
+  /** Workspace identifier alias */
+  workspaceId?: string;
+  /** User Role within organization (e.g. 'admin', 'member', 'owner') */
+  role?: string;
+  /** Subscription Plan name (e.g. 'free', 'starter', 'pro', 'enterprise') */
+  plan?: string;
+  /** Billing Tier (e.g. 'tier_1', 'growth', 'unlimited') */
+  tier?: string;
+  /** Billing currency (defaults to 'usd') */
+  currency?: string;
+  /** Current prepaid credit balance in USD */
+  balanceUSD?: number;
+  /** Flexible custom metadata (key-value attributes) */
+  metadata?: Record<string, string | number | boolean | null>;
+  /** Arbitrary extra developer fields */
+  [key: string]: any;
+}
+
+/**
+ * Customer identification parameter: can be a string ('cus_xxx' or 'user@example.com') or a rich structured object
+ */
+export type CustomerParam = string | CustomerInfo;
+
+/**
  * Full usage event emitted upon completion of an LLM call or stream
  */
 export interface UsageEvent {
@@ -128,22 +173,11 @@ export interface UsageEvent {
   customerId?: string;
   /** Optional customer email */
   customerEmail?: string;
+  /** Full customer profile snapshot if provided */
+  customer?: CustomerInfo;
   /** Custom developer metadata (e.g. userId, orgId, feature, session) */
   metadata?: Record<string, string | number | boolean>;
 }
-
-/**
- * Customer identification parameter: can be a string ('cus_xxx' or 'user@example.com') or an object
- */
-export type CustomerParam =
-  | string
-  | {
-      id?: string;
-      userId?: string;
-      email?: string;
-      name?: string;
-      metadata?: Record<string, string>;
-    };
 
 /**
  * Event emitted when a circuit breaker budget or token limit is reached

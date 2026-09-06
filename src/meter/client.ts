@@ -11,6 +11,7 @@ import { MeterBatcher } from './batcher';
 import { detectAndExtractUsage } from './extractors';
 import { calculateUsageCost } from '../pricing/calculator';
 import { wrapUniversalStream } from './stream';
+import { normalizeCustomer } from '../customers/helpers';
 
 export class VibezMeter {
   private batcher: MeterBatcher;
@@ -28,7 +29,7 @@ export class VibezMeter {
       this.stripeClient = new Stripe(key, {
         appInfo: {
           name: 'vibezcheck',
-          version: '0.1.0',
+          version: '0.4.2',
           url: 'https://vibezcheck.xyz',
         },
       });
@@ -60,10 +61,12 @@ export class VibezMeter {
 
     const model = options.model || extracted.model;
     const cost = calculateUsageCost(model, extracted.usage, this.markupMultiplier);
-    const customerId =
-      typeof options.customer === 'string'
-        ? options.customer
-        : options.customer?.id || options.customerId;
+    const normalized = normalizeCustomer(options.customer, options.customerId);
+
+    const mergedMeta = {
+      ...normalized.customerMetadata,
+      ...options.metadata,
+    };
 
     const event: UsageEvent = {
       timestamp: new Date().toISOString(),
@@ -71,8 +74,10 @@ export class VibezMeter {
       provider: extracted.provider,
       usage: extracted.usage,
       cost,
-      customerId,
-      metadata: options.metadata,
+      customerId: normalized.customerId,
+      customerEmail: normalized.customerEmail,
+      customer: normalized.customerObj,
+      metadata: mergedMeta,
     };
 
     this.batcher.enqueue(event);
@@ -91,7 +96,7 @@ export class VibezMeter {
   /**
    * Directly record token usage manually
    */
-  public recordUsage(options: RecordUsageOptions): UsageEvent {
+  public recordUsage(options: RecordUsageOptions & { customer?: CustomerParam }): UsageEvent {
     const inputTokens = options.inputTokens ?? 0;
     const outputTokens = options.outputTokens ?? 0;
     const reasoningTokens = options.reasoningTokens;
@@ -108,10 +113,12 @@ export class VibezMeter {
     };
 
     const cost = calculateUsageCost(options.model, usage, this.markupMultiplier);
-    const customerId =
-      typeof options.customer === 'string'
-        ? options.customer
-        : options.customer?.id || options.customerId;
+    const normalized = normalizeCustomer(options.customer, options.customerId);
+
+    const mergedMeta = {
+      ...normalized.customerMetadata,
+      ...options.metadata,
+    };
 
     const event: UsageEvent = {
       timestamp: new Date().toISOString(),
@@ -119,8 +126,10 @@ export class VibezMeter {
       provider: options.provider || 'custom',
       usage,
       cost,
-      customerId,
-      metadata: options.metadata,
+      customerId: normalized.customerId,
+      customerEmail: normalized.customerEmail,
+      customer: normalized.customerObj,
+      metadata: mergedMeta,
     };
 
     this.batcher.enqueue(event);

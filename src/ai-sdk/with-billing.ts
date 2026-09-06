@@ -10,9 +10,10 @@ import type {
 import { VibezCircuitBreakerError } from '../types';
 import { createMeter, VibezMeter } from '../meter/client';
 import { calculateUsageCost } from '../pricing/calculator';
+import { normalizeCustomer } from '../customers/helpers';
 
 export interface WithBillingOptions extends CircuitBreakerOptions {
-  /** Customer email, user ID, or Stripe customer ID */
+  /** Customer email, user ID, or rich customer object with metadata */
   customer?: CustomerParam;
   /** Direct Stripe customer ID */
   customerId?: string;
@@ -61,10 +62,11 @@ export function withBilling<T extends object>(model: T, options: WithBillingOpti
       eventName: options.eventName,
     });
 
-  const customerId =
-    typeof options.customer === 'string'
-      ? options.customer
-      : options.customer?.id || options.customerId;
+  const normalized = normalizeCustomer(options.customer, options.customerId);
+  const customerId = normalized.customerId;
+  const customerEmail = normalized.customerEmail;
+  const customerObj = normalized.customerObj;
+  const customerMetadata = normalized.customerMetadata;
 
   const modelId = (model as any).modelId || 'unknown-model';
   const provider = (model as any).provider?.replace(/^@ai-sdk\//, '') || 'ai-sdk';
@@ -161,6 +163,13 @@ export function withBilling<T extends object>(model: T, options: WithBillingOpti
       }
     }
 
+    const mergedMetadata: Record<string, string | number | boolean> = {
+      ...customerMetadata,
+      ...options.metadata,
+      ...extraMeta,
+      billingMode: options.billing?.mode || 'postpaid',
+    };
+
     const event: UsageEvent = {
       timestamp: new Date().toISOString(),
       model: modelId,
@@ -168,11 +177,9 @@ export function withBilling<T extends object>(model: T, options: WithBillingOpti
       usage,
       cost,
       customerId,
-      metadata: {
-        ...options.metadata,
-        ...extraMeta,
-        billingMode: options.billing?.mode || 'postpaid',
-      },
+      customerEmail,
+      customer: customerObj,
+      metadata: mergedMetadata,
     };
 
     // Record via meter batcher
@@ -184,6 +191,7 @@ export function withBilling<T extends object>(model: T, options: WithBillingOpti
       reasoningTokens: usage.reasoningTokens,
       cachedTokens: usage.cachedTokens,
       customerId,
+      customer: customerObj,
       metadata: event.metadata,
     });
 
@@ -205,7 +213,7 @@ export function withBilling<T extends object>(model: T, options: WithBillingOpti
             const tableName = (dbTarget as any)?.table || 'vibez_usage';
             await supabaseClient.from(tableName).insert({
               customer_id: customerId,
-              user_id: customerId,
+              user_id: customerObj?.userId || customerId,
               model: modelId,
               input_tokens: usage.inputTokens,
               output_tokens: usage.outputTokens,

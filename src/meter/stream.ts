@@ -3,6 +3,7 @@ import { inspectOpenAIStreamChunk } from './extractors/openai';
 import { AnthropicStreamAccumulator } from './extractors/anthropic';
 import { extractGeminiResponseUsage } from './extractors/gemini';
 import { calculateUsageCost } from '../pricing/calculator';
+import { normalizeCustomer } from '../customers/helpers';
 
 export type UsageDispatchedCallback = (event: UsageEvent) => void;
 
@@ -33,10 +34,7 @@ export function wrapOpenAIStream<T extends AsyncIterable<any>>(
       } finally {
         if (finalUsage) {
           const cost = calculateUsageCost(detectedModel, finalUsage);
-          const customerId =
-            typeof options.customer === 'string'
-              ? options.customer
-              : options.customer?.id || options.customerId;
+          const normalized = normalizeCustomer(options.customer, options.customerId);
 
           const event: UsageEvent = {
             timestamp: new Date().toISOString(),
@@ -44,8 +42,13 @@ export function wrapOpenAIStream<T extends AsyncIterable<any>>(
             provider: 'openai',
             usage: finalUsage,
             cost,
-            customerId,
-            metadata: options.metadata,
+            customerId: normalized.customerId,
+            customerEmail: normalized.customerEmail,
+            customer: normalized.customerObj,
+            metadata: {
+              ...normalized.customerMetadata,
+              ...options.metadata,
+            },
           };
 
           onComplete(event);
@@ -81,10 +84,7 @@ export function wrapAnthropicStream<T extends AsyncIterable<any>>(
         const extracted = accumulator.getUsage();
         const model = options.model || extracted.model;
         const cost = calculateUsageCost(model, extracted.usage);
-        const customerId =
-          typeof options.customer === 'string'
-            ? options.customer
-            : options.customer?.id || options.customerId;
+        const normalized = normalizeCustomer(options.customer, options.customerId);
 
         const usageEvent: UsageEvent = {
           timestamp: new Date().toISOString(),
@@ -92,8 +92,13 @@ export function wrapAnthropicStream<T extends AsyncIterable<any>>(
           provider: 'anthropic',
           usage: extracted.usage,
           cost,
-          customerId,
-          metadata: options.metadata,
+          customerId: normalized.customerId,
+          customerEmail: normalized.customerEmail,
+          customer: normalized.customerObj,
+          metadata: {
+            ...normalized.customerMetadata,
+            ...options.metadata,
+          },
         };
 
         onComplete(usageEvent);
@@ -134,10 +139,7 @@ export function wrapGeminiStream(
         const extracted = extractGeminiResponseUsage(lastChunkWithUsage, model);
         if (extracted) {
           const cost = calculateUsageCost(extracted.model, extracted.usage);
-          const customerId =
-            typeof options.customer === 'string'
-              ? options.customer
-              : options.customer?.id || options.customerId;
+          const normalized = normalizeCustomer(options.customer, options.customerId);
 
           const event: UsageEvent = {
             timestamp: new Date().toISOString(),
@@ -145,8 +147,13 @@ export function wrapGeminiStream(
             provider: 'google',
             usage: extracted.usage,
             cost,
-            customerId,
-            metadata: options.metadata,
+            customerId: normalized.customerId,
+            customerEmail: normalized.customerEmail,
+            customer: normalized.customerObj,
+            metadata: {
+              ...normalized.customerMetadata,
+              ...options.metadata,
+            },
           };
 
           onComplete(event);
