@@ -7,7 +7,7 @@
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fseeyouin2x5x%2Fvibezcheck-sdk%2Ftree%2Fmain%2Fexamples%2Fnextjs-saas-starter&env=OPENAI_API_KEY,STRIPE_SECRET_KEY,NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY&envDescription=API%20Keys%20for%20OpenAI%20and%20Stripe&project-name=vibezcheck-ai-saas)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Strict-blue.svg)](https://www.typescriptlang.org/)
-[![Tests](https://img.shields.io/badge/Tests-36%20Passed-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/Tests-50%20Passed-brightgreen.svg)]()
 
 ---
 
@@ -22,9 +22,11 @@ When you turn on the lights in your bedroom, your electric meter spins. When use
 * **🛡️ Default $0.50 Fuse Box**: Automatically prevents runaway loops without requiring manual ceilings.
 * **🛟 In-Flight Abort Trapper**: Captures and bills partial tokens even if a user closes their browser tab mid-stream.
 * **🏷️ Automatic 85% Prompt Cache Discounts**: Detects cache hits on Claude 3.7, GPT-4o, and DeepSeek and passes real savings through.
-* **🚀 Serverless Lifecycle Protection**: Seamlessly keeps serverless containers alive until telemetry is acknowledged.
+* **🚀 Serverless Lifecycle Protection**: Seamlessly keeps serverless containers alive until telemetry is acknowledged (`after()` / `waitUntil()`).
 * **💰 1-Line Profit Margins**: Turn wholesale provider costs into guaranteed net profit with `pricing: { margin: 1.5 }`.
-* **💳 Prepaid & Postpaid**: Choose between monthly metered invoices or zero-debt credit wallets.
+* **🏢 B2B Multi-Tenancy & Customer Metadata**: Pass structured customer profiles with `orgId`, `teamId`, `plan`, `tier`, `role`, and custom metadata.
+* **🗄️ Duck-Typed Database Sinks**: Direct auto-syncing to Supabase (`database: supabase`) with zero blast radius.
+* **💳 Pluggable Payment Gateways**: Works out of the box with Stripe, Polar (`provider: 'polar'`), or custom internal wallets.
 * **🧠 Reasoning Token Aware**: Captures hidden thinking tokens in o3-mini and Claude 3.7 Thinking.
 * **🆓 Free Vibe Mode**: Works 100% out of the box in local development with no Stripe account required.
 
@@ -44,13 +46,24 @@ npm install vibezcheck ai @ai-sdk/openai stripe
 ```typescript
 import { streamText } from 'ai';
 import { vibezcheck } from 'vibezcheck';
+import { supabase } from '@/lib/supabase';
 
 export async function POST(req: Request) {
-  const { messages, userEmail = 'alex@company.com' } = await req.json();
+  const { messages, user } = await req.json();
 
   return streamText({
-    // ⚡ 1 Line. All 6 sane defaults run automatically.
-    model: vibezcheck('openai/gpt-4o-mini', { customer: userEmail }),
+    // ⚡ 1 Line. All 10 sane defaults run automatically.
+    model: vibezcheck('openai/gpt-4o-mini', {
+      customer: {
+        id: user.stripeCustomerId,
+        userId: user.id,
+        email: user.email,
+        orgId: user.organizationId,
+        plan: 'pro',
+      },
+      pricing: { margin: 1.4 },   // 40% profit margin
+      database: supabase,         // Auto-persists token receipts with 0ms latency
+    }),
     messages,
   }).toDataStreamResponse();
 }
@@ -66,7 +79,7 @@ export default function ChatPage() {
 
   return (
     <main className="max-w-xl mx-auto py-10 px-4 space-y-6">
-      {/* 1. Floating live token & dollar counter */}
+      {/* 1. Floating live token & dollar speedometer */}
       <VibezSessionWidget position="bottom-right" />
 
       {/* 2. Messages with micro-receipts */}
@@ -116,23 +129,74 @@ model: vibezcheck('openai/gpt-4o-mini', {
 
 ---
 
-### Pattern B: Prepaid Credit Wallets (Zero Debt Risk)
-User pre-purchases $10; stream cleanly halts when balance hits $0 without invoice debt:
+### Pattern B: B2B Multi-Tenancy & Rich Customer Metadata
+Track usage by company, workspace, role, and subscription tier:
 
 ```typescript
-model: vibezcheck('openai/gpt-4o-mini', {
-  customer: 'alex@gmail.com',
-  billing: {
-    mode: 'prepaid', // 👈 Deducts from prepaid credit balance in real time
+model: vibezcheck('openai/gpt-4o', {
+  customer: {
+    id: 'cus_stripe_888',
+    userId: 'usr_123',
+    email: 'alex@acme.corp',
+    name: 'Alex Developer',
+    orgId: 'org_acme_corp',
+    teamId: 'team_ai_agents',
+    role: 'admin',
+    plan: 'enterprise',
+    tier: 'unlimited',
+    metadata: {
+      cost_center: 90210,
+      department: 'R&D',
+    },
   },
-  // Gracefully downshift when credits run low instead of crashing
-  fallbackModelOnBudget: 'openai/gpt-4o-mini',
 })
 ```
 
 ---
 
-### Pattern C: Frontier Reasoning Models (Claude 3.7 & o3-mini)
+### Pattern C: Duck-Typed Database Sinks (Supabase / PostgreSQL)
+Save full usage events into your database with **Zero Blast Radius** (DB downtime never crashes the user's stream):
+
+```typescript
+// Pass initialized Supabase client directly:
+model: vibezcheck('gpt-4o', {
+  customer: user.id,
+  database: supabase, // Inserts to `vibez_usage` table automatically
+})
+
+// Or specify custom table:
+model: vibezcheck('gpt-4o', {
+  customer: user.id,
+  database: { client: supabase, table: 'custom_ai_logs' },
+})
+```
+
+---
+
+### Pattern D: Pluggable Payment Providers (Stripe, Polar, Custom)
+Switch billing gateways or connect custom internal wallets:
+
+```typescript
+// Polar.sh provider
+model: vibezcheck('gpt-4o', {
+  customer: user.id,
+  billing: { provider: 'polar' },
+})
+
+// Custom in-house wallet / coin ledger
+model: vibezcheck('gpt-4o', {
+  customer: user.id,
+  billing: {
+    charge: async (costUSD, event) => {
+      await userWallet.deduct(event.customerId, costUSD);
+    },
+  },
+})
+```
+
+---
+
+### Pattern E: Frontier Reasoning Models (Claude 3.7 & o3-mini)
 Automatically extracts hidden thinking tokens and applies 85% prompt cache discounts:
 
 ```typescript
@@ -144,8 +208,8 @@ model: vibezcheck('anthropic/claude-3-7-sonnet', {
 
 ---
 
-### Pattern D: Unified Agent Tool Call Metering
-Bill external tools (web searches, scrapers, Python sandboxes) and LLM streams into one invoice:
+### Pattern F: Unified Agent Tool Call Metering
+Bill external tools (web searches, scrapers, Python sandboxes) and LLM streams into one customer invoice:
 
 ```typescript
 // app/api/agent/route.ts
@@ -181,17 +245,6 @@ export async function POST(req: Request) {
 
 ---
 
-### Pattern E: Brand-New Model (1-Line Inline Rate Card)
-Use newly released or fine-tuned models with zero wait for package updates:
-
-```typescript
-model: vibezcheck('deepseek/deepseek-r2', {
-  rate: { in: 0.20, out: 0.80 }, // $0.20/M in, $0.80/M out
-})
-```
-
----
-
 ## 🎨 React UI Suite (`vibezcheck/react`)
 
 * **`useVibezChat`**: 1-hook drop-in chat streaming with live session cost sync.
@@ -217,4 +270,4 @@ npx vibezcheck audit
 
 ## 📄 License
 
-MIT © [VibezCheck](https://vibezcheck.app)
+MIT © [VibezCheck](https://vibezcheck.xyz)
