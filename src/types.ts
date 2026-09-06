@@ -189,7 +189,25 @@ export interface CircuitBreakerOptions {
 }
 
 /**
- * Billing Configuration (Postpaid metered invoice vs Prepaid credit wallet)
+ * Pluggable Database / Storage Adapter Interface
+ */
+export interface DatabaseAdapter {
+  name: string;
+  save: (event: UsageEvent) => Promise<void> | void;
+  getBalance?: (customerId: string) => Promise<number | undefined>;
+}
+
+/**
+ * Pluggable Payment Provider Interface
+ */
+export interface PaymentProvider {
+  name: string;
+  charge?: (costUSD: number, event: UsageEvent) => Promise<void> | void;
+  checkBalance?: (customerId: string) => Promise<{ ok: boolean; balanceUSD?: number }>;
+}
+
+/**
+ * Billing Configuration (Universal Auto-Debit, Postpaid metered invoice vs Prepaid credit wallet, Pluggable Providers)
  */
 export interface BillingConfig {
   /** 'postpaid' = Invoiced at month's end; 'prepaid' = Deducted from credit wallet, locks at $0 */
@@ -198,6 +216,10 @@ export interface BillingConfig {
   balanceUSD?: number;
   /** Action when balance is low: 'warn' logs/sends event, 'throw' throws CreditExhaustedError */
   onLowBalance?: 'warn' | 'throw';
+  /** Payment Provider Gateway (default: 'stripe') */
+  provider?: 'stripe' | 'polar' | 'lemonsqueezy' | 'paystack' | PaymentProvider;
+  /** Custom charge handler for internal credit wallets / bespoke payment logic */
+  charge?: (costUSD: number, event: UsageEvent) => Promise<void> | void;
 }
 
 /**

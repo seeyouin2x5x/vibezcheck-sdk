@@ -16,12 +16,14 @@ export interface WithBillingOptions extends CircuitBreakerOptions {
   customer?: CustomerParam;
   /** Direct Stripe customer ID */
   customerId?: string;
-  /** Billing mode configuration (postpaid vs prepaid) */
+  /** Billing mode configuration (Universal Auto-Debit, postpaid vs prepaid, pluggable providers) */
   billing?: BillingConfig;
   /** Profit margin & minimum charge configuration */
   pricing?: PricingConfig;
   /** 1-line inline pricing rate card */
   rate?: InlineRateConfig;
+  /** Pluggable Database Sink (Supabase, Postgres, Firebase, or 1-line callback) */
+  database?: any | ((event: UsageEvent) => void | Promise<void>);
   /** Whether to capture tokens if the client aborts or closes tab mid-stream (default: true) */
   captureOnAbort?: boolean;
   /** Execution runtime environment (default: 'auto') */
@@ -189,6 +191,81 @@ export function withBilling<T extends object>(model: T, options: WithBillingOpti
       options.onUsage(event);
     }
 
+    // 🛡️ Duck-Typed Database Sink Execution (Airbag Isolated)
+    if (options.database) {
+      const dbTarget = options.database;
+      const executeDbWrite = async () => {
+        try {
+          // 1. Supabase client duck-typing (has .from())
+          if (typeof dbTarget === 'object' && dbTarget !== null && typeof dbTarget.from === 'function') {
+            await dbTarget.from('vibez_usage').insert({
+              customer_id: customerId,
+              model: modelId,
+              input_tokens: usage.inputTokens,
+              output_tokens: usage.outputTokens,
+              cached_tokens: usage.cachedTokens,
+              reasoning_tokens: usage.reasoningTokens,
+              cost_usd: cost.totalUSD,
+              created_at: event.timestamp,
+            });
+            return;
+          }
+
+          // 2. Typed DatabaseAdapter (has .save())
+          if (typeof dbTarget === 'object' && dbTarget !== null && typeof dbTarget.save === 'function') {
+            await dbTarget.save(event);
+            return;
+          }
+
+          // 3. 1-line callback function
+          if (typeof dbTarget === 'function') {
+            await dbTarget(event);
+            return;
+          }
+        } catch (err: any) {
+          // Zero Blast Radius: Third-party DB errors never crash the user's stream
+          console.warn(`[vibezcheck] Database record failed safely:`, err?.message || err);
+        }
+      };
+
+      if (typeof globalThis !== 'undefined' && typeof (globalThis as any).after === 'function') {
+        (globalThis as any).after(() => executeDbWrite());
+      } else {
+        executeDbWrite().catch(() => {});
+      }
+    }
+
+    // 💳 Pluggable Payment Provider Execution (Airbag Isolated)
+    if (options.billing?.charge && typeof options.billing.charge === 'function') {
+      const chargeFn = options.billing.charge;
+      const executeCharge = async () => {
+        try {
+          await chargeFn(cost.totalUSD, event);
+        } catch (err: any) {
+          console.warn(`[vibezcheck] Custom charge handler failed safely:`, err?.message || err);
+        }
+      };
+      if (typeof globalThis !== 'undefined' && typeof (globalThis as any).after === 'function') {
+        (globalThis as any).after(() => executeCharge());
+      } else {
+        executeCharge().catch(() => {});
+      }
+    } else if (options.billing?.provider && typeof options.billing.provider === 'object' && typeof (options.billing.provider as any).charge === 'function') {
+      const providerCharge = (options.billing.provider as any).charge;
+      const executeCharge = async () => {
+        try {
+          await providerCharge(cost.totalUSD, event);
+        } catch (err: any) {
+          console.warn(`[vibezcheck] Payment provider charge failed safely:`, err?.message || err);
+        }
+      };
+      if (typeof globalThis !== 'undefined' && typeof (globalThis as any).after === 'function') {
+        (globalThis as any).after(() => executeCharge());
+      } else {
+        executeCharge().catch(() => {});
+      }
+    }
+
     scheduleFlush();
   };
 
@@ -247,6 +324,8 @@ export function withBilling<T extends object>(model: T, options: WithBillingOpti
 
               if (chunk.type === 'text-delta' && chunk.textDelta) {
                 accumulatedChars += chunk.textDelta.length;
+              } else if (chunk.type === 'reasoning' && (chunk.textDelta || chunk.reasoning)) {
+                accumulatedChars += (chunk.textDelta || chunk.reasoning || '').length;
               }
 
               // AI SDK stream finish chunk containing exact provider usage
