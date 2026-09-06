@@ -43,7 +43,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
 
         {showBadge && (
           <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-lime-100 text-slate-950 border border-lime-300">
-            v0.3.0
+            v0.4.2
           </span>
         )}
       </div>
