@@ -149,5 +149,13 @@
     "stripe": {
       "optional": true
     }
-  }
+  },
+  "homepage": "https://vibezcheck.xyz",
+  "bugs": {
+    "url": "https://github.com/seeyouin2x5x/vibezcheck-sdk/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "sideEffects": false
 }
