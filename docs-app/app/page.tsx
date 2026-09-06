@@ -115,7 +115,7 @@ export default function LandingPage() {
             <span className="h-2 w-2 rounded-full bg-lime-400 border border-slate-900 animate-pulse" />
             <span>The Electric Meter for AI</span>
             <span className="text-slate-400">•</span>
-            <span className="text-stripe-indigo font-bold">v0.3.0 Public Release</span>
+            <span className="text-stripe-indigo font-bold">v0.4.2 Public Release</span>
           </div>
 
           {/* Main Headline */}

@@ -26,10 +26,9 @@ export const DOC_SECTIONS: DocSection[] = [
         description: 'The 1-line Stripe Billing and Token Metering engine for LLMs.',
         category: 'Getting Started',
         headings: [
-          { id: 'why-vibezcheck', title: 'Why VibezCheck?', level: 2 },
-          { id: 'how-it-works', title: 'How It Works (The Mobile Data Analogy)', level: 2 },
-          { id: 'architecture', title: '0ms Latency Architecture', level: 2 },
-          { id: 'installation', title: 'Installation', level: 2 },
+          { id: 'why-vibezcheck', title: 'The 1-Line Standard', level: 2 },
+          { id: 'core-philosophy', title: 'Live Cost Economics', level: 2 },
+          { id: 'architecture', title: 'React Suite & Receipts', level: 2 },
         ],
         content: `
 # Overview
