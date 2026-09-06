@@ -196,17 +196,25 @@ export function withBilling<T extends object>(model: T, options: WithBillingOpti
       const dbTarget = options.database;
       const executeDbWrite = async () => {
         try {
-          // 1. Supabase client duck-typing (has .from())
-          if (typeof dbTarget === 'object' && dbTarget !== null && typeof dbTarget.from === 'function') {
-            await dbTarget.from('vibez_usage').insert({
+          // 1. Direct Supabase client duck-typing (has .from()) or wrapped { client, table }
+          const supabaseClient = typeof dbTarget === 'object' && dbTarget !== null && typeof dbTarget.from === 'function'
+            ? dbTarget
+            : (typeof dbTarget === 'object' && dbTarget !== null && typeof dbTarget.client?.from === 'function' ? dbTarget.client : null);
+
+          if (supabaseClient) {
+            const tableName = (dbTarget as any)?.table || 'vibez_usage';
+            await supabaseClient.from(tableName).insert({
               customer_id: customerId,
+              user_id: customerId,
               model: modelId,
               input_tokens: usage.inputTokens,
               output_tokens: usage.outputTokens,
+              total_tokens: usage.totalTokens,
               cached_tokens: usage.cachedTokens,
               reasoning_tokens: usage.reasoningTokens,
               cost_usd: cost.totalUSD,
               created_at: event.timestamp,
+              metadata: event.metadata,
             });
             return;
           }
