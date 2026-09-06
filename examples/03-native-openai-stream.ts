@@ -7,19 +7,20 @@ import OpenAI from 'openai';
 
 const openai = new OpenAI();
 
-async function runChatStream(userPrompt: string, customerId: string) {
+async function runChatStream(userPrompt: string, customerParam: any) {
   const stream = await openai.chat.completions.create({
-    model: 'o3-mini',
+    model: 'gpt-4o-mini',
     messages: [{ role: 'user', content: userPrompt }],
     stream: true,
     stream_options: { include_usage: true },
   });
 
-  // Wrap stream with VibezCheck
+  // Wrap stream with VibezCheck & customer metadata
   const meteredStream = wrapStream(stream, {
-    customerId,
+    customer: customerParam,
     onUsage: (event) => {
-      console.log(`\n[Stream Completed] Tracked ${event.usage.totalTokens} tokens for customer ${customerId}`);
+      console.log(`\n[Stream Completed] Tracked ${event.usage.totalTokens} tokens for customer ${event.customerId || event.customer?.email}`);
+      console.log(`Total USD: $${event.cost.totalUSD.toFixed(6)}`);
     },
   });
 
@@ -30,5 +31,9 @@ async function runChatStream(userPrompt: string, customerId: string) {
 }
 
 if (require.main === module && process.env.OPENAI_API_KEY) {
-  runChatStream('Explain the theory of relativity simply.', 'cus_demo_123').catch(console.error);
+  runChatStream('Explain the theory of relativity simply in 2 sentences.', {
+    email: 'alex@acme.com',
+    orgId: 'org_acme',
+    plan: 'pro'
+  }).catch(console.error);
 }
