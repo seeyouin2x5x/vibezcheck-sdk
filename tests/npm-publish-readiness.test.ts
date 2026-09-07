@@ -6,6 +6,14 @@ describe('NPM Package Pre-Publish Readiness & Export Integrity', () => {
   const pkgJsonPath = path.join(pkgRoot, 'package.json');
   const pkg = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'));
 
+  beforeAll(() => {
+    const distIndexPath = path.join(pkgRoot, 'dist', 'index.js');
+    if (!fs.existsSync(distIndexPath)) {
+      const { execSync } = require('child_process');
+      execSync('npm run build', { cwd: pkgRoot, stdio: 'pipe' });
+    }
+  });
+
   test('package.json metadata satisfies NPM standards', () => {
     expect(pkg.name).toBe('vibezcheck');
     expect(pkg.version).toMatch(/^\d+\.\d+\.\d+/);

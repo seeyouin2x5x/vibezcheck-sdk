@@ -109,7 +109,7 @@
   "scripts": {
     "build": "tsup",
     "clean": "rm -rf dist",
-    "test": "jest",
+    "test": "jest --forceExit",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "prepublishOnly": "npm run build"
