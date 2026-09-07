@@ -225,6 +225,16 @@ npx vibezcheck audit --ci
 
 ---
 
+## 📂 Examples
+
+* **[Next.js App Router + OpenAI](examples/nextjs-app-router-openai)**: Direct implementation of the official [AI SDK Next.js App Router Tutorial](https://ai-sdk.dev/docs/getting-started/nextjs-app-router) with 1-line VibezCheck token metering.
+* **[Next.js 15 AI SaaS Starter](examples/nextjs-saas-starter)**: Complete SaaS template with Stripe Checkout, Top-Up Modal, and `<VibezReceipt />`.
+* **[Local Cost Meter](examples/01-local-cost-meter.ts)**: Offline micro-transaction calculations with BigInt Nano-USD precision.
+* **[Native OpenAI Streaming](examples/03-native-openai-stream.ts)**: Zero-latency stream wrapper for the official `openai` Node SDK.
+* **[Claude 3.7 Reasoning Tokens](examples/04-claude-thinking.ts)**: Tracking hidden thought tokens with Anthropic SDK.
+
+---
+
 ## 📄 License
 
 MIT © [VibezCheck](https://vibezcheck.xyz)
