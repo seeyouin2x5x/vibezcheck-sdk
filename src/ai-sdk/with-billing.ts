@@ -39,6 +39,8 @@ export interface WithBillingOptions extends CircuitBreakerOptions {
   onUsage?: (event: UsageEvent) => void | Promise<void>;
   /** Custom developer metadata */
   metadata?: Record<string, string | number | boolean>;
+  /** Suppress console warnings (default: true in test environment) */
+  silent?: boolean;
 }
 
 /**
@@ -283,7 +285,9 @@ export function withBilling<T extends object>(
           }
         } catch (err: any) {
           // Zero Blast Radius: Third-party DB errors never crash the user's stream
-          console.warn(`[vibezcheck] Database record failed safely:`, err?.message || err);
+          if (process.env.NODE_ENV !== 'test' && !options.silent) {
+            console.warn(`[vibezcheck] Database record failed safely:`, err?.message || err);
+          }
         }
       };
 
@@ -301,7 +305,9 @@ export function withBilling<T extends object>(
         try {
           await chargeFn(cost.totalUSD, event);
         } catch (err: any) {
-          console.warn(`[vibezcheck] Custom charge handler failed safely:`, err?.message || err);
+          if (process.env.NODE_ENV !== 'test' && !options.silent) {
+            console.warn(`[vibezcheck] Custom charge handler failed safely:`, err?.message || err);
+          }
         }
       };
       if (typeof globalThis !== 'undefined' && typeof (globalThis as any).after === 'function') {
@@ -315,7 +321,9 @@ export function withBilling<T extends object>(
         try {
           await providerCharge(cost.totalUSD, event);
         } catch (err: any) {
-          console.warn(`[vibezcheck] Payment provider charge failed safely:`, err?.message || err);
+          if (process.env.NODE_ENV !== 'test' && !options.silent) {
+            console.warn(`[vibezcheck] Payment provider charge failed safely:`, err?.message || err);
+          }
         }
       };
       if (typeof globalThis !== 'undefined' && typeof (globalThis as any).after === 'function') {
