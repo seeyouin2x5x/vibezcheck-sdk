@@ -39,7 +39,7 @@ const model = vibezcheck('openai/gpt-4o', { customer: 'cus_alex' });
 ## 📦 Installation
 
 ```bash
-npm install vibezcheck ai @ai-sdk/openai stripe
+npm install vibezcheck ai @ai-sdk/openai @ai-sdk/react stripe
 ```
 
 ---
@@ -74,38 +74,47 @@ export async function POST(req: Request) {
 
 ```tsx
 'use client';
-import { useChat } from 'ai/react';
+
+import { useChat } from '@ai-sdk/react';
+import { useState } from 'react';
 import { VibezCheck } from 'vibezcheck/ui';
 
-export default function ChatPage() {
-  const { messages, input, handleInputChange, handleSubmit } = useChat();
+export default function Chat() {
+  const [input, setInput] = useState('');
+  const { messages, sendMessage } = useChat();
 
   return (
-    <main className="max-w-2xl mx-auto p-6 space-y-4">
-      <div className="space-y-3">
-        {messages.map((m) => (
-          <div key={m.id} className="p-3 rounded-lg bg-slate-100 dark:bg-slate-800">
-            <strong>{m.role}: </strong>
-            <span>{m.content}</span>
-          </div>
-        ))}
-      </div>
+    <div className="flex flex-col w-full max-w-md py-24 mx-auto stretch">
+      {messages.map(message => (
+        <div key={message.id} className="whitespace-pre-wrap">
+          {message.role === 'user' ? 'User: ' : 'AI: '}
+          {message.parts.map((part, i) => {
+            switch (part.type) {
+              case 'text':
+                return <div key={`${message.id}-${i}`}>{part.text}</div>;
+            }
+          })}
+        </div>
+      ))}
 
-      <form onSubmit={handleSubmit} className="flex gap-2">
+      <form
+        onSubmit={e => {
+          e.preventDefault();
+          sendMessage({ text: input });
+          setInput('');
+        }}
+      >
         <input
+          className="fixed dark:bg-zinc-900 bottom-0 w-full max-w-md p-2 mb-8 border border-zinc-300 dark:border-zinc-800 rounded shadow-xl"
           value={input}
-          onChange={handleInputChange}
-          placeholder="Ask anything..."
-          className="flex-1 p-2 border rounded-lg"
+          placeholder="Say something..."
+          onChange={e => setInput(e.currentTarget.value)}
         />
-        <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg">
-          Send
-        </button>
       </form>
 
-      {/* ✦ 1-Line HUD: Works with zero database & zero Stripe in Dev Mode */}
-      <VibezCheck messages={messages} model="gpt-4o-mini" margin={1.3} />
-    </main>
+      {/* ✦ 1-Line Token Meter & Financial HUD: Works with zero database & zero Stripe in Dev Mode */}
+      <VibezCheck messages={messages} />
+    </div>
   );
 }
 ```
