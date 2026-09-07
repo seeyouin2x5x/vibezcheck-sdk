@@ -6,6 +6,12 @@ import type Stripe from 'stripe';
 export type SupportedOpenAIModel =
   | 'openai/gpt-4o'
   | 'openai/gpt-4o-mini'
+  | 'openai/gpt-4.5-preview'
+  | 'openai/gpt-4.1'
+  | 'openai/gpt-4.1-nano'
+  | 'openai/gpt-4-turbo'
+  | 'openai/gpt-4'
+  | 'openai/gpt-3.5-turbo'
   | 'openai/o1'
   | 'openai/o1-mini'
   | 'openai/o3'
@@ -15,8 +21,17 @@ export type SupportedOpenAIModel =
   | 'openai/gpt-5.6-sol'
   | 'openai/gpt-5.6-terra'
   | 'openai/gpt-5.6-luna'
+  | 'openai/text-embedding-3-small'
+  | 'openai/text-embedding-3-large'
   | 'gpt-4o'
   | 'gpt-4o-mini'
+  | 'gpt-4.5-preview'
+  | 'gpt-4.5'
+  | 'gpt-4.1'
+  | 'gpt-4.1-nano'
+  | 'gpt-4-turbo'
+  | 'gpt-4'
+  | 'gpt-3.5-turbo'
   | 'o1'
   | 'o1-mini'
   | 'o3'
@@ -31,37 +46,105 @@ export type SupportedAnthropicModel =
   | 'anthropic/claude-3-7-sonnet'
   | 'anthropic/claude-3-5-sonnet'
   | 'anthropic/claude-3-5-haiku'
+  | 'anthropic/claude-3-opus'
+  | 'anthropic/claude-3-haiku'
+  | 'anthropic/claude-2.1'
+  | 'anthropic/claude-2.0'
   | 'anthropic/claude-opus-5'
   | 'anthropic/haiku-4.5'
   | 'claude-3-7-sonnet'
   | 'claude-3-5-sonnet'
   | 'claude-3-5-haiku'
+  | 'claude-3-opus'
+  | 'claude-3-haiku'
+  | 'claude-2.1'
+  | 'claude-2.0'
   | 'claude-opus-5'
   | 'haiku-4.5';
 
 export type SupportedGoogleModel =
+  | 'google/gemini-2.5-pro'
+  | 'google/gemini-2.5-flash'
   | 'google/gemini-2.0-flash'
+  | 'google/gemini-2.0-flash-lite'
+  | 'google/gemini-2.0-pro'
   | 'google/gemini-1.5-pro'
+  | 'google/gemini-1.5-flash'
+  | 'google/gemini-1.5-flash-8b'
+  | 'google/gemini-1.0-pro'
   | 'google/gemini-3.7-flash'
   | 'google/gemini-3.1-pro'
+  | 'gemini-2.5-pro'
+  | 'gemini-2.5-flash'
   | 'gemini-2.0-flash'
+  | 'gemini-2.0-flash-lite'
+  | 'gemini-2.0-pro'
   | 'gemini-1.5-pro'
+  | 'gemini-1.5-flash'
+  | 'gemini-1.5-flash-8b'
+  | 'gemini-1.0-pro'
   | 'gemini-3.7-flash'
   | 'gemini-3.1-pro';
 
 export type SupportedDeepSeekModel =
   | 'deepseek/deepseek-chat'
   | 'deepseek/deepseek-reasoner'
+  | 'deepseek/deepseek-v3'
+  | 'deepseek/deepseek-r1'
   | 'deepseek/deepseek-v4-pro'
   | 'deepseek-chat'
   | 'deepseek-reasoner'
+  | 'deepseek-v3'
+  | 'deepseek-r1'
   | 'deepseek-v4-pro';
+
+export type SupportedXAIModel =
+  | 'xai/grok-3'
+  | 'xai/grok-3-mini'
+  | 'xai/grok-2'
+  | 'xai/grok-2-vision'
+  | 'xai/grok-beta'
+  | 'grok-3'
+  | 'grok-3-mini'
+  | 'grok-2'
+  | 'grok-2-vision'
+  | 'grok-beta';
+
+export type SupportedMistralModel =
+  | 'mistral/mistral-large-latest'
+  | 'mistral/codestral-latest'
+  | 'mistral/mistral-small-latest'
+  | 'mistral/ministral-8b-latest'
+  | 'mistral-large-latest'
+  | 'codestral-latest'
+  | 'mistral-small-latest'
+  | 'ministral-8b-latest';
+
+export type SupportedGroqModel =
+  | 'groq/llama-3.3-70b-versatile'
+  | 'groq/llama-3.1-70b-versatile'
+  | 'groq/llama-3.1-8b-instant'
+  | 'groq/deepseek-r1-distill-llama-70b'
+  | 'llama-3.3-70b-versatile'
+  | 'llama-3.1-70b-versatile'
+  | 'llama-3.1-8b-instant'
+  | 'deepseek-r1-distill-llama-70b';
+
+export type SupportedCohereModel =
+  | 'cohere/command-r-plus'
+  | 'cohere/command-r'
+  | 'command-r-plus'
+  | 'command-r';
 
 export type KnownModel =
   | SupportedOpenAIModel
   | SupportedAnthropicModel
   | SupportedGoogleModel
-  | SupportedDeepSeekModel;
+  | SupportedDeepSeekModel
+  | SupportedXAIModel
+  | SupportedMistralModel
+  | SupportedGroqModel
+  | SupportedCohereModel;
 
 /**
  * Union of all known model IDs with loose string fallback for custom / future models

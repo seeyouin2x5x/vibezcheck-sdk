@@ -188,11 +188,11 @@ export function wrapUniversalStream<T>(
 
   // 2. Check if stream is an AsyncIterable
   if (Symbol.asyncIterator in stream) {
-    // If provider is explicitly anthropic or stream looks like anthropic events
-    if (options.provider === 'anthropic') {
+    // If provider is explicitly anthropic or model is claude
+    if (options.provider === 'anthropic' || options.model?.toLowerCase().includes('claude')) {
       return wrapAnthropicStream(stream as any, options, onComplete);
     }
-    // Default to OpenAI stream wrapper which detects usage chunks polymorphically
+    // Default to universal stream wrapper which detects usage chunks polymorphically
     return wrapOpenAIStream(stream as any, options, onComplete);
   }
 

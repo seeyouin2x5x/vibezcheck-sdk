@@ -18,6 +18,10 @@ export * from './ai-sdk';
 export * from './customers';
 export * from './auth';
 export * from './billing';
+export { createTokenMeter, type TokenMeter, type TokenMeterConfig, type TokenMeterCustomer } from './compat/token-meter';
+export { createStripe, stripe, createStripeV3, stripeV3 } from './compat/stripe-provider';
+export { meteredModel as stripeMeteredModel } from './compat/stripe-meter';
+export { vibezcheckMiddleware } from './ai-sdk/middleware';
 
 /**
  * VibezCheck Unified Client Configuration

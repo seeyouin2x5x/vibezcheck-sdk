@@ -84,6 +84,27 @@ export function createVibezModel(
       providerName = 'anthropic';
     } else if (rawId.startsWith('gemini-')) {
       providerName = 'google';
+    } else if (rawId.startsWith('deepseek-')) {
+      providerName = 'deepseek';
+    } else if (rawId.startsWith('grok-')) {
+      providerName = 'xai';
+    } else if (
+      rawId.startsWith('mistral-') ||
+      rawId.startsWith('codestral-') ||
+      rawId.startsWith('ministral-') ||
+      rawId.startsWith('open-mistral') ||
+      rawId.startsWith('open-mixtral')
+    ) {
+      providerName = 'mistral';
+    } else if (
+      rawId.startsWith('llama-') ||
+      rawId.startsWith('mixtral-') ||
+      rawId.startsWith('gemma') ||
+      rawId.startsWith('qwen-')
+    ) {
+      providerName = 'groq';
+    } else if (rawId.startsWith('command-')) {
+      providerName = 'cohere';
     }
 
     const apiKey =
@@ -91,6 +112,11 @@ export function createVibezModel(
       process.env.AI_GATEWAY_API_KEY ||
       (providerName === 'anthropic' ? process.env.ANTHROPIC_API_KEY : undefined) ||
       (providerName === 'google' ? process.env.GOOGLE_GENERATIVE_AI_API_KEY : undefined) ||
+      (providerName === 'mistral' ? process.env.MISTRAL_API_KEY : undefined) ||
+      (providerName === 'groq' ? process.env.GROQ_API_KEY : undefined) ||
+      (providerName === 'deepseek' ? process.env.DEEPSEEK_API_KEY : undefined) ||
+      (providerName === 'xai' ? process.env.XAI_API_KEY : undefined) ||
+      (providerName === 'cohere' ? process.env.COHERE_API_KEY : undefined) ||
       process.env.OPENAI_API_KEY;
 
     const baseURL =
@@ -133,6 +159,36 @@ export function createVibezModel(
           } else {
             baseModelInstance = factory(cleanModelId);
           }
+        }
+      } else if (providerName === 'mistral') {
+        const mod = require('@ai-sdk/mistral');
+        const factory = mod.createMistral || mod.mistral || mod.default?.createMistral || mod.default?.mistral;
+        if (typeof factory === 'function') {
+          baseModelInstance = mod.createMistral ? factory({ apiKey, baseURL })(cleanModelId) : factory(cleanModelId);
+        }
+      } else if (providerName === 'groq') {
+        const mod = require('@ai-sdk/groq');
+        const factory = mod.createGroq || mod.groq || mod.default?.createGroq || mod.default?.groq;
+        if (typeof factory === 'function') {
+          baseModelInstance = mod.createGroq ? factory({ apiKey, baseURL })(cleanModelId) : factory(cleanModelId);
+        }
+      } else if (providerName === 'deepseek') {
+        const mod = require('@ai-sdk/deepseek');
+        const factory = mod.createDeepSeek || mod.deepseek || mod.default?.createDeepSeek || mod.default?.deepseek;
+        if (typeof factory === 'function') {
+          baseModelInstance = mod.createDeepSeek ? factory({ apiKey, baseURL })(cleanModelId) : factory(cleanModelId);
+        }
+      } else if (providerName === 'xai') {
+        const mod = require('@ai-sdk/xai');
+        const factory = mod.createXai || mod.xai || mod.default?.createXai || mod.default?.xai;
+        if (typeof factory === 'function') {
+          baseModelInstance = mod.createXai ? factory({ apiKey, baseURL })(cleanModelId) : factory(cleanModelId);
+        }
+      } else if (providerName === 'cohere') {
+        const mod = require('@ai-sdk/cohere');
+        const factory = mod.createCohere || mod.cohere || mod.default?.createCohere || mod.default?.cohere;
+        if (typeof factory === 'function') {
+          baseModelInstance = mod.createCohere ? factory({ apiKey, baseURL })(cleanModelId) : factory(cleanModelId);
         }
       }
     } catch {

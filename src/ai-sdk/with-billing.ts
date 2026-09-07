@@ -50,9 +50,24 @@ export interface WithBillingOptions extends CircuitBreakerOptions {
  * - Automatic prompt caching discount parsing
  * - Serverless lifecycle preservation
  */
-export function withBilling<T extends object>(model: T, options: WithBillingOptions = {}): T {
+export function withBilling<T extends object>(
+  model: T,
+  optionsOrCustomer?: CustomerParam | WithBillingOptions,
+  extraOptions: WithBillingOptions = {}
+): T {
   if (!model || typeof model !== 'object') {
     return model;
+  }
+
+  let options: WithBillingOptions = {};
+  if (typeof optionsOrCustomer === 'string') {
+    options = { ...extraOptions, customer: optionsOrCustomer };
+  } else if (typeof optionsOrCustomer === 'object' && optionsOrCustomer !== null) {
+    if ('userId' in optionsOrCustomer || 'email' in optionsOrCustomer || 'id' in optionsOrCustomer) {
+      options = { ...extraOptions, customer: optionsOrCustomer as CustomerParam };
+    } else {
+      options = { ...(optionsOrCustomer as WithBillingOptions), ...extraOptions };
+    }
   }
 
   const meter =
@@ -96,16 +111,43 @@ export function withBilling<T extends object>(model: T, options: WithBillingOpti
   const handleUsage = (rawUsage: any, extraMeta?: Record<string, any>) => {
     if (!rawUsage) return;
 
-    const inputTokens = rawUsage.promptTokens ?? rawUsage.inputTokens ?? 0;
-    const outputTokens = rawUsage.completionTokens ?? rawUsage.outputTokens ?? 0;
+    const inputTokens =
+      rawUsage.promptTokens ??
+      rawUsage.inputTokens ??
+      rawUsage.prompt_tokens ??
+      rawUsage.input_tokens ??
+      rawUsage.promptTokenCount ??
+      0;
+    const outputTokens =
+      rawUsage.completionTokens ??
+      rawUsage.outputTokens ??
+      rawUsage.completion_tokens ??
+      rawUsage.output_tokens ??
+      rawUsage.candidatesTokenCount ??
+      0;
     const reasoningTokens =
       rawUsage.reasoningTokens ??
       rawUsage.completionTokensDetails?.reasoningTokens ??
       rawUsage.outputTokenDetails?.reasoningTokens ??
+      rawUsage.reasoning_tokens ??
+      rawUsage.completion_tokens_details?.reasoning_tokens ??
+      rawUsage.output_token_details?.reasoning_tokens ??
+      rawUsage.thoughtsTokenCount ??
       0;
     const cachedTokens =
       rawUsage.promptTokensDetails?.cachedTokens ??
       rawUsage.inputTokenDetails?.cachedTokens ??
+      rawUsage.cachedTokens ??
+      rawUsage.cached_tokens ??
+      rawUsage.prompt_tokens_details?.cached_tokens ??
+      rawUsage.input_token_details?.cached_tokens ??
+      rawUsage.cachedContentTokenCount ??
+      rawUsage.cache_read_input_tokens ??
+      0;
+    const cacheWriteTokens =
+      rawUsage.cacheWriteTokens ??
+      rawUsage.cache_creation_input_tokens ??
+      rawUsage.cacheCreationTokens ??
       0;
 
     const usage = {
@@ -115,6 +157,7 @@ export function withBilling<T extends object>(model: T, options: WithBillingOpti
       reasoningTokens: reasoningTokens > 0 ? reasoningTokens : undefined,
       visibleOutputTokens: Math.max(0, outputTokens - reasoningTokens),
       cachedTokens: cachedTokens > 0 ? cachedTokens : undefined,
+      cacheWriteTokens: cacheWriteTokens > 0 ? cacheWriteTokens : undefined,
     };
 
     // Calculate cost with profit margin & minimum charge & custom rates
@@ -338,16 +381,21 @@ export function withBilling<T extends object>(model: T, options: WithBillingOpti
             transform(chunk, controller) {
               controller.enqueue(chunk);
 
-              if (chunk.type === 'text-delta' && chunk.textDelta) {
-                accumulatedChars += chunk.textDelta.length;
-              } else if (chunk.type === 'reasoning' && (chunk.textDelta || chunk.reasoning)) {
-                accumulatedChars += (chunk.textDelta || chunk.reasoning || '').length;
+              const delta = chunk.textDelta || chunk.text || chunk.delta;
+              if (delta && typeof delta === 'string') {
+                accumulatedChars += delta.length;
+              } else if (chunk.type === 'reasoning' || chunk.type === 'reasoning-delta') {
+                const reasoning = chunk.reasoning || chunk.textDelta || chunk.text || chunk.delta || '';
+                if (typeof reasoning === 'string') {
+                  accumulatedChars += reasoning.length;
+                }
               }
 
-              // AI SDK stream finish chunk containing exact provider usage
-              if (chunk.type === 'finish' && chunk.usage) {
+              // AI SDK stream finish chunk or direct usage payload (OpenAI, Anthropic, Gemini, DeepSeek, Groq)
+              const chunkUsage = chunk.usage || chunk.token_usage || chunk.usageMetadata;
+              if (chunkUsage) {
                 streamCompleted = true;
-                handleUsage(chunk.usage);
+                handleUsage(chunkUsage);
               }
             },
             flush() {
@@ -373,18 +421,34 @@ export function withBilling<T extends object>(model: T, options: WithBillingOpti
         };
       }
 
-      // Intercept doGenerate (Vercel AI SDK v1/v2/v3)
+      // Intercept doGenerate (Vercel AI SDK v1/v2/v3/v4/v5+)
       if (prop === 'doGenerate' && typeof originalValue === 'function') {
         return async function (...args: any[]) {
           const result = await originalValue.apply(target, args);
-          if (result && result.usage) {
-            handleUsage(result.usage);
+          const usage = result?.usage || result?.tokenUsage || result?.usageMetadata;
+          if (usage) {
+            handleUsage(usage);
           }
           return result;
         };
       }
 
       return originalValue;
+    },
+    apply(target, thisArg, argArray) {
+      if (typeof target === 'function') {
+        return Reflect.apply(target, thisArg, argArray);
+      }
+      return target;
+    },
+    has(target, prop) {
+      return Reflect.has(target, prop);
+    },
+    ownKeys(target) {
+      return Reflect.ownKeys(target);
+    },
+    getPrototypeOf(target) {
+      return Reflect.getPrototypeOf(target);
     },
   };
 

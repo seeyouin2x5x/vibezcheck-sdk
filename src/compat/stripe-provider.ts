@@ -5,6 +5,8 @@
 
 import { withBilling, type WithBillingOptions } from '../ai-sdk/with-billing';
 
+import { createVibezModel } from '../ai-sdk/declarative';
+
 export interface StripeProviderConfig {
   apiKey?: string;
   customerId?: string;
@@ -15,11 +17,14 @@ export interface StripeProviderConfig {
 
 export interface StripeModelSettings {
   customerId?: string;
+  model?: any;
   [key: string]: any;
 }
 
 export function createStripe(config: StripeProviderConfig = {}) {
-  const apiKey = config.apiKey || (typeof process !== 'undefined' ? (process.env?.STRIPE_API_KEY || process.env?.STRIPE_SECRET_KEY) : undefined);
+  const apiKey =
+    config.apiKey ||
+    (typeof process !== 'undefined' ? (process.env?.STRIPE_API_KEY || process.env?.STRIPE_SECRET_KEY) : undefined);
 
   const provider = function (modelId: string, settings: StripeModelSettings = {}) {
     const customerId = settings.customerId || config.customerId || 'anonymous';
@@ -29,25 +34,17 @@ export function createStripe(config: StripeProviderConfig = {}) {
       stripeApiKey: apiKey,
     };
 
-    // Construct proxy model matching Stripe provider interface
-    const baseModel = {
-      specificationVersion: 'v3' as const,
-      provider: 'stripe',
-      modelId,
-      supportedUrls: {},
-      async doGenerate(params: any) {
-        throw new Error(
-          `[Stripe Provider] To use stripe('${modelId}'), please pass an underlying provider instance or configure provider registry.`
-        );
-      },
-      async doStream(params: any) {
-        throw new Error(
-          `[Stripe Provider] To use stripe('${modelId}'), please pass an underlying provider instance or configure provider registry.`
-        );
-      },
-    };
+    if (settings.model && typeof settings.model === 'object') {
+      return withBilling(settings.model, options);
+    }
 
-    return withBilling(baseModel, options);
+    // Resolve model dynamically via universal declarative engine
+    return createVibezModel(modelId, {
+      ...settings,
+      customer: customerId,
+      stripeApiKey: apiKey,
+      baseURL: config.baseURL,
+    });
   };
 
   provider.languageModel = provider;
