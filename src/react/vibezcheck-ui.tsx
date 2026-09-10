@@ -18,7 +18,7 @@ export interface VibezCheckProps {
   remainingBalanceUSD?: number;
   /** Screen position (default: 'bottom-center') */
   position?: 'bottom-center' | 'bottom-right' | 'bottom-left' | 'top-center';
-  /** Color theme (default: 'dark') */
+  /** Color theme (default: 'auto') */
   theme?: 'dark' | 'light' | 'auto';
   /** Force dev mode banner on/off (defaults to auto-detect) */
   devMode?: boolean;
@@ -42,6 +42,7 @@ const DEV_RATES: Record<string, { input: number; output: number }> = {
   'gpt-4o-mini': { input: 0.15, output: 0.6 },
   'claude-3-5-sonnet': { input: 3.0, output: 15.0 },
   'claude-3-7-sonnet': { input: 3.0, output: 15.0 },
+  'claude-opus': { input: 15.0, output: 75.0 },
   'gemini-1.5-pro': { input: 1.25, output: 5.0 },
   'gemini-1.5-flash': { input: 0.075, output: 0.3 },
   'deepseek-chat': { input: 0.14, output: 0.28 },
@@ -51,9 +52,9 @@ const DEV_RATES: Record<string, { input: number; output: number }> = {
 /**
  * ✦ <VibezCheck /> (from 'vibezcheck/ui' or 'vibezcheck/react')
  *
- * The 1-Line Token Meter & Financial HUD.
+ * The 1-Line Financial Meter HUD & Floating Badge.
  * Works 100% out of the box in local dev mode with ZERO database and ZERO Stripe setup.
- * Computes exact tokens, wholesale provider costs, profit margins, and customer bills.
+ * Dynamically adapts to Light and Dark mode, with clean typography and zero odd colors.
  */
 export function VibezCheck({
   messages,
@@ -63,21 +64,50 @@ export function VibezCheck({
   totalCostUSD: manualCost,
   totalTokens: manualTokens,
   remainingBalanceUSD,
-  position = 'bottom-center',
-  theme = 'dark',
+  position = 'bottom-left',
+  theme = 'auto',
   devMode,
   className = '',
   onTopUp,
   onCostUpdate,
 }: VibezCheckProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isDarkDoc, setIsDarkDoc] = useState(false);
+
+  // Dynamic Theme Observer: Reacts to dark/light toggle immediately
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+
+    const checkTheme = () => {
+      setIsDarkDoc(document.documentElement.classList.contains('dark'));
+    };
+
+    checkTheme();
+
+    const observer = new MutationObserver((mutations) => {
+      for (const m of mutations) {
+        if (m.attributeName === 'class') {
+          checkTheme();
+        }
+      }
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  const isDark = theme === 'dark' ? true : theme === 'light' ? false : isDarkDoc;
 
   const normalizedModel = useMemo(() => {
     const clean = model.toLowerCase().replace(/^(openai|anthropic|google)\//, '');
     return Object.keys(DEV_RATES).find((k) => clean.includes(k)) || 'default';
   }, [model]);
 
-  // Aggregation Engine: Auto-extracts from server telemetry or falls back to Zero-DB token math
+  // Aggregation Engine
   const stats = useMemo(() => {
     let hasServerTelemetry = false;
     let wholesaleUSD = 0;
@@ -87,30 +117,24 @@ export function VibezCheck({
     let completionTokens = 0;
     let cachedTokens = 0;
     let reasoningTokens = 0;
-    let turns = 0;
 
-    // 1. Check explicit raw events
     if (events && events.length > 0) {
       hasServerTelemetry = true;
       for (const ev of events) {
-        billedUSD += ev.cost?.retailUSD ?? ev.cost?.billedUSD ?? ev.cost?.totalUSD ?? 0;
-        wholesaleUSD += ev.cost?.wholesaleTotalUSD ?? ev.cost?.totalUSD ?? 0;
+        billedUSD += ev.cost?.billedUSD ?? 0;
+        wholesaleUSD += ev.cost?.wholesaleTotalUSD ?? ev.cost?.billedUSD ?? 0;
         totalTokens += ev.usage?.totalTokens ?? 0;
         promptTokens += ev.usage?.inputTokens ?? 0;
         completionTokens += ev.usage?.outputTokens ?? 0;
         cachedTokens += ev.usage?.cachedTokens ?? 0;
         reasoningTokens += ev.usage?.reasoningTokens ?? 0;
-        turns++;
       }
     }
 
-    // 2. Scan conversation messages
     if (messages && messages.length > 0) {
       for (const msg of messages) {
-        turns++;
         let eventFound: UsageEvent | null = null;
 
-        // Check annotations (AI SDK 4 & 5)
         if (Array.isArray(msg.annotations)) {
           for (const ann of msg.annotations) {
             if (ann && (ann.cost || ann.usage || ann.vibez)) {
@@ -120,7 +144,6 @@ export function VibezCheck({
           }
         }
 
-        // Check parts (AI SDK 5)
         if (!eventFound && Array.isArray(msg.parts)) {
           for (const part of msg.parts) {
             if (part && (part.type === 'data' || part.type === 'custom') && part.data?.vibez) {
@@ -132,15 +155,14 @@ export function VibezCheck({
 
         if (eventFound) {
           hasServerTelemetry = true;
-          billedUSD += eventFound.cost?.retailUSD ?? eventFound.cost?.billedUSD ?? eventFound.cost?.totalUSD ?? 0;
-          wholesaleUSD += eventFound.cost?.wholesaleTotalUSD ?? eventFound.cost?.totalUSD ?? 0;
+          billedUSD += eventFound.cost?.billedUSD ?? 0;
+          wholesaleUSD += eventFound.cost?.wholesaleTotalUSD ?? eventFound.cost?.billedUSD ?? 0;
           totalTokens += eventFound.usage?.totalTokens ?? 0;
           promptTokens += eventFound.usage?.inputTokens ?? 0;
           completionTokens += eventFound.usage?.outputTokens ?? 0;
           cachedTokens += eventFound.usage?.cachedTokens ?? 0;
           reasoningTokens += eventFound.usage?.reasoningTokens ?? 0;
         } else {
-          // Zero-DB Dev Mode: Extract text content and calculate character-token approximation
           let text = '';
           if (typeof msg.content === 'string') {
             text = msg.content;
@@ -151,28 +173,30 @@ export function VibezCheck({
               .join(' ');
           }
 
-          const estimatedTok = Math.ceil(text.length / 3.8);
-          if (msg.role === 'user') {
-            promptTokens += estimatedTok;
-          } else if (msg.role === 'assistant') {
-            completionTokens += estimatedTok;
-          } else {
-            promptTokens += estimatedTok;
+          if (text) {
+            const charCount = text.length;
+            const approxTokens = Math.max(1, Math.ceil(charCount / 3.8));
+            if (msg.role === 'user') {
+              promptTokens += approxTokens;
+            } else {
+              completionTokens += approxTokens;
+            }
+            totalTokens += approxTokens;
           }
-          totalTokens += estimatedTok;
         }
       }
 
-      // If no server annotations found, compute local Dev Mode pricing
-      if (!hasServerTelemetry && totalTokens > 0) {
+      if (!hasServerTelemetry && (promptTokens > 0 || completionTokens > 0)) {
         const rates = DEV_RATES[normalizedModel] || DEV_RATES.default;
-        wholesaleUSD = (promptTokens * rates.input + completionTokens * rates.output) / 1_000_000;
+        wholesaleUSD =
+          (promptTokens / 1_000_000) * rates.input +
+          (completionTokens / 1_000_000) * rates.output;
         billedUSD = wholesaleUSD * margin;
       }
     }
 
     const profitUSD = Math.max(0, billedUSD - wholesaleUSD);
-    const isDev = devMode !== undefined ? devMode : !hasServerTelemetry;
+    const isDevMode = devMode !== undefined ? devMode : !hasServerTelemetry;
 
     return {
       wholesaleUSD,
@@ -183,12 +207,10 @@ export function VibezCheck({
       completionTokens,
       cachedTokens,
       reasoningTokens,
-      turns,
-      isDevMode: isDev,
+      isDevMode,
     };
-  }, [messages, events, manualCost, manualTokens, normalizedModel, margin, devMode]);
+  }, [events, messages, manualCost, manualTokens, normalizedModel, margin, devMode]);
 
-  // Fire onCostUpdate callback whenever numbers change
   useEffect(() => {
     if (onCostUpdate) {
       onCostUpdate({
@@ -201,21 +223,19 @@ export function VibezCheck({
     }
   }, [stats.billedUSD, stats.totalTokens, stats.isDevMode, onCostUpdate]);
 
-  const isDark = theme === 'dark' || theme === 'auto';
-
   const positionStyles: React.CSSProperties = useMemo(() => {
     const base: React.CSSProperties = { position: 'fixed', zIndex: 9999 };
     switch (position) {
       case 'bottom-center':
-        return { ...base, bottom: '24px', left: '50%', transform: 'translateX(-50%)' };
+        return { ...base, bottom: '20px', left: '50%', transform: 'translateX(-50%)' };
       case 'bottom-right':
-        return { ...base, bottom: '24px', right: '24px' };
+        return { ...base, bottom: '20px', right: '20px' };
       case 'bottom-left':
-        return { ...base, bottom: '24px', left: '24px' };
+        return { ...base, bottom: '20px', left: '20px' };
       case 'top-center':
-        return { ...base, top: '24px', left: '50%', transform: 'translateX(-50%)' };
+        return { ...base, top: '20px', left: '50%', transform: 'translateX(-50%)' };
       default:
-        return { ...base, bottom: '24px', left: '50%', transform: 'translateX(-50%)' };
+        return { ...base, bottom: '20px', left: '20px' };
     }
   }, [position]);
 
@@ -226,105 +246,157 @@ export function VibezCheck({
   };
 
   return (
-    <div style={positionStyles} className={`vibezcheck-ui-root font-sans text-xs select-none ${className}`}>
-      {/* Expanded HUD Card */}
+    <div style={positionStyles} className={`vibezcheck-ui-root vibezcheck-root font-sans select-none ${className}`}>
+      {/* Attached Popover Card */}
       {isOpen && (
         <div
-          style={{
-            background: isDark ? 'rgba(15, 23, 42, 0.96)' : 'rgba(255, 255, 255, 0.98)',
-            backdropFilter: 'blur(16px)',
-            borderColor: isDark ? '#334155' : '#e2e8f0',
-            color: isDark ? '#f8fafc' : '#0f172a',
-          }}
-          className="mb-3 p-4 rounded-2xl border shadow-2xl w-84 space-y-3.5 transition-all animate-in fade-in slide-in-from-bottom-2"
+          className={`mb-2.5 p-4 rounded-xl border shadow-2xl w-[320px] space-y-3 transition-all animate-in fade-in slide-in-from-bottom-2 ${
+            isDark
+              ? 'bg-zinc-900/98 border-zinc-800 text-zinc-100 shadow-zinc-950/60'
+              : 'bg-white/98 border-zinc-200 text-zinc-900 shadow-zinc-900/10'
+          }`}
+          style={{ backdropFilter: 'blur(16px)' }}
         >
           {/* Header */}
-          <div className="flex items-center justify-between border-b pb-2 border-slate-700/50">
-            <div className="flex items-center gap-2">
-              <span className="text-lime-400 font-bold text-sm">✦</span>
-              <span className="font-semibold tracking-wide uppercase text-[11px] text-lime-400">
-                VibezCheck Financial Meter
+          <div
+            className={`flex items-center justify-between pb-2 border-b ${
+              isDark ? 'border-zinc-800' : 'border-zinc-100'
+            }`}
+          >
+            <div className="flex items-center gap-1.5">
+              <span className="text-emerald-500 dark:text-emerald-400 font-bold text-xs">✦</span>
+              <span className="font-semibold text-xs tracking-tight">VibezCheck</span>
+              <span
+                className={`text-[9.5px] font-mono px-1.5 py-0.5 rounded border ${
+                  isDark
+                    ? 'bg-zinc-800 text-zinc-400 border-zinc-700/60'
+                    : 'bg-zinc-100 text-zinc-500 border-zinc-200'
+                }`}
+              >
+                Financial Meter
               </span>
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="text-slate-400 hover:text-white text-xs px-1.5 py-0.5 rounded cursor-pointer transition"
+              className={`text-xs p-1 rounded transition ${
+                isDark
+                  ? 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800'
+                  : 'text-zinc-400 hover:text-zinc-800 hover:bg-zinc-100'
+              }`}
+              aria-label="Close"
             >
               ✕
             </button>
           </div>
 
-          {/* Dev Mode Banner (Zero Database Guarantee) */}
-          {stats.isDevMode ? (
-            <div className="bg-amber-950/40 border border-amber-500/30 rounded-lg p-2 text-[10px] text-amber-300 flex items-center justify-between">
-              <span className="flex items-center gap-1.5 font-medium">
-                <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
-                Zero-DB Dev Mode (Simulated Bill)
+          {/* Customer Billed Hero Card */}
+          <div
+            className={`rounded-lg p-3 space-y-2 border ${
+              isDark
+                ? 'bg-zinc-800/40 border-zinc-800/90'
+                : 'bg-zinc-50/90 border-zinc-100'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span
+                className={`text-[10px] uppercase font-semibold tracking-wider ${
+                  isDark ? 'text-zinc-400' : 'text-zinc-500'
+                }`}
+              >
+                Customer Billed Total
               </span>
-              <span className="text-[9px] bg-amber-500/20 px-1.5 py-0.5 rounded font-mono">
+              <span
+                className={`text-[9.5px] font-mono font-medium px-1.5 py-0.5 rounded border ${
+                  isDark
+                    ? 'bg-emerald-950/40 text-emerald-400 border-emerald-800/40'
+                    : 'bg-emerald-50 text-emerald-700 border-emerald-200/80'
+                }`}
+              >
                 +{Math.round((margin - 1) * 100)}% Margin
               </span>
             </div>
-          ) : (
-            <div className="bg-emerald-950/40 border border-emerald-500/30 rounded-lg p-2 text-[10px] text-emerald-300 flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-400" />
-              <span>Live Stripe Usage Meter Active</span>
-            </div>
-          )}
 
-          {/* Financial Breakdown (Wholesale vs Billed vs Net Profit) */}
-          <div className="bg-slate-800/60 p-2.5 rounded-lg border border-slate-700/40 space-y-2 text-[11px]">
-            <div className="flex justify-between items-center text-slate-400">
-              <span>Provider Cost (Wholesale):</span>
-              <span className="font-mono text-slate-300">${stats.wholesaleUSD.toFixed(4)}</span>
+            <div
+              className={`font-mono text-2xl font-bold tracking-tight tabular-nums ${
+                isDark ? 'text-white' : 'text-zinc-900'
+              }`}
+            >
+              ${stats.billedUSD.toFixed(4)}
             </div>
 
-            <div className="flex justify-between items-center text-slate-400">
-              <span>Your Profit (+{Math.round((margin - 1) * 100)}%):</span>
-              <span className="font-mono text-lime-400 font-medium">+${stats.profitUSD.toFixed(4)}</span>
-            </div>
-
-            <div className="border-t border-slate-700/60 pt-1.5 flex justify-between items-center font-bold">
-              <span className="text-white">Customer Billed Total:</span>
-              <span className="font-mono text-lime-400 text-sm">${stats.billedUSD.toFixed(4)}</span>
+            <div
+              className={`grid grid-cols-2 gap-2 pt-1 border-t text-xs ${
+                isDark ? 'border-zinc-800' : 'border-zinc-200/60'
+              }`}
+            >
+              <div>
+                <span className={`block text-[10px] ${isDark ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                  Provider Wholesale:
+                </span>
+                <span className={`font-mono text-[11px] ${isDark ? 'text-zinc-300' : 'text-zinc-700'}`}>
+                  ${stats.wholesaleUSD.toFixed(4)}
+                </span>
+              </div>
+              <div className="text-right">
+                <span className={`block text-[10px] ${isDark ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                  Net Profit:
+                </span>
+                <span className="font-mono text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+                  +${stats.profitUSD.toFixed(4)}
+                </span>
+              </div>
             </div>
           </div>
 
-          {/* Token Breakdown */}
-          <div className="bg-slate-800/40 p-2.5 rounded-lg border border-slate-700/30 space-y-1.5 text-[11px]">
-            <div className="flex justify-between text-slate-400">
-              <span>Prompt Tokens:</span>
-              <span className="font-mono text-slate-200">{formatTokens(stats.promptTokens)}</span>
+          {/* Token Breakdown Card */}
+          <div
+            className={`rounded-lg p-3 space-y-1.5 text-xs border ${
+              isDark
+                ? 'bg-zinc-800/20 border-zinc-800/80'
+                : 'bg-zinc-50/50 border-zinc-100'
+            }`}
+          >
+            <div className="flex justify-between items-center">
+              <span className={isDark ? 'text-zinc-400' : 'text-zinc-500'}>Prompt Tokens:</span>
+              <span className={`font-mono tabular-nums ${isDark ? 'text-zinc-300' : 'text-zinc-700'}`}>
+                {formatTokens(stats.promptTokens)}
+              </span>
             </div>
             {stats.cachedTokens > 0 && (
-              <div className="flex justify-between text-[10px] text-lime-300">
+              <div className="flex justify-between items-center text-[10.5px] text-emerald-600 dark:text-emerald-400">
                 <span>↳ Cache Savings (85% off):</span>
-                <span className="font-mono">-{formatTokens(stats.cachedTokens)}</span>
+                <span className="font-mono tabular-nums">-{formatTokens(stats.cachedTokens)}</span>
               </div>
             )}
-            <div className="flex justify-between text-slate-400">
-              <span>Completion Tokens:</span>
-              <span className="font-mono text-slate-200">{formatTokens(stats.completionTokens)}</span>
+            <div className="flex justify-between items-center">
+              <span className={isDark ? 'text-zinc-400' : 'text-zinc-500'}>Completion Tokens:</span>
+              <span className={`font-mono tabular-nums ${isDark ? 'text-zinc-300' : 'text-zinc-700'}`}>
+                {formatTokens(stats.completionTokens)}
+              </span>
             </div>
             {stats.reasoningTokens > 0 && (
-              <div className="flex justify-between text-[10px] text-purple-300">
-                <span>↳ Thinking / Reasoning:</span>
-                <span className="font-mono">{formatTokens(stats.reasoningTokens)}</span>
+              <div className="flex justify-between items-center text-[10.5px] text-zinc-500 dark:text-zinc-400">
+                <span>↳ Reasoning / Thinking:</span>
+                <span className="font-mono tabular-nums">{formatTokens(stats.reasoningTokens)}</span>
               </div>
             )}
-            <div className="flex justify-between border-t border-slate-700/50 pt-1 font-semibold text-slate-300">
+            <div
+              className={`flex justify-between items-center pt-1.5 border-t font-semibold ${
+                isDark ? 'border-zinc-800 text-zinc-100' : 'border-zinc-200/60 text-zinc-900'
+              }`}
+            >
               <span>Total Tokens:</span>
-              <span className="font-mono text-white">{formatTokens(stats.totalTokens)}</span>
+              <span className="font-mono tabular-nums">{formatTokens(stats.totalTokens)}</span>
             </div>
           </div>
 
-          {/* Balance & Top Up Action */}
+          {/* Remaining Balance & Top Up Action */}
           {typeof remainingBalanceUSD === 'number' && (
-            <div className="flex justify-between items-center text-[11px] px-1">
-              <span className="text-slate-400">Remaining Balance:</span>
+            <div className="flex justify-between items-center text-xs px-1">
+              <span className={isDark ? 'text-zinc-400' : 'text-zinc-500'}>Remaining Balance:</span>
               <span
-                className={`font-mono font-bold ${
-                  remainingBalanceUSD < 1 ? 'text-amber-400' : 'text-slate-200'
+                className={`font-mono font-semibold tabular-nums ${
+                  remainingBalanceUSD < 1 ? 'text-amber-500' : isDark ? 'text-zinc-200' : 'text-zinc-800'
                 }`}
               >
                 ${remainingBalanceUSD.toFixed(2)}
@@ -335,45 +407,82 @@ export function VibezCheck({
           {onTopUp && (
             <button
               onClick={onTopUp}
-              className="w-full py-2 px-3 rounded-lg bg-lime-500 hover:bg-lime-400 text-slate-950 font-semibold text-xs transition cursor-pointer shadow-md active:scale-98"
+              className={`w-full py-1.5 px-3 rounded-lg font-medium text-xs transition cursor-pointer shadow-sm active:scale-98 ${
+                isDark
+                  ? 'bg-zinc-100 hover:bg-white text-zinc-900'
+                  : 'bg-zinc-900 hover:bg-zinc-800 text-white'
+              }`}
             >
               + Add / Top Up Credits
             </button>
           )}
 
-          {stats.isDevMode && (
-            <p className="text-[9px] text-slate-500 text-center leading-tight">
-              Zero-DB Dev Mode: Running in local memory without database or Stripe dependencies.
-            </p>
-          )}
+          {/* Environment Footer */}
+          <div className="flex items-center gap-2 pt-0.5 text-[10px]">
+            <span className="relative flex h-1.5 w-1.5 shrink-0">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
+            </span>
+            <span className={isDark ? 'text-zinc-500' : 'text-zinc-400'}>
+              {stats.isDevMode
+                ? 'Zero-DB Dev Mode · Running in local memory'
+                : 'Live Stripe Usage Meter Active'}
+            </span>
+          </div>
         </div>
       )}
 
       {/* Floating Bottom Pill */}
       <div
         onClick={() => setIsOpen(!isOpen)}
-        style={{
-          background: isDark ? 'rgba(15, 23, 42, 0.90)' : 'rgba(255, 255, 255, 0.95)',
-          backdropFilter: 'blur(12px)',
-          borderColor: isDark ? '#334155' : '#e2e8f0',
-          color: isDark ? '#f8fafc' : '#0f172a',
-        }}
-        className="flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border shadow-xl cursor-pointer hover:scale-105 active:scale-95 transition-all select-none"
+        className={`flex items-center gap-2 px-3 py-1.5 rounded-full border shadow-lg cursor-pointer transition-all select-none hover:scale-[1.02] active:scale-[0.98] ${
+          isDark
+            ? 'bg-zinc-900/95 hover:bg-zinc-850 text-zinc-100 border-zinc-800 shadow-zinc-950/40 hover:border-zinc-700'
+            : 'bg-white/95 hover:bg-zinc-50 text-zinc-900 border-zinc-200 shadow-zinc-900/5 hover:border-zinc-300'
+        }`}
+        style={{ backdropFilter: 'blur(12px)' }}
+        title="Click to open VibezCheck Financial Meter"
       >
-        <span className="text-lime-400 font-bold text-xs animate-pulse">✦</span>
-        <span className="font-mono font-semibold text-lime-400 text-xs">
+        <span className="text-emerald-500 dark:text-emerald-400 font-bold text-xs shrink-0">✦</span>
+        <span
+          className={`font-mono font-medium text-xs tabular-nums ${
+            isDark ? 'text-zinc-100' : 'text-zinc-900'
+          }`}
+        >
           ${stats.billedUSD.toFixed(4)}
         </span>
-        <span className="text-slate-500">•</span>
-        <span className="font-mono text-slate-300 text-xs">
+        <span className={isDark ? 'text-zinc-700' : 'text-zinc-300'}>·</span>
+        <span
+          className={`font-mono text-xs tabular-nums ${
+            isDark ? 'text-zinc-400' : 'text-zinc-500'
+          }`}
+        >
           {formatTokens(stats.totalTokens)} tok
         </span>
         {stats.isDevMode && (
-          <span className="text-[9px] font-mono text-amber-400 bg-amber-400/10 px-1 py-0.2 rounded">
+          <span
+            className={`text-[9px] font-mono font-medium uppercase tracking-wider px-1.5 py-0.2 rounded border ${
+              isDark
+                ? 'bg-zinc-800 text-zinc-400 border-zinc-700/60'
+                : 'bg-zinc-100 text-zinc-500 border-zinc-200'
+            }`}
+          >
             DEV
           </span>
         )}
-        <span className="text-[10px] text-slate-400 ml-0.5">{isOpen ? '▼' : '▲'}</span>
+        <svg
+          className={`w-3 h-3 text-zinc-400 transition-transform duration-200 ml-0.5 ${
+            isOpen ? 'rotate-180' : ''
+          }`}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="m6 9 6 6 6-6" />
+        </svg>
       </div>
     </div>
   );

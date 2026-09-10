@@ -25,19 +25,34 @@ export interface VibezReceiptProps {
   variant?: 'minimal' | 'pill' | 'card';
   /** Custom CSS class names */
   className?: string;
+  /** Hide model slug for ultra-compact card layouts */
+  compact?: boolean;
+}
+
+/**
+ * Normalizes verbose model identifiers into clean, human-readable slugs.
+ * E.g. "anthropic('claude-opus-4.8')" -> "claude-opus"
+ * "openai('gpt-4o-mini')" -> "gpt-4o-mini"
+ */
+function cleanModelName(raw?: string): string | undefined {
+  if (!raw || raw === 'ai-model') return undefined;
+  const match = raw.match(/\(['"]?([^'"]+)['"]?\)/);
+  let name = match ? match[1] : raw;
+  name = name.replace(/^(openai|anthropic|google|xai|elevenlabs|deepseek|luma)\//, '');
+  return name;
 }
 
 export const VibezReceipt: React.FC<VibezReceiptProps> = ({
   message,
-  model = 'ai-model',
+  model,
   tokens,
   reasoningTokens,
   costUSD,
   latencyMs,
-  variant = 'minimal',
+  variant = 'pill',
   className = '',
+  compact = false,
 }) => {
-  // Extract usage/cost data from message annotations or meta if available
   let resolvedTokens = tokens;
   let resolvedReasoning = reasoningTokens;
   let resolvedCost = costUSD;
@@ -47,25 +62,26 @@ export const VibezReceipt: React.FC<VibezReceiptProps> = ({
   if (message?.annotations && Array.isArray(message.annotations)) {
     for (const ann of message.annotations) {
       if (ann && typeof ann === 'object') {
-        if (ann.type === 'vibezcheck' || ann.usage || ann.cost) {
-          resolvedTokens = resolvedTokens ?? ann.usage?.totalTokens;
-          resolvedReasoning = resolvedReasoning ?? ann.usage?.reasoningTokens;
-          resolvedCost = resolvedCost ?? ann.cost?.totalUSD ?? ann.cost;
-          resolvedModel = resolvedModel === 'ai-model' ? (ann.model || resolvedModel) : resolvedModel;
+        if (ann.type === 'vibezcheck' || ann.usage || ann.cost || ann.tokens || ann.costUSD) {
+          resolvedTokens = resolvedTokens ?? ann.usage?.totalTokens ?? ann.tokens;
+          resolvedReasoning = resolvedReasoning ?? ann.usage?.reasoningTokens ?? ann.reasoningTokens;
+          resolvedCost = resolvedCost ?? ann.cost?.totalUSD ?? ann.costUSD ?? (typeof ann.cost === 'number' ? ann.cost : undefined);
+          resolvedModel = resolvedModel ?? ann.model;
           resolvedLatency = resolvedLatency ?? ann.latencyMs;
         }
       }
     }
   }
 
-  // Format token numbers cleanly (e.g. 1,420 or 12.4k)
-  const formatTokens = (num?: number) => {
-    if (num === undefined) return null;
-    if (num >= 10000) return `${(num / 1000).toFixed(1)}k tokens`;
-    return `${num.toLocaleString()} tokens`;
-  };
+  // Fallback token estimation from content length
+  if (resolvedTokens === undefined && typeof message?.content === 'string') {
+    resolvedTokens = Math.max(1, Math.ceil(message.content.length / 3.8));
+  }
 
-  // Format cost cleanly (e.g. $0.00021)
+  if (resolvedTokens === undefined && resolvedCost === undefined) {
+    return null;
+  }
+
   const formatCost = (cost?: number) => {
     if (cost === undefined) return null;
     if (cost < 0.0001) return `<$0.0001`;
@@ -73,73 +89,49 @@ export const VibezReceipt: React.FC<VibezReceiptProps> = ({
     return `$${cost.toFixed(3)}`;
   };
 
-  // Shorten model identifier (e.g. 'openai/gpt-4o-mini' -> 'gpt-4o-mini')
-  const cleanModel = resolvedModel.includes('/') ? resolvedModel.split('/')[1] : resolvedModel;
+  const shortModel = cleanModelName(resolvedModel);
 
   return (
     <div
-      className={`inline-flex items-center gap-2 py-1 px-2.5 rounded-lg text-[11px] font-mono select-none transition-colors duration-150 ${
-        variant === 'pill'
-          ? 'bg-slate-900 text-slate-200 border border-slate-800 shadow-xs'
-          : variant === 'card'
-          ? 'bg-cream-50 text-slate-700 border border-slate-200/80 shadow-2xs'
-          : 'bg-slate-50 hover:bg-slate-100/80 text-slate-600 border border-slate-200/70'
-      } ${className}`}
+      className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md font-mono text-[10.5px] select-none transition-colors border max-w-full truncate bg-zinc-100/90 hover:bg-zinc-100 text-zinc-700 border-zinc-200/80 dark:bg-zinc-800/80 dark:hover:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-700/70 ${className}`}
+      title={
+        resolvedModel
+          ? `Verified by VibezCheck | Model: ${resolvedModel} | ${resolvedTokens ?? 0} tokens`
+          : 'Verified by VibezCheck'
+      }
     >
-      {/* Electric Lime Sparkle Icon */}
-      <div className="flex items-center justify-center shrink-0">
-        <svg
-          className="h-3 w-3 text-lime-500"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
-          <circle cx="12" cy="12" r="2.5" fill="#D4FF32" />
-        </svg>
-      </div>
-
-      {/* Model Name */}
-      <span className="font-semibold text-slate-800">{cleanModel}</span>
-
-      {/* Token count */}
-      {resolvedTokens !== undefined && (
-        <>
-          <span className="text-slate-300">•</span>
-          <span>{formatTokens(resolvedTokens)}</span>
-        </>
-      )}
-
-      {/* Reasoning tokens indicator if applicable */}
-      {resolvedReasoning !== undefined && resolvedReasoning > 0 && (
-        <>
-          <span className="text-slate-300">•</span>
-          <span className="text-stripe-indigo font-medium">{resolvedReasoning} thought tokens</span>
-        </>
-      )}
-
-      {/* Cost in USD */}
+      <span className="text-emerald-600 dark:text-emerald-400 font-bold text-[10px] shrink-0">✦</span>
       {resolvedCost !== undefined && (
+        <span className="font-semibold text-zinc-900 dark:text-zinc-100 tabular-nums">
+          {formatCost(resolvedCost)}
+        </span>
+      )}
+      {resolvedCost !== undefined && resolvedTokens !== undefined && (
+        <span className="text-zinc-300 dark:text-zinc-600 shrink-0">·</span>
+      )}
+      {resolvedTokens !== undefined && (
+        <span className="text-zinc-500 dark:text-zinc-400 tabular-nums shrink-0">
+          {resolvedTokens.toLocaleString()} tok
+        </span>
+      )}
+      {!compact && shortModel && (
         <>
-          <span className="text-slate-300">•</span>
-          <span className="text-emerald-600 font-semibold">{formatCost(resolvedCost)}</span>
+          <span className="text-zinc-300 dark:text-zinc-600 shrink-0">·</span>
+          <span className="text-zinc-400 dark:text-zinc-500 text-[10px] truncate max-w-[85px]">
+            {shortModel}
+          </span>
         </>
       )}
-
-      {/* Latency if supplied */}
-      {resolvedLatency !== undefined && (
+      {resolvedLatency !== undefined && resolvedLatency > 0 && !compact && (
         <>
-          <span className="text-slate-300">•</span>
-          <span className="text-slate-400">{resolvedLatency}ms</span>
+          <span className="text-zinc-300 dark:text-zinc-600 shrink-0">·</span>
+          <span className="text-zinc-400 dark:text-zinc-500 text-[10px] shrink-0">
+            {resolvedLatency}ms
+          </span>
         </>
       )}
-
-      {/* Verified Badge */}
-      <span className="text-slate-300">•</span>
-      <span className="text-[10px] text-slate-400 font-sans font-medium">Verified by VibezCheck</span>
     </div>
   );
 };
+
+export default VibezReceipt;

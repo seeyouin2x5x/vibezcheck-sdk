@@ -39,7 +39,7 @@ async function prompt(question: string, defaultVal: string = ''): Promise<string
  */
 async function handleInit() {
   printBanner();
-  console.log('\x1b[35m🚀 Welcome to the VibezCheck Setup Wizard!\x1b[0m\n');
+  console.log('\x1b[1m✦ VibezCheck Project Setup Wizard\x1b[0m\n');
 
   const cwd = process.cwd();
 
@@ -48,22 +48,21 @@ async function handleInit() {
   const isNextPagesRouter = fs.existsSync(path.join(cwd, 'pages'));
   const isSrcDir = fs.existsSync(path.join(cwd, 'src', 'app'));
 
-  console.log(`\x1b[90m📁 Project directory: ${cwd}\x1b[0m`);
+  console.log(`\x1b[90mProject directory: ${cwd}\x1b[0m`);
   if (isNextAppRouter || isSrcDir) {
-    console.log('\x1b[32m✓ Detected Next.js App Router project!\x1b[0m\n');
+    console.log('\x1b[32m✓ Detected Next.js App Router project\x1b[0m\n');
   }
 
   // 1. Prompt for API Keys
   const defaultGateway = 'vck_demo_key';
-  const gatewayKey = await prompt('Enter your AI Gateway API Key (or OpenAI key)', defaultGateway);
-  const gatewayUrl = await prompt('Enter your AI Gateway Base URL', 'https://ai-gateway.vercel.sh/v1');
-  const stripeKey = await prompt('Enter your Stripe Secret Key (optional for test mode)', '');
+  const gatewayKey = await prompt('Enter your OpenAI or AI Gateway API Key', defaultGateway);
+  const stripeKey = await prompt('Enter your Stripe Secret Key (press enter for free test mode)', '');
 
   // 2. Create / Update .env.local
   const envPath = path.join(cwd, '.env.local');
-  const envContent = `# VibezCheck AI Gateway & Stripe Configuration
+  const envContent = `# VibezCheck AI & Stripe Configuration
+OPENAI_API_KEY=${gatewayKey}
 AI_GATEWAY_API_KEY=${gatewayKey}
-AI_GATEWAY_BASE_URL=${gatewayUrl}
 STRIPE_SECRET_KEY=${stripeKey}
 `;
 
@@ -79,44 +78,44 @@ STRIPE_SECRET_KEY=${stripeKey}
   const routePath = path.join(apiDir, 'route.ts');
 
   const routeContent = `import { streamText } from 'ai';
+import { openai } from '@ai-sdk/openai';
 import { vibezcheck } from 'vibezcheck';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
-  const { messages, customer = 'demo@example.com' } = await req.json();
+  const { messages, customerId = 'cus_demo_user' } = await req.json();
 
   // ⚡ 1-Line Declarative Model Metering
   const result = streamText({
-    model: vibezcheck('openai/gpt-4o-mini', {
-      customer,
+    model: vibezcheck(openai('gpt-4o-mini'), {
+      customer: customerId,
+      pricing: { margin: 1.30 },           // +30% profit markup
+      safety: { maxCostPerCallUSD: 0.50 }, // Auto-shutoff safety switch
       onUsage: (event) => {
-        console.log(\`⚡ [vibezcheck] Tokens: \${event.usage.totalTokens} | Cost: $\${event.cost.totalUSD.toFixed(6)}\`);
+        console.log(\`[vibezcheck] Tokens: \${event.usage.totalTokens} | Cost: $\${event.cost.totalUSD.toFixed(6)}\`);
       },
     }),
     messages,
   });
 
-  return result.toTextStreamResponse();
+  return result.toDataStreamResponse();
 }
 `;
 
   fs.writeFileSync(routePath, routeContent, { flag: 'w' });
-  console.log(`\x1b[32m✓ Generated declarative API route: ${path.relative(cwd, routePath)}\x1b[0m`);
+  console.log(`\x1b[32m✓ Generated metered AI route: ${path.relative(cwd, routePath)}\x1b[0m`);
 
   console.log(`
-\x1b[32m\x1b[1m🎉 Setup Complete!\x1b[0m
+\x1b[32m\x1b[1mSetup Complete!\x1b[0m
 
 \x1b[1mNext Steps:\x1b[0m
-  1. Add \x1b[36m<VibezSessionWidget />\x1b[0m to your layout:
-     \x1b[90mimport { VibezSessionProvider, VibezSessionWidget } from 'vibezcheck/react';\x1b[0m
+  1. Add \x1b[36m<VibezReceipt />\x1b[0m under assistant messages:
+     \x1b[90mimport { VibezReceipt } from 'vibezcheck/react';\x1b[0m
 
-  2. Use \x1b[36museVibezChat()\x1b[0m in your client component:
-     \x1b[90mconst { messages, input, handleSubmit } = useVibezChat();\x1b[0m
-
-  3. Run your dev server:
-     \x1b[33mnpm run dev\x1b[0m or \x1b[33mpnpm dev\x1b[0m
+  2. Run your dev server:
+     \x1b[33mpnpm dev\x1b[0m or \x1b[33mnpm run dev\x1b[0m
 `);
 }
 
