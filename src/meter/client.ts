@@ -29,7 +29,7 @@ export class VibezMeter {
       this.stripeClient = new Stripe(key, {
         appInfo: {
           name: 'vibezcheck',
-          version: '0.5.4',
+          version: '0.5.5',
           url: 'https://vibezcheck.xyz',
         },
       });

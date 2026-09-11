@@ -1,6 +1,6 @@
 {
   "name": "vibezcheck",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "description": "The 1-line Stripe Billing and Token Metering engine for LLMs. Track tokens, compute real-time dollar costs, and bill customers with 0ms added latency.",
   "author": "VibezCheck <dev@vibezcheck.xyz> (https://vibezcheck.xyz)",
   "license": "MIT",
@@ -114,7 +114,7 @@
     "test": "jest --forceExit",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "tsup"
   },
   "dependencies": {
     "stripe": "^17.5.0"

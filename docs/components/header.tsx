@@ -69,7 +69,7 @@ export function Header() {
           </a>
           <a href="/releases" className="hover:text-slate-950 dark:hover:text-white transition text-emerald-600 dark:text-emerald-400 font-semibold inline-flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-            v0.5.4 Notes
+            v0.5.5 Notes
           </a>
           <a href="/docs?section=cli" className="hover:text-slate-950 dark:hover:text-white transition">
             CLI Suite
