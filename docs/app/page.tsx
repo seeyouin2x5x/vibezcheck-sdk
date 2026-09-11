@@ -172,20 +172,20 @@ export default function Home() {
       </div>
 
       {/* ✦ 1-Line Token Meter & Financial HUD: Docked in bottom-left */}
-      <VibezCheck messages={messages} position="bottom-left" />
+      {/* <VibezCheck messages={messages} position="bottom-left" /> */}
 
       {/* Bottom Right QR Card (Matching Screenshot) */}
-      <QrCard />
+      {/* <QrCard /> */}
 
       {/* Sticky Bottom Chat Input Bar with AI Elements PromptInput */}
-      <StickyChat
+      {/* <StickyChat
         input={input}
         setInput={setInput}
         isLoading={isLoading}
         onStop={stop}
         onSubmit={() => handleSendPrompt(input)}
         onChipClick={(prompt: string) => handleSendPrompt(prompt)}
-      />
+      /> */}
     </main>
   );
 }

@@ -3361,9 +3361,7 @@ export function AiSdkShowcase({
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                       <span>instructions: "You are a helpful assistant."</span>
                     </div>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-mono font-medium">
-                      streaming UI
-                    </span>
+          
                   </div>
 
                   <p>
