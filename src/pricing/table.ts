@@ -22,6 +22,10 @@ export const MODEL_PRICING_TABLE: Record<string, ModelPricingRates> = {
   'chatgpt-4o-latest': { inputPer1M: 5.0, outputPer1M: 15.0 },
   'gpt-4.1': { inputPer1M: 2.0, outputPer1M: 8.0, cachedInputPer1M: 1.0 },
   'gpt-4.1-nano': { inputPer1M: 0.1, outputPer1M: 0.4, cachedInputPer1M: 0.05 },
+  'gpt-6-astra': { inputPer1M: 5.0, outputPer1M: 25.0, cachedInputPer1M: 0.5 },
+  'gpt-6-astra-fast': { inputPer1M: 3.0, outputPer1M: 15.0, cachedInputPer1M: 0.3 },
+  'gpt-image-2.5-flare': { inputPer1M: 0.0, outputPer1M: 0.04 },
+  'gpt-image-2.5-sunburst': { inputPer1M: 0.0, outputPer1M: 0.08 },
 
   // --- OpenAI (Legacy & Backward Compatibility) ---
   'gpt-4-turbo': { inputPer1M: 10.0, outputPer1M: 30.0, cachedInputPer1M: 5.0 },
@@ -81,7 +85,20 @@ export const MODEL_PRICING_TABLE: Record<string, ModelPricingRates> = {
   'mistral-large-2411': { inputPer1M: 2.0, outputPer1M: 6.0 },
   'codestral-latest': { inputPer1M: 0.3, outputPer1M: 0.9 },
   'mistral-medium-latest': { inputPer1M: 2.7, outputPer1M: 8.1 },
+  'mistral-medium-3-5': { inputPer1M: 2.0, outputPer1M: 6.0, cachedInputPer1M: 0.4 },
+  'mistral-medium-2604': { inputPer1M: 2.0, outputPer1M: 6.0, cachedInputPer1M: 0.4 },
+  'magistral-small-latest': { inputPer1M: 0.5, outputPer1M: 1.5, cachedInputPer1M: 0.1 },
+  'magistral-medium-latest': { inputPer1M: 2.0, outputPer1M: 6.0, cachedInputPer1M: 0.4 },
   'mistral-small-latest': { inputPer1M: 0.2, outputPer1M: 0.6 },
+  'mistral-small-2603': { inputPer1M: 0.2, outputPer1M: 0.6, cachedInputPer1M: 0.05 },
+  'mistral-vibe-cli-fast': { inputPer1M: 0.2, outputPer1M: 0.6, cachedInputPer1M: 0.05 },
+  'mistral-vibe-cli-latest': { inputPer1M: 0.2, outputPer1M: 0.6, cachedInputPer1M: 0.05 },
+  'codestral-2508': { inputPer1M: 0.3, outputPer1M: 0.9, cachedInputPer1M: 0.08 },
+  'codestral-embed': { inputPer1M: 0.1, outputPer1M: 0.0 },
+  'mistral-embed-2312': { inputPer1M: 0.1, outputPer1M: 0.0 },
+  'zai-glm-5-2': { inputPer1M: 0.6, outputPer1M: 2.2, cachedInputPer1M: 0.15 },
+  'glm-5-2': { inputPer1M: 0.6, outputPer1M: 2.2, cachedInputPer1M: 0.15 },
+  'labs-leanstral-1-5': { inputPer1M: 0.2, outputPer1M: 0.6, cachedInputPer1M: 0.05 },
   'ministral-8b-latest': { inputPer1M: 0.1, outputPer1M: 0.1 },
   'ministral-3b-latest': { inputPer1M: 0.04, outputPer1M: 0.04 },
   'open-mistral-7b': { inputPer1M: 0.2, outputPer1M: 0.2 },
@@ -106,11 +123,18 @@ export const MODEL_PRICING_TABLE: Record<string, ModelPricingRates> = {
 
   // --- DeepSeek ---
   'deepseek-v4-pro': { inputPer1M: 0.66, outputPer1M: 1.98, cachedInputPer1M: 0.15 },
+  'deepseek-v4.1-flash': { inputPer1M: 0.20, outputPer1M: 0.60, cachedInputPer1M: 0.05 },
   'deepseek-v4-flash': { inputPer1M: 0.22, outputPer1M: 0.66, cachedInputPer1M: 0.05 },
   'deepseek-v3': { inputPer1M: 0.14, outputPer1M: 0.28, cachedInputPer1M: 0.014 },
   'deepseek-chat': { inputPer1M: 0.14, outputPer1M: 0.28, cachedInputPer1M: 0.014 },
   'deepseek-r1': { inputPer1M: 0.55, outputPer1M: 2.19, cachedInputPer1M: 0.14 },
   'deepseek-reasoner': { inputPer1M: 0.55, outputPer1M: 2.19, cachedInputPer1M: 0.14 },
+
+  // --- Gateway, Inception & InclusionAI Models ---
+  'mercury-2.5': { inputPer1M: 0.25, outputPer1M: 0.75, cachedInputPer1M: 0.05 },
+  'mercury-2': { inputPer1M: 0.25, outputPer1M: 0.75, cachedInputPer1M: 0.05 },
+  'ling-3.0-flash-sante': { inputPer1M: 0.15, outputPer1M: 0.45, cachedInputPer1M: 0.03 },
+  'ling-3.0-flash': { inputPer1M: 0.15, outputPer1M: 0.45, cachedInputPer1M: 0.03 },
 
   // --- Cohere ---
   'command-r-plus': { inputPer1M: 2.5, outputPer1M: 10.0 },
@@ -170,6 +194,14 @@ export const MODEL_ALIASES: Record<string, string> = {
   'codestral': 'codestral-latest',
   'mistral-large': 'mistral-large-latest',
   'mistral-small': 'mistral-small-latest',
+  'magistral': 'magistral-small-latest',
+  'magistral-small': 'magistral-small-latest',
+  'magistral-medium': 'magistral-medium-latest',
+  'mistral-3.5': 'mistral-medium-3-5',
+  'mistral-medium-3.5': 'mistral-medium-3-5',
+  'gpt-image-2.5': 'gpt-image-2.5-flare',
+  'gpt-image-sunburst': 'gpt-image-2.5-sunburst',
+  'gpt-image-flare': 'gpt-image-2.5-flare',
 };
 
 /**

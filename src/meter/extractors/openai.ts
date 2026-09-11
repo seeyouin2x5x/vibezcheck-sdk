@@ -96,38 +96,69 @@ export function inspectOpenAIStreamChunk(chunk: any): {
 
   const model = chunk.model;
 
-  // Final chunk with usage object (when stream_options: { include_usage: true }, or Groq / DeepSeek / Mistral stream ending)
-  const rawUsage = chunk.usage || chunk.token_usage || chunk.x_groq?.usage || chunk.usageMetadata;
+  // Final chunk with usage object (when stream_options: { include_usage: true }, finish chunk, or Groq / DeepSeek / Mistral stream ending)
+  const rawUsage =
+    (chunk.type === 'finish' ? chunk.usage : null) ||
+    chunk.usage ||
+    chunk.token_usage ||
+    chunk.x_groq?.usage ||
+    chunk.usageMetadata;
   if (rawUsage) {
-    const inputTokens =
-      rawUsage.prompt_tokens ??
-      rawUsage.input_tokens ??
-      rawUsage.promptTokens ??
-      rawUsage.inputTokens ??
-      rawUsage.promptTokenCount ??
-      0;
-    const outputTokens =
-      rawUsage.completion_tokens ??
-      rawUsage.output_tokens ??
-      rawUsage.completionTokens ??
-      rawUsage.outputTokens ??
-      rawUsage.candidatesTokenCount ??
-      0;
-    const reasoningTokens =
-      rawUsage.completion_tokens_details?.reasoning_tokens ??
-      rawUsage.output_token_details?.reasoning_tokens ??
-      rawUsage.reasoning_tokens ??
-      rawUsage.reasoningTokens ??
-      rawUsage.thoughtsTokenCount ??
-      0;
-    const cachedTokens =
-      rawUsage.prompt_tokens_details?.cached_tokens ??
-      rawUsage.input_token_details?.cached_tokens ??
-      rawUsage.prompt_cache_hit_tokens ??
-      rawUsage.cached_tokens ??
-      rawUsage.cachedTokens ??
-      rawUsage.cachedContentTokenCount ??
-      0;
+    let inputTokens = 0;
+    let outputTokens = 0;
+    let reasoningTokens = 0;
+    let cachedTokens = 0;
+
+    if (typeof rawUsage.inputTokens === 'object' && rawUsage.inputTokens !== null) {
+      inputTokens = rawUsage.inputTokens.total ?? rawUsage.inputTokens.noCache ?? 0;
+      cachedTokens = rawUsage.inputTokens.cacheRead ?? 0;
+    } else if (typeof rawUsage.promptTokens === 'number') {
+      inputTokens = rawUsage.promptTokens;
+    } else if (typeof rawUsage.inputTokens === 'number') {
+      inputTokens = rawUsage.inputTokens;
+    } else {
+      inputTokens =
+        rawUsage.prompt_tokens ??
+        rawUsage.input_tokens ??
+        rawUsage.promptTokenCount ??
+        0;
+    }
+
+    if (typeof rawUsage.outputTokens === 'object' && rawUsage.outputTokens !== null) {
+      outputTokens = rawUsage.outputTokens.total ?? rawUsage.outputTokens.text ?? 0;
+      reasoningTokens = rawUsage.outputTokens.reasoning ?? 0;
+    } else if (typeof rawUsage.completionTokens === 'number') {
+      outputTokens = rawUsage.completionTokens;
+    } else if (typeof rawUsage.outputTokens === 'number') {
+      outputTokens = rawUsage.outputTokens;
+    } else {
+      outputTokens =
+        rawUsage.completion_tokens ??
+        rawUsage.output_tokens ??
+        rawUsage.candidatesTokenCount ??
+        0;
+    }
+
+    if (!reasoningTokens) {
+      reasoningTokens =
+        rawUsage.completion_tokens_details?.reasoning_tokens ??
+        rawUsage.output_token_details?.reasoning_tokens ??
+        rawUsage.reasoning_tokens ??
+        rawUsage.reasoningTokens ??
+        rawUsage.thoughtsTokenCount ??
+        0;
+    }
+
+    if (!cachedTokens) {
+      cachedTokens =
+        rawUsage.prompt_tokens_details?.cached_tokens ??
+        rawUsage.input_token_details?.cached_tokens ??
+        rawUsage.prompt_cache_hit_tokens ??
+        rawUsage.cached_tokens ??
+        rawUsage.cachedTokens ??
+        rawUsage.cachedContentTokenCount ??
+        0;
+    }
 
     return {
       model,

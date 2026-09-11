@@ -113,44 +113,76 @@ export function withBilling<T extends object>(
   const handleUsage = (rawUsage: any, extraMeta?: Record<string, any>) => {
     if (!rawUsage) return;
 
-    const inputTokens =
-      rawUsage.promptTokens ??
-      rawUsage.inputTokens ??
-      rawUsage.prompt_tokens ??
-      rawUsage.input_tokens ??
-      rawUsage.promptTokenCount ??
-      0;
-    const outputTokens =
-      rawUsage.completionTokens ??
-      rawUsage.outputTokens ??
-      rawUsage.completion_tokens ??
-      rawUsage.output_tokens ??
-      rawUsage.candidatesTokenCount ??
-      0;
-    const reasoningTokens =
-      rawUsage.reasoningTokens ??
-      rawUsage.completionTokensDetails?.reasoningTokens ??
-      rawUsage.outputTokenDetails?.reasoningTokens ??
-      rawUsage.reasoning_tokens ??
-      rawUsage.completion_tokens_details?.reasoning_tokens ??
-      rawUsage.output_token_details?.reasoning_tokens ??
-      rawUsage.thoughtsTokenCount ??
-      0;
-    const cachedTokens =
-      rawUsage.promptTokensDetails?.cachedTokens ??
-      rawUsage.inputTokenDetails?.cachedTokens ??
-      rawUsage.cachedTokens ??
-      rawUsage.cached_tokens ??
-      rawUsage.prompt_tokens_details?.cached_tokens ??
-      rawUsage.input_token_details?.cached_tokens ??
-      rawUsage.cachedContentTokenCount ??
-      rawUsage.cache_read_input_tokens ??
-      0;
-    const cacheWriteTokens =
-      rawUsage.cacheWriteTokens ??
-      rawUsage.cache_creation_input_tokens ??
-      rawUsage.cacheCreationTokens ??
-      0;
+    let inputTokens = 0;
+    let outputTokens = 0;
+    let reasoningTokens = 0;
+    let cachedTokens = 0;
+    let cacheWriteTokens = 0;
+
+    // AI SDK v4+ (LanguageModelV4Usage) structured object or legacy flat number
+    if (typeof rawUsage.inputTokens === 'object' && rawUsage.inputTokens !== null) {
+      inputTokens = rawUsage.inputTokens.total ?? rawUsage.inputTokens.noCache ?? 0;
+      cachedTokens = rawUsage.inputTokens.cacheRead ?? 0;
+      cacheWriteTokens = rawUsage.inputTokens.cacheWrite ?? 0;
+    } else if (typeof rawUsage.promptTokens === 'number') {
+      inputTokens = rawUsage.promptTokens;
+    } else if (typeof rawUsage.inputTokens === 'number') {
+      inputTokens = rawUsage.inputTokens;
+    } else {
+      inputTokens =
+        rawUsage.prompt_tokens ??
+        rawUsage.input_tokens ??
+        rawUsage.promptTokenCount ??
+        0;
+    }
+
+    if (typeof rawUsage.outputTokens === 'object' && rawUsage.outputTokens !== null) {
+      outputTokens = rawUsage.outputTokens.total ?? rawUsage.outputTokens.text ?? 0;
+      reasoningTokens = rawUsage.outputTokens.reasoning ?? 0;
+    } else if (typeof rawUsage.completionTokens === 'number') {
+      outputTokens = rawUsage.completionTokens;
+    } else if (typeof rawUsage.outputTokens === 'number') {
+      outputTokens = rawUsage.outputTokens;
+    } else {
+      outputTokens =
+        rawUsage.completion_tokens ??
+        rawUsage.output_tokens ??
+        rawUsage.candidatesTokenCount ??
+        0;
+    }
+
+    if (!reasoningTokens) {
+      reasoningTokens =
+        rawUsage.reasoningTokens ??
+        rawUsage.completionTokensDetails?.reasoningTokens ??
+        rawUsage.outputTokenDetails?.reasoningTokens ??
+        rawUsage.reasoning_tokens ??
+        rawUsage.completion_tokens_details?.reasoning_tokens ??
+        rawUsage.output_token_details?.reasoning_tokens ??
+        rawUsage.thoughtsTokenCount ??
+        0;
+    }
+
+    if (!cachedTokens) {
+      cachedTokens =
+        rawUsage.promptTokensDetails?.cachedTokens ??
+        rawUsage.inputTokenDetails?.cachedTokens ??
+        rawUsage.cachedTokens ??
+        rawUsage.cached_tokens ??
+        rawUsage.prompt_tokens_details?.cached_tokens ??
+        rawUsage.input_token_details?.cached_tokens ??
+        rawUsage.cachedContentTokenCount ??
+        rawUsage.cache_read_input_tokens ??
+        0;
+    }
+
+    if (!cacheWriteTokens) {
+      cacheWriteTokens =
+        rawUsage.cacheWriteTokens ??
+        rawUsage.cache_creation_input_tokens ??
+        rawUsage.cacheCreationTokens ??
+        0;
+    }
 
     const usage = {
       inputTokens,
@@ -389,18 +421,28 @@ export function withBilling<T extends object>(
             transform(chunk, controller) {
               controller.enqueue(chunk);
 
-              const delta = chunk.textDelta || chunk.text || chunk.delta;
-              if (delta && typeof delta === 'string') {
-                accumulatedChars += delta.length;
-              } else if (chunk.type === 'reasoning' || chunk.type === 'reasoning-delta') {
-                const reasoning = chunk.reasoning || chunk.textDelta || chunk.text || chunk.delta || '';
-                if (typeof reasoning === 'string') {
-                  accumulatedChars += reasoning.length;
+              if (chunk.type === 'text-delta' && typeof chunk.delta === 'string') {
+                accumulatedChars += chunk.delta.length;
+              } else if (chunk.type === 'reasoning-delta' && typeof chunk.delta === 'string') {
+                accumulatedChars += chunk.delta.length;
+              } else {
+                const delta = chunk.textDelta || chunk.text || chunk.delta;
+                if (delta && typeof delta === 'string') {
+                  accumulatedChars += delta.length;
+                } else if (chunk.type === 'reasoning' || chunk.type === 'reasoning-delta') {
+                  const reasoning = chunk.reasoning || chunk.textDelta || chunk.text || chunk.delta || '';
+                  if (typeof reasoning === 'string') {
+                    accumulatedChars += reasoning.length;
+                  }
                 }
               }
 
-              // AI SDK stream finish chunk or direct usage payload (OpenAI, Anthropic, Gemini, DeepSeek, Groq)
-              const chunkUsage = chunk.usage || chunk.token_usage || chunk.usageMetadata;
+              // AI SDK stream finish chunk or direct usage payload (OpenAI, Anthropic, Gemini, DeepSeek, Groq, Mistral)
+              const chunkUsage =
+                (chunk.type === 'finish' ? chunk.usage : null) ||
+                chunk.usage ||
+                chunk.token_usage ||
+                chunk.usageMetadata;
               if (chunkUsage) {
                 streamCompleted = true;
                 handleUsage(chunkUsage);

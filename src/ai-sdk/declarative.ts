@@ -92,6 +92,9 @@ export function createVibezModel(
       rawId.startsWith('mistral-') ||
       rawId.startsWith('codestral-') ||
       rawId.startsWith('ministral-') ||
+      rawId.startsWith('magistral-') ||
+      rawId.startsWith('voxtral-') ||
+      rawId.startsWith('devstral-') ||
       rawId.startsWith('open-mistral') ||
       rawId.startsWith('open-mixtral')
     ) {
@@ -105,6 +108,10 @@ export function createVibezModel(
       providerName = 'groq';
     } else if (rawId.startsWith('command-')) {
       providerName = 'cohere';
+    } else if (rawId.startsWith('mercury-') || rawId.startsWith('ling-')) {
+      providerName = 'gateway';
+    } else if (rawId.startsWith('gpt-image-') || rawId.startsWith('gpt-6-')) {
+      providerName = 'openai';
     }
 
     const apiKey =
