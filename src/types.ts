@@ -183,10 +183,14 @@ export interface InferenceCost {
   reasoningCostUSD?: number;
   /** Savings from prompt caching in USD */
   cachedDiscountUSD?: number;
+  /** Alias for cachedDiscountUSD */
+  savingsUSD?: number;
   /** Total computed base inference cost in USD */
   totalUSD: number;
   /** Wholesale provider cost in USD */
   wholesaleTotalUSD?: number;
+  /** Alias for wholesaleTotalUSD */
+  wholesaleUSD?: number;
   /** Amount billed to customer in USD */
   billedUSD?: number;
   /** Net developer profit in USD */
@@ -405,6 +409,8 @@ export interface MeterOptions extends CircuitBreakerOptions {
   onError?: (error: Error, events: UsageEvent[]) => void;
   /** Markup multiplier for retail price calculations (e.g. 1.3 for 30% profit) */
   markupMultiplier?: number;
+  /** Pricing options including profit margin and minimum charge */
+  pricing?: PricingConfig;
   /** Enable debug console logging (default: false) */
   debug?: boolean;
 }

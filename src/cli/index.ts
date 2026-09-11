@@ -5,13 +5,14 @@ import path from 'path';
 import readline from 'readline';
 import { MODEL_PRICING_TABLE } from '../pricing/table';
 import { runAudit, displayAuditReport } from './audit';
+import { handleExamplesCommand } from './examples';
 
 const args = process.argv.slice(2);
 const command = args[0] || 'init';
 
 function printBanner() {
   console.log(`
-\x1b[38;2;212;255;50m✦\x1b[0m \x1b[1mvibezcheck CLI\x1b[0m \x1b[90mv0.4.1\x1b[0m
+\x1b[38;2;212;255;50m✦\x1b[0m \x1b[1mvibezcheck CLI\x1b[0m \x1b[90mv0.5.4\x1b[0m
 \x1b[90mThe 1-line Stripe Billing & Token Metering Engine for LLMs\x1b[0m
 `);
 }
@@ -197,6 +198,12 @@ switch (command) {
   case 'init':
     handleInit();
     break;
+  case 'example':
+  case 'examples':
+  case 'template':
+  case 'templates':
+    handleExamplesCommand(args.slice(1));
+    break;
   case 'prices':
   case 'pricing':
     handlePrices();
@@ -210,10 +217,11 @@ switch (command) {
 Unknown command: \x1b[31m${command}\x1b[0m
 
 Available commands:
-  \x1b[36mvibezcheck audit\x1b[0m     Scan project for unmetered AI routes and runaway loop risks
-  \x1b[36mvibezcheck init\x1b[0m      Interactive project setup wizard
-  \x1b[36mvibezcheck prices\x1b[0m    Display supported model pricing table
-  \x1b[36mvibezcheck doctor\x1b[0m    Diagnose environment and API configurations
+  \x1b[36mvibezcheck examples [name]\x1b[0m  Explore & scaffold official starter templates & scripts
+  \x1b[36mvibezcheck audit\x1b[0m            Scan project for unmetered AI routes and runaway loop risks
+  \x1b[36mvibezcheck init\x1b[0m             Interactive project setup wizard
+  \x1b[36mvibezcheck prices\x1b[0m           Display supported model pricing table
+  \x1b[36mvibezcheck doctor\x1b[0m           Diagnose environment and API configurations
 `);
     break;
 }

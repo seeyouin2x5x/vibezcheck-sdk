@@ -97,11 +97,13 @@
     }
   },
   "bin": {
-    "vibezcheck": "bin/vibezcheck.js"
+    "vibezcheck": "bin/vibezcheck.js",
+    "vibezcheck-examples": "bin/examples.js"
   },
   "files": [
     "dist",
     "bin",
+    "examples",
     "README.md",
     "LICENSE",
     "package.json"

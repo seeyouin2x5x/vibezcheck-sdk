@@ -19,7 +19,7 @@ export class VibezMeter {
   private markupMultiplier?: number;
 
   constructor(options: MeterOptions = {}) {
-    this.markupMultiplier = options.markupMultiplier;
+    this.markupMultiplier = options.pricing?.margin ?? options.markupMultiplier;
 
     // Initialize Stripe client if apiKey or stripe instance is provided
     if (options.stripe) {
@@ -29,7 +29,7 @@ export class VibezMeter {
       this.stripeClient = new Stripe(key, {
         appInfo: {
           name: 'vibezcheck',
-          version: '0.5.3',
+          version: '0.5.4',
           url: 'https://vibezcheck.xyz',
         },
       });

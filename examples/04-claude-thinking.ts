@@ -2,7 +2,7 @@
  * Example 4: Claude 3.7 Sonnet Extended Thinking Stream
  */
 
-import { wrapStream } from '../src/meter';
+import { wrapStream } from 'vibezcheck/meter';
 import Anthropic from '@anthropic-ai/sdk';
 
 const anthropic = new Anthropic();
@@ -19,12 +19,13 @@ async function runThinkingPrompt(prompt: string, customerId: string) {
   const meteredStream = wrapStream(stream, {
     customerId,
     provider: 'anthropic',
+    pricing: { margin: 1.20 }, // 20% margin
     onUsage: (event) => {
       console.log(`\n[Claude Stream Finished]`);
       console.log(`Input Tokens: ${event.usage.inputTokens}`);
       console.log(`Output Tokens: ${event.usage.outputTokens}`);
       console.log(`Thinking Tokens: ${event.usage.reasoningTokens}`);
-      console.log(`Total Cost: $${event.cost.totalUSD.toFixed(6)} USD`);
+      console.log(`Total Billed: $${event.cost.totalUSD.toFixed(6)} USD`);
     },
   });
 

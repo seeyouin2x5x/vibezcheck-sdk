@@ -2,7 +2,7 @@
  * Example 3: Native OpenAI Stream with Zero-Latency Tracking
  */
 
-import { wrapStream } from '../src/meter';
+import { wrapStream } from 'vibezcheck/meter';
 import OpenAI from 'openai';
 
 const openai = new OpenAI();
@@ -18,9 +18,10 @@ async function runChatStream(userPrompt: string, customerParam: any) {
   // Wrap stream with VibezCheck & customer metadata
   const meteredStream = wrapStream(stream, {
     customer: customerParam,
+    pricing: { margin: 1.25 },
     onUsage: (event) => {
       console.log(`\n[Stream Completed] Tracked ${event.usage.totalTokens} tokens for customer ${event.customerId || event.customer?.email}`);
-      console.log(`Total USD: $${event.cost.totalUSD.toFixed(6)}`);
+      console.log(`Wholesale: $${event.cost.wholesaleUSD.toFixed(6)} | Billed: $${event.cost.totalUSD.toFixed(6)}`);
     },
   });
 

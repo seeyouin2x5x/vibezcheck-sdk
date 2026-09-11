@@ -22,7 +22,10 @@ const INITIAL_COST: InferenceCost = {
   outputCostUSD: 0,
   reasoningCostUSD: 0,
   cachedDiscountUSD: 0,
+  savingsUSD: 0,
   totalUSD: 0,
+  wholesaleTotalUSD: 0,
+  wholesaleUSD: 0,
   currency: 'USD',
 };
 
@@ -194,7 +197,31 @@ export const VibezSessionProvider: React.FC<VibezSessionProviderProps> = ({
                 ).toFixed(6)
               )
             : undefined,
+        savingsUSD:
+          turnCost.savingsUSD !== undefined || sessionCost.savingsUSD !== undefined
+            ? Number(
+                (
+                  (sessionCost.savingsUSD ?? 0) + (turnCost.savingsUSD ?? 0)
+                ).toFixed(6)
+              )
+            : undefined,
         totalUSD: Number((sessionCost.totalUSD + turnCost.totalUSD).toFixed(6)),
+        wholesaleTotalUSD:
+          turnCost.wholesaleTotalUSD !== undefined || sessionCost.wholesaleTotalUSD !== undefined
+            ? Number(
+                (
+                  (sessionCost.wholesaleTotalUSD ?? 0) + (turnCost.wholesaleTotalUSD ?? 0)
+                ).toFixed(6)
+              )
+            : undefined,
+        wholesaleUSD:
+          turnCost.wholesaleUSD !== undefined || sessionCost.wholesaleUSD !== undefined
+            ? Number(
+                (
+                  (sessionCost.wholesaleUSD ?? 0) + (turnCost.wholesaleUSD ?? 0)
+                ).toFixed(6)
+              )
+            : undefined,
         retailUSD:
           turnCost.retailUSD !== undefined || sessionCost.retailUSD !== undefined
             ? Number(((sessionCost.retailUSD ?? 0) + (turnCost.retailUSD ?? 0)).toFixed(6))

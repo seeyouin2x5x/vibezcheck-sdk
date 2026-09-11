@@ -3,14 +3,14 @@
  * Demonstrates Next.js App Router route pattern with B2B Multi-Tenancy & Margins
  */
 
-import { vibezcheck } from '../src';
+import { vibezcheck } from 'vibezcheck';
 import { openai } from '@ai-sdk/openai';
 import { streamText } from 'ai';
 
 export async function handleNextJsChatRoute(req: Request) {
   const { messages, user } = await req.json();
 
-  // 1. Wrap model in 1 line with B2B Multi-Tenant Metadata & 1.5x Margin
+  // 1. Wrap model in 1 line with B2B Multi-Tenant Metadata & 1.3x Margin
   const model = vibezcheck(openai('gpt-4o'), {
     customer: {
       userId: user?.id || 'usr_123',
@@ -20,14 +20,16 @@ export async function handleNextJsChatRoute(req: Request) {
       role: 'engineer',
     },
     pricing: {
-      margin: 1.5, // 50% profit margin
+      margin: 1.3, // Wholesale API cost + 30% profit margin
       minimumChargeUSD: 0.001,
     },
     safety: {
-      maxCostPerCallUSD: 0.50, // Runaway safety fuse
+      maxCostPerCallUSD: 0.50, // Auto-tripwire circuit breaker against runaway loops
     },
     onUsage: (event) => {
-      console.log(`[Usage Telemetry] ${event.model} -> ${event.usage.totalTokens} tokens ($${event.cost.totalUSD.toFixed(6)}) | Org: ${event.customer?.orgId}`);
+      console.log(
+        `[Usage Telemetry] ${event.model} -> ${event.usage.totalTokens} tokens ($${event.cost.totalUSD.toFixed(6)}) | Org: ${event.customer?.orgId}`
+      );
     },
   });
 
