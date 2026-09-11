@@ -1,8 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { Header } from '@/components/header';
 import { ChatboxTutorial } from '@/components/chatbox-tutorial';
+import { VibezReceipt } from '@/components/vibez-meter';
 import {
   Zap,
   ShieldCheck,
@@ -96,6 +98,18 @@ const DOC_NAV: { category: string; items: DocItem[] }[] = [
         title: 'Disconnect Protection',
         category: 'Core Features',
         description: 'Capture and bill partial questions even if a customer closes their browser.',
+      },
+    ],
+  },
+  {
+    category: 'UI & Artifacts',
+    items: [
+      {
+        id: 'artifacts',
+        title: 'Rendering UI in Artifacts',
+        category: 'UI & Artifacts',
+        badge: 'Interactive',
+        description: 'Render real-time cost meters, token receipts, and wallet HUDs directly inside AI chat artifacts.',
       },
     ],
   },
@@ -837,6 +851,126 @@ export async function POST(req: Request) {
                 <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">
                   Prints an up-to-date table in your terminal showing exact costs per 1,000,000 words across 50+ models.
                 </p>
+              </div>
+            </div>
+          )}
+
+          {/* TAB: RENDERING UI IN ARTIFACTS */}
+          {activeTab === 'artifacts' && (
+            <div className="space-y-8 animate-fadeIn">
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-purple-500/10 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-500/20 text-xs font-medium mb-3">
+                  <Sparkles className="w-3 h-3" />
+                  Generative UI &amp; Artifacts
+                </div>
+                <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+                  Rendering VibezCheck UI in AI Artifacts
+                </h1>
+                <p className="text-base text-slate-600 dark:text-zinc-300 mt-2 leading-relaxed">
+                  Learn how to embed live token counters, micro-receipt badges, and customer wallet HUDs directly inside interactive AI artifacts (Claude Artifacts, ChatGPT Canvas, Google Antigravity, and isolated web iframes).
+                </p>
+              </div>
+
+              {/* Live Interactive Sandbox Component */}
+              <div className="p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 shadow-xs space-y-6">
+                <div className="flex items-center justify-between border-b border-slate-100 dark:border-zinc-800 pb-4">
+                  <div className="space-y-1">
+                    <h3 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                      <Terminal className="w-4 h-4 text-emerald-500" />
+                      Live Artifact Micro-Badge Preview
+                    </h3>
+                    <p className="text-xs text-slate-500 dark:text-zinc-400">
+                      The featherweight &lt;VibezReceipt /&gt; badge mounts in sub-millisecond time inside your artifact container:
+                    </p>
+                  </div>
+                  <Link
+                    href="/docs/artifacts"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 text-xs font-semibold hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition"
+                  >
+                    Dedicated Page
+                    <ExternalLink className="w-3 h-3" />
+                  </Link>
+                </div>
+
+                {/* Simulated Chat Message with Micro-Badge */}
+                <div className="p-4 rounded-xl bg-slate-50 dark:bg-zinc-950/80 border border-slate-200/80 dark:border-zinc-800/80 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-slate-700 dark:text-zinc-300">
+                      Assistant Response in Side Pane
+                    </span>
+                    <VibezReceipt
+                      model="gpt-6-astra"
+                      tokens={1420}
+                      costUSD={0.0036}
+                      variant="pill"
+                    />
+                  </div>
+                  <div className="p-3.5 rounded-lg bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs text-slate-600 dark:text-zinc-400 font-sans leading-relaxed">
+                    &quot;Interactive artifacts allow users to inspect calculations and code side-by-side. VibezCheck renders continuous usage metrics directly alongside each turn without UI lag.&quot;
+                  </div>
+                </div>
+
+                {/* Integration Guide Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                  <div className="p-4 rounded-xl bg-slate-50 dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800/80 space-y-1.5">
+                    <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 block">
+                      REACT / NEXT.JS
+                    </span>
+                    <p className="text-xs text-slate-600 dark:text-zinc-400">
+                      Import <code className="font-mono text-emerald-600 dark:text-emerald-400">&lt;VibezReceipt message=&#123;m&#125; /&gt;</code> directly from <code className="font-mono">vibezcheck/react</code> into your AI message thread.
+                    </p>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-slate-50 dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800/80 space-y-1.5">
+                    <span className="text-xs font-mono font-bold text-cyan-600 dark:text-cyan-400 block">
+                      STANDALONE IFRAME / HTML
+                    </span>
+                    <p className="text-xs text-slate-600 dark:text-zinc-400">
+                      Use the allowlisted Tailwind script and semantic tokens (<code className="font-mono">--card</code>, <code className="font-mono">--foreground</code>) for isolated sandboxes.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Code Snippet Box */}
+              <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-semibold text-slate-900 dark:text-white">
+                    Drop-In Next.js Component
+                  </h4>
+                  <button
+                    onClick={() => copyToClipboard(`import { VibezReceipt } from 'vibezcheck/react';
+
+export function ChatTurn({ message }) {
+  return (
+    <div className="space-y-2">
+      <p>{message.content}</p>
+      {message.role === 'assistant' && (
+        <VibezReceipt message={message} variant="pill" />
+      )}
+    </div>
+  );
+}`, 'artifact-react-code')}
+                    className="flex items-center gap-1 text-xs font-mono text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer"
+                  >
+                    {copiedCode === 'artifact-react-code' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                    Copy Code
+                  </button>
+                </div>
+                <pre className="p-4 rounded-xl bg-slate-900 text-zinc-200 font-mono text-xs overflow-x-auto leading-relaxed border border-slate-800">
+                  <code>{`import { VibezReceipt } from 'vibezcheck/react';
+
+export function ChatTurn({ message }) {
+  return (
+    <div className="space-y-2">
+      <p>{message.content}</p>
+      {message.role === 'assistant' && (
+        <VibezReceipt message={message} variant="pill" />
+      )}
+    </div>
+  );
+}`}</code>
+                </pre>
               </div>
             </div>
           )}
