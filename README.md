@@ -41,7 +41,9 @@ When you build an AI app, chatbot, or agent:
 
 ---
 
-## 60-Second Example (Next.js App Router)
+## 🚀 End-to-End Chatbot Example (Next.js App Router)
+
+Here is a complete, copy-paste ready AI chatbot with live per-message spending receipts and the floating financial HUD:
 
 ### 1. Server Route (`app/api/chat/route.ts`)
 
@@ -50,21 +52,23 @@ import { convertToModelMessages, streamText, UIMessage } from 'ai';
 import { openai } from '@ai-sdk/openai';
 import { vibezcheck } from 'vibezcheck';
 
+export const maxDuration = 30;
+
 export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json();
 
   const result = streamText({
     // ✦ 1 Line: track costs, add 30% profit margin, and set $0.50 runaway safety fuse
     model: vibezcheck(openai('gpt-4o-mini'), {
-      customer: 'user_alex@example.com',
-      pricing: { margin: 1.3 },
-      maxCostPerCallUSD: 0.50,
+      customer: 'user_alex@example.com', // User email or Stripe customer ID
+      pricing: { margin: 1.3 },         // +30% profit margin
+      maxCostPerCallUSD: 0.50,          // Auto-stops if call exceeds $0.50
     }),
-    instructions: 'You are a helpful assistant.',
+    instructions: 'You are a helpful AI assistant.',
     messages: await convertToModelMessages(messages),
   });
 
-  // Sends the stream with verified spending telemetry attached
+  // ✦ Transmits stream with verified spending telemetry attached
   return vibezcheck.toResponse(result);
 }
 ```
@@ -76,36 +80,100 @@ export async function POST(req: Request) {
 
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
+import { useState } from 'react';
 import { VibezReceipt, VibezCheck } from 'vibezcheck/ui';
 
-export default function Chat() {
-  const { messages, sendMessage } = useChat({
-    transport: new DefaultChatTransport({ api: '/api/chat' }),
+export default function ChatPage() {
+  const [input, setInput] = useState('');
+  const { messages, sendMessage, status } = useChat({
+    transport: new DefaultChatTransport({
+      api: '/api/chat',
+    }),
   });
 
   return (
-    <main className="max-w-lg mx-auto py-12 px-4">
-      <div className="space-y-4 mb-24">
-        {messages.map((m) => (
-          <div key={m.id} className="p-4 rounded-xl border border-zinc-200 dark:border-zinc-800">
-            <p className="text-xs text-zinc-400 mb-1">{m.role === 'user' ? 'You' : 'AI'}</p>
-            <p className="text-sm whitespace-pre-wrap">{m.content}</p>
+    <div className="flex flex-col w-full max-w-lg py-20 mx-auto px-4 min-h-screen">
+      {/* Messages Stream */}
+      <div className="flex-1 space-y-4 mb-28">
+        {messages.map((message) => (
+          <div
+            key={message.id}
+            className={`p-4 rounded-2xl border ${
+              message.role === 'user'
+                ? 'bg-zinc-100 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 ml-10'
+                : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 mr-10 shadow-sm'
+            }`}
+          >
+            <div className="text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1.5">
+              {message.role === 'user' ? 'You' : 'Assistant'}
+            </div>
 
-            {/* ✦ 1 Line: Micro-receipt under each assistant message */}
-            {m.role === 'assistant' && (
-              <div className="mt-2 flex justify-end">
-                <VibezReceipt message={m} />
+            {/* Message Text */}
+            <div className="text-sm whitespace-pre-wrap leading-relaxed">
+              {message.parts
+                ? message.parts.map((part, index) => {
+                    switch (part.type) {
+                      case 'text':
+                        return <span key={index}>{part.text}</span>;
+                      default:
+                        return null;
+                    }
+                  })
+                : message.content}
+            </div>
+
+            {/* ✦ 1 Line: Micro-Receipt showing tokens, micro-cost, model, and latency */}
+            {message.role === 'assistant' && (
+              <div className="mt-3 flex justify-end">
+                <VibezReceipt message={message} />
               </div>
             )}
           </div>
         ))}
+
+        {status === 'streaming' && (
+          <div className="text-xs text-zinc-400 italic">Assistant is typing...</div>
+        )}
       </div>
 
-      {/* ✦ 1 Line: Floating HUD showing spending in real time */}
+      {/* Input Form */}
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (!input.trim()) return;
+          sendMessage({ text: input });
+          setInput('');
+        }}
+        className="fixed bottom-0 left-0 right-0 p-4 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md border-t border-zinc-200 dark:border-zinc-800"
+      >
+        <div className="max-w-lg mx-auto flex gap-2">
+          <input
+            className="flex-1 p-3 text-sm rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-100"
+            value={input}
+            placeholder="Type your prompt..."
+            onChange={(e) => setInput(e.target.value)}
+          />
+          <button
+            type="submit"
+            disabled={status === 'streaming' || !input.trim()}
+            className="px-5 py-3 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 text-sm font-semibold rounded-xl hover:opacity-90 disabled:opacity-50 transition"
+          >
+            Send
+          </button>
+        </div>
+      </form>
+
+      {/* ✦ 1 Line: Floating HUD showing real-time spending and tokens */}
       <VibezCheck messages={messages} />
-    </main>
+    </div>
   );
 }
+```
+
+### 3. Environment Variables (`.env.local`)
+
+```env
+OPENAI_API_KEY=sk-...
 ```
 
 ---
@@ -148,7 +216,7 @@ VibezCheck automatically detects every model used and lists them in the HUD:
 * `gpt-4o-mini (1 turn)`: 31 tok · $0.0001
 * `claude-3-5-sonnet (1 turn)`: 420 tok · $0.0068
 
-Click any model to see its specific spending.
+Click any model in the list to see its specific spending.
 
 ---
 
