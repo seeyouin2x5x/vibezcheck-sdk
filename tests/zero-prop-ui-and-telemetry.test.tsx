@@ -4,7 +4,7 @@ import { VibezReceipt, VibezCheck } from '../src/react';
 import { vibezcheck, toResponse } from '../src';
 import { withBilling } from '../src/ai-sdk/with-billing';
 
-describe('Zero-Prop UI & Native Stream Telemetry Suite (v0.5.6)', () => {
+describe('Zero-Prop UI & Native Stream Telemetry Suite (v0.5.7)', () => {
   describe('<VibezReceipt /> Zero-Prop Telemetry Extraction', () => {
     it('should render verified telemetry from AI SDK v4 message.annotations with zero extra props', () => {
       const message = {
