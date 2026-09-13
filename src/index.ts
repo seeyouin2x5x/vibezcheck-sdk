@@ -3,6 +3,7 @@ import type { MeterOptions, StreamWrapOptions, CustomerParam } from './types';
 import { VibezMeter, createMeter } from './meter/client';
 import { calculateCost, calculateUsageCost, getModelPricing, registerModelPricing } from './pricing';
 import { withBilling, meteredModel } from './ai-sdk/with-billing';
+import { toResponse } from './ai-sdk/to-response';
 import { createVibezModel, createVibezSession, type VibezCheckModelOptions } from './ai-sdk/declarative';
 import { vibezcheckMiddleware } from './ai-sdk/middleware';
 import { CustomerManager, createCustomerManager } from './customers/manager';
@@ -173,6 +174,7 @@ vibezcheck.middleware = vibezcheckMiddleware;
 vibezcheck.Billing = BillingHelper;
 vibezcheck.Auth = ApiKeyAuth;
 vibezcheck.Customers = CustomerManager;
+vibezcheck.toResponse = toResponse;
 
 /**
  * Singleton client instance

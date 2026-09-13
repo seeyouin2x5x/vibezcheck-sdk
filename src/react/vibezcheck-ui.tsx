@@ -34,6 +34,8 @@ export interface VibezCheckProps {
     totalTokens: number;
     isDevMode: boolean;
   }) => void;
+  /** Whether popover is initially open (default: false) */
+  defaultOpen?: boolean;
 }
 
 // Built-in fallback rate cards per 1M tokens for local Zero-DB Dev Mode
@@ -48,6 +50,14 @@ const DEV_RATES: Record<string, { input: number; output: number }> = {
   'deepseek-chat': { input: 0.14, output: 0.28 },
   default: { input: 2.0, output: 8.0 },
 };
+
+function cleanModelName(raw?: string): string | undefined {
+  if (!raw || raw === 'ai-model' || raw === 'default') return undefined;
+  const match = raw.match(/\(['"]?([^'"]+)['"]?\)/);
+  let name = match ? match[1] : raw;
+  name = name.replace(/^(openai|anthropic|google|xai|elevenlabs|deepseek|luma|mistral|groq)\//, '');
+  return name;
+}
 
 /**
  * ✦ <VibezCheck /> (from 'vibezcheck/ui' or 'vibezcheck/react')
@@ -70,8 +80,9 @@ export function VibezCheck({
   className = '',
   onTopUp,
   onCostUpdate,
+  defaultOpen,
 }: VibezCheckProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(defaultOpen ?? false);
   const [isDarkDoc, setIsDarkDoc] = useState(false);
 
   // Dynamic Theme Observer: Reacts to dark/light toggle immediately
@@ -102,11 +113,6 @@ export function VibezCheck({
 
   const isDark = theme === 'dark' ? true : theme === 'light' ? false : isDarkDoc;
 
-  const normalizedModel = useMemo(() => {
-    const clean = model.toLowerCase().replace(/^(openai|anthropic|google)\//, '');
-    return Object.keys(DEV_RATES).find((k) => clean.includes(k)) || 'default';
-  }, [model]);
-
   // Aggregation Engine
   const stats = useMemo(() => {
     let hasServerTelemetry = false;
@@ -117,58 +123,100 @@ export function VibezCheck({
     let completionTokens = 0;
     let cachedTokens = 0;
     let reasoningTokens = 0;
+    let detectedModel: string | undefined = undefined;
 
     if (events && events.length > 0) {
       hasServerTelemetry = true;
       for (const ev of events) {
-        billedUSD += ev.cost?.billedUSD ?? 0;
-        wholesaleUSD += ev.cost?.wholesaleTotalUSD ?? ev.cost?.billedUSD ?? 0;
+        billedUSD += ev.cost?.billedUSD ?? ev.cost?.totalUSD ?? 0;
+        wholesaleUSD += ev.cost?.wholesaleTotalUSD ?? ev.cost?.wholesaleUSD ?? ev.cost?.billedUSD ?? 0;
         totalTokens += ev.usage?.totalTokens ?? 0;
         promptTokens += ev.usage?.inputTokens ?? 0;
         completionTokens += ev.usage?.outputTokens ?? 0;
         cachedTokens += ev.usage?.cachedTokens ?? 0;
         reasoningTokens += ev.usage?.reasoningTokens ?? 0;
+        if (ev.model && !detectedModel) {
+          detectedModel = ev.model;
+        }
       }
     }
 
     if (messages && messages.length > 0) {
       for (const msg of messages) {
-        let eventFound: UsageEvent | null = null;
+        let eventFound: any = null;
 
+        // 1. AI SDK v4 Message Annotations
         if (Array.isArray(msg.annotations)) {
           for (const ann of msg.annotations) {
-            if (ann && (ann.cost || ann.usage || ann.vibez)) {
+            if (ann && (ann.cost || ann.usage || ann.vibez || ann.type === 'vibezcheck')) {
               eventFound = ann.vibez || ann;
               break;
             }
           }
         }
 
+        // 2. AI SDK v5/v6/v7 Message Parts
         if (!eventFound && Array.isArray(msg.parts)) {
           for (const part of msg.parts) {
-            if (part && (part.type === 'data' || part.type === 'custom') && part.data?.vibez) {
-              eventFound = part.data.vibez;
+            if (part?.type === 'data-vibezcheck' && part.data) {
+              eventFound = part.data;
+              break;
+            } else if ((part?.type === 'data' || part?.type === 'custom') && (part.data?.vibez || part.data?.cost || part.data?.usage)) {
+              eventFound = part.data.vibez || part.data;
+              break;
+            } else if (part?.providerMetadata?.vibezcheck) {
+              eventFound = part.providerMetadata.vibezcheck;
               break;
             }
           }
         }
 
+        // 3. AI SDK v5/v6/v7 Message Metadata
+        if (!eventFound && msg.metadata?.vibezcheck) {
+          eventFound = msg.metadata.vibezcheck;
+        } else if (!eventFound && msg.metadata && (msg.metadata.cost || msg.metadata.usage)) {
+          eventFound = msg.metadata;
+        }
+
+        // 4. Message Direct Provider Metadata
+        if (!eventFound && msg.providerMetadata?.vibezcheck) {
+          eventFound = msg.providerMetadata.vibezcheck;
+        }
+
         if (eventFound) {
           hasServerTelemetry = true;
-          billedUSD += eventFound.cost?.billedUSD ?? 0;
-          wholesaleUSD += eventFound.cost?.wholesaleTotalUSD ?? eventFound.cost?.billedUSD ?? 0;
-          totalTokens += eventFound.usage?.totalTokens ?? 0;
-          promptTokens += eventFound.usage?.inputTokens ?? 0;
-          completionTokens += eventFound.usage?.outputTokens ?? 0;
+          const costVal = eventFound.cost;
+          let msgBilled = 0;
+          let msgWholesale = 0;
+          if (typeof costVal === 'number') {
+            msgBilled = costVal;
+            msgWholesale = costVal;
+          } else if (costVal && typeof costVal === 'object') {
+            msgBilled = costVal.billedUSD ?? costVal.totalUSD ?? costVal.costUSD ?? 0;
+            msgWholesale = costVal.wholesaleUSD ?? costVal.wholesaleTotalUSD ?? costVal.billedUSD ?? costVal.totalUSD ?? 0;
+          } else if (typeof eventFound.costUSD === 'number') {
+            msgBilled = eventFound.costUSD;
+            msgWholesale = eventFound.costUSD;
+          }
+
+          billedUSD += msgBilled;
+          wholesaleUSD += msgWholesale;
+          totalTokens += eventFound.usage?.totalTokens ?? eventFound.tokens ?? 0;
+          promptTokens += eventFound.usage?.inputTokens ?? eventFound.promptTokens ?? 0;
+          completionTokens += eventFound.usage?.outputTokens ?? eventFound.completionTokens ?? 0;
           cachedTokens += eventFound.usage?.cachedTokens ?? 0;
           reasoningTokens += eventFound.usage?.reasoningTokens ?? 0;
+
+          if (eventFound.model && !detectedModel) {
+            detectedModel = eventFound.model;
+          }
         } else {
           let text = '';
           if (typeof msg.content === 'string') {
             text = msg.content;
           } else if (Array.isArray(msg.parts)) {
             text = msg.parts
-              .filter((p: any) => p.type === 'text')
+              .filter((p: any) => p?.type === 'text' && typeof p.text === 'string')
               .map((p: any) => p.text)
               .join(' ');
           }
@@ -187,7 +235,10 @@ export function VibezCheck({
       }
 
       if (!hasServerTelemetry && (promptTokens > 0 || completionTokens > 0)) {
-        const rates = DEV_RATES[normalizedModel] || DEV_RATES.default;
+        const activeModel = detectedModel || model || 'gpt-4o';
+        const clean = activeModel.toLowerCase().replace(/^(openai|anthropic|google|xai|deepseek|mistral|groq)\//, '');
+        const rateKey = Object.keys(DEV_RATES).find((k) => clean.includes(k)) || 'default';
+        const rates = DEV_RATES[rateKey] || DEV_RATES.default;
         wholesaleUSD =
           (promptTokens / 1_000_000) * rates.input +
           (completionTokens / 1_000_000) * rates.output;
@@ -197,6 +248,16 @@ export function VibezCheck({
 
     const profitUSD = Math.max(0, billedUSD - wholesaleUSD);
     const isDevMode = devMode !== undefined ? devMode : !hasServerTelemetry;
+
+    let derivedMargin: number | undefined = undefined;
+    if (hasServerTelemetry && wholesaleUSD > 0) {
+      derivedMargin = billedUSD / wholesaleUSD;
+    }
+
+    const effectiveMarginPercent =
+      derivedMargin !== undefined && (margin === undefined || margin === 1.25)
+        ? Math.round((derivedMargin - 1) * 100)
+        : Math.round((margin - 1) * 100);
 
     return {
       wholesaleUSD,
@@ -208,8 +269,11 @@ export function VibezCheck({
       cachedTokens,
       reasoningTokens,
       isDevMode,
+      detectedModel,
+      derivedMargin,
+      effectiveMarginPercent,
     };
-  }, [events, messages, manualCost, manualTokens, normalizedModel, margin, devMode]);
+  }, [events, messages, manualCost, manualTokens, model, margin, devMode]);
 
   useEffect(() => {
     if (onCostUpdate) {
@@ -255,7 +319,18 @@ export function VibezCheck({
               ? 'bg-zinc-900/98 border-zinc-800 text-zinc-100 shadow-zinc-950/60'
               : 'bg-white/98 border-zinc-200 text-zinc-900 shadow-zinc-900/10'
           }`}
-          style={{ backdropFilter: 'blur(16px)' }}
+          style={{
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+            backgroundColor: isDark ? 'rgba(24, 24, 27, 0.98)' : 'rgba(255, 255, 255, 0.98)',
+            borderColor: isDark ? '#27272a' : '#e4e4e7',
+            borderWidth: '1px',
+            borderStyle: 'solid',
+            borderRadius: '0.75rem',
+            padding: '1rem',
+            width: '320px',
+            color: isDark ? '#f4f4f5' : '#18181b',
+          }}
         >
           {/* Header */}
           <div
@@ -273,7 +348,7 @@ export function VibezCheck({
                     : 'bg-zinc-100 text-zinc-500 border-zinc-200'
                 }`}
               >
-                Financial Meter
+                {stats.detectedModel || 'Financial Meter'}
               </span>
             </div>
             <button
@@ -312,7 +387,7 @@ export function VibezCheck({
                     : 'bg-emerald-50 text-emerald-700 border-emerald-200/80'
                 }`}
               >
-                +{Math.round((margin - 1) * 100)}% Margin
+                {`+${stats.effectiveMarginPercent}% Margin`}
               </span>
             </div>
 
@@ -321,7 +396,7 @@ export function VibezCheck({
                 isDark ? 'text-white' : 'text-zinc-900'
               }`}
             >
-              ${stats.billedUSD.toFixed(4)}
+              {`$${stats.billedUSD.toFixed(4)}`}
             </div>
 
             <div
@@ -334,7 +409,7 @@ export function VibezCheck({
                   Provider Wholesale:
                 </span>
                 <span className={`font-mono text-[11px] ${isDark ? 'text-zinc-300' : 'text-zinc-700'}`}>
-                  ${stats.wholesaleUSD.toFixed(4)}
+                  {`$${stats.wholesaleUSD.toFixed(4)}`}
                 </span>
               </div>
               <div className="text-right">
@@ -342,7 +417,7 @@ export function VibezCheck({
                   Net Profit:
                 </span>
                 <span className="font-mono text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
-                  +${stats.profitUSD.toFixed(4)}
+                  {`+$${stats.profitUSD.toFixed(4)}`}
                 </span>
               </div>
             </div>
@@ -440,7 +515,21 @@ export function VibezCheck({
             ? 'bg-zinc-900/95 hover:bg-zinc-850 text-zinc-100 border-zinc-800 shadow-zinc-950/40 hover:border-zinc-700'
             : 'bg-white/95 hover:bg-zinc-50 text-zinc-900 border-zinc-200 shadow-zinc-900/5 hover:border-zinc-300'
         }`}
-        style={{ backdropFilter: 'blur(12px)' }}
+        style={{
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem',
+          padding: '0.375rem 0.75rem',
+          borderRadius: '9999px',
+          borderWidth: '1px',
+          borderStyle: 'solid',
+          borderColor: isDark ? '#27272a' : '#e4e4e7',
+          backgroundColor: isDark ? 'rgba(24, 24, 27, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+          color: isDark ? '#f4f4f5' : '#18181b',
+          cursor: 'pointer',
+        }}
         title="Click to open VibezCheck Financial Meter"
       >
         <span className="text-emerald-500 dark:text-emerald-400 font-bold text-xs shrink-0">✦</span>
@@ -449,7 +538,7 @@ export function VibezCheck({
             isDark ? 'text-zinc-100' : 'text-zinc-900'
           }`}
         >
-          ${stats.billedUSD.toFixed(4)}
+          {`$${stats.billedUSD.toFixed(4)}`}
         </span>
         <span className={isDark ? 'text-zinc-700' : 'text-zinc-300'}>·</span>
         <span
@@ -457,8 +546,20 @@ export function VibezCheck({
             isDark ? 'text-zinc-400' : 'text-zinc-500'
           }`}
         >
-          {formatTokens(stats.totalTokens)} tok
+          {`${formatTokens(stats.totalTokens)} tok`}
         </span>
+        {stats.detectedModel && (
+          <>
+            <span className={isDark ? 'text-zinc-700' : 'text-zinc-300'}>·</span>
+            <span
+              className={`font-mono text-[11px] truncate max-w-[90px] ${
+                isDark ? 'text-zinc-400' : 'text-zinc-500'
+              }`}
+            >
+              {cleanModelName(stats.detectedModel)}
+            </span>
+          </>
+        )}
         {stats.isDevMode && (
           <span
             className={`text-[9px] font-mono font-medium uppercase tracking-wider px-1.5 py-0.2 rounded border ${

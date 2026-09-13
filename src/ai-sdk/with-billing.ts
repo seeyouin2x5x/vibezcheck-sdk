@@ -366,6 +366,7 @@ export function withBilling<T extends object>(
     }
 
     scheduleFlush();
+    return event;
   };
 
   // Proxy to intercept LanguageModel calls
@@ -445,7 +446,22 @@ export function withBilling<T extends object>(
                 chunk.usageMetadata;
               if (chunkUsage) {
                 streamCompleted = true;
-                handleUsage(chunkUsage);
+                const event = handleUsage(chunkUsage);
+                if (chunk.type === 'finish' && event) {
+                  chunk.providerMetadata = {
+                    ...chunk.providerMetadata,
+                    vibezcheck: {
+                      type: 'vibezcheck',
+                      cost: event.cost,
+                      usage: event.usage,
+                      model: modelId,
+                      provider,
+                      customerId,
+                      customerEmail,
+                      timestamp: event.timestamp,
+                    },
+                  };
+                }
               }
             },
             flush() {

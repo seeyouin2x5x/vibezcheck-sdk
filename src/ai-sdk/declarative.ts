@@ -2,6 +2,7 @@ import type { CustomerParam, UsageEvent, ToolMeterOptions } from '../types';
 import { withBilling, type WithBillingOptions } from './with-billing';
 import { calculateCost } from '../pricing/calculator';
 import { createMeter, VibezMeter } from '../meter/client';
+import { toResponse } from './to-response';
 
 export interface VibezCheckModelOptions extends WithBillingOptions {
   /** OpenAI / Anthropic / AI Gateway API Key override */
@@ -288,9 +289,11 @@ export function createVibezSession(sessionOptions: VibezSessionOptions = {}): Vi
   };
 }
 
-// Attach session helper to createVibezModel function
+// Attach session & toResponse helpers to createVibezModel function
 export const vibezcheck: typeof createVibezModel & {
   session: typeof createVibezSession;
+  toResponse: typeof toResponse;
 } = Object.assign(createVibezModel, {
   session: createVibezSession,
+  toResponse,
 });
