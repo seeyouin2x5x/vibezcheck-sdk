@@ -1,6 +1,20 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import type { UsageEvent } from '../types';
 
+export interface ModelUsageDetail {
+  model: string;
+  displayName: string;
+  tokens: number;
+  promptTokens: number;
+  completionTokens: number;
+  reasoningTokens: number;
+  cachedTokens: number;
+  billedUSD: number;
+  wholesaleUSD: number;
+  profitUSD: number;
+  turns: number;
+}
+
 export interface VibezCheckProps {
   /** Messages array from AI SDK useChat() — automatically aggregates tokens & costs */
   messages?: any[];
@@ -45,6 +59,7 @@ export interface VibezCheckProps {
     profitUSD: number;
     totalTokens: number;
     isDevMode: boolean;
+    byModel?: Record<string, ModelUsageDetail>;
   }) => void;
   /** Whether popover is initially open (default: false) */
   defaultOpen?: boolean;
@@ -76,6 +91,8 @@ function cleanModelName(raw?: string): string | undefined {
  *
  * An ultra-modern, interactive fintech AI financial HUD inspired by Aztec Web3 design.
  * Features:
+ * - Precise token accounting with zero double counting (server telemetry is authoritative)
+ * - Multi-model session breakdown (details and distributions across models)
  * - Huge hero typography with interactive USD ⇄ Token unit toggle (⇅)
  * - Segmented Session ⇄ Latest Turn pill switcher
  * - Interactive preset pills ([$5] [$10] [$25] [Max])
@@ -109,6 +126,7 @@ export function VibezCheck({
   const [activeTab, setActiveTab] = useState<'session' | 'turn'>('session');
   const [selectedPreset, setSelectedPreset] = useState<number | null>(null);
   const [detailsExpanded, setDetailsExpanded] = useState(true);
+  const [selectedModelFilter, setSelectedModelFilter] = useState<string | null>(null);
 
   // Dynamic Theme Observer: Reacts to dark/light toggle immediately
   useEffect(() => {
@@ -150,12 +168,53 @@ export function VibezCheck({
     let reasoningTokens = 0;
     let detectedModel: string | undefined = undefined;
 
+    // Multi-model map
+    const byModel: Record<string, ModelUsageDetail> = {};
+
     // Latest turn specific telemetry
     let latestBilledUSD = 0;
     let latestWholesaleUSD = 0;
     let latestTokens = 0;
     let latestPromptTokens = 0;
     let latestCompletionTokens = 0;
+    let latestModel: string | undefined = undefined;
+
+    const recordModelUsage = (
+      rawModel: string | undefined,
+      tok: number,
+      pTok: number,
+      cTok: number,
+      billed: number,
+      wholesale: number,
+      rTok: number = 0,
+      cachedTok: number = 0
+    ) => {
+      const clean = cleanModelName(rawModel) || rawModel || 'ai-model';
+      if (!byModel[clean]) {
+        byModel[clean] = {
+          model: clean,
+          displayName: clean,
+          tokens: 0,
+          promptTokens: 0,
+          completionTokens: 0,
+          reasoningTokens: 0,
+          cachedTokens: 0,
+          billedUSD: 0,
+          wholesaleUSD: 0,
+          profitUSD: 0,
+          turns: 0,
+        };
+      }
+      byModel[clean].tokens += tok;
+      byModel[clean].promptTokens += pTok;
+      byModel[clean].completionTokens += cTok;
+      byModel[clean].reasoningTokens += rTok;
+      byModel[clean].cachedTokens += cachedTok;
+      byModel[clean].billedUSD += billed;
+      byModel[clean].wholesaleUSD += wholesale;
+      byModel[clean].profitUSD = Math.max(0, byModel[clean].billedUSD - byModel[clean].wholesaleUSD);
+      byModel[clean].turns += 1;
+    };
 
     if (events && events.length > 0) {
       hasServerTelemetry = true;
@@ -166,18 +225,23 @@ export function VibezCheck({
         const evTokens = ev.usage?.totalTokens ?? 0;
         const evPrompt = ev.usage?.inputTokens ?? 0;
         const evComp = ev.usage?.outputTokens ?? 0;
+        const evCached = ev.usage?.cachedTokens ?? 0;
+        const evReasoning = ev.usage?.reasoningTokens ?? 0;
 
         billedUSD += evBilled;
         wholesaleUSD += evWholesale;
         totalTokens += evTokens;
         promptTokens += evPrompt;
         completionTokens += evComp;
-        cachedTokens += ev.usage?.cachedTokens ?? 0;
-        reasoningTokens += ev.usage?.reasoningTokens ?? 0;
+        cachedTokens += evCached;
+        reasoningTokens += evReasoning;
 
-        if (ev.model && !detectedModel) {
-          detectedModel = ev.model;
+        const currentModel = ev.model || model;
+        if (currentModel && !detectedModel) {
+          detectedModel = currentModel;
         }
+
+        recordModelUsage(currentModel, evTokens, evPrompt, evComp, evBilled, evWholesale, evReasoning, evCached);
 
         if (i === events.length - 1) {
           latestBilledUSD = evBilled;
@@ -185,11 +249,15 @@ export function VibezCheck({
           latestTokens = evTokens;
           latestPromptTokens = evPrompt;
           latestCompletionTokens = evComp;
+          latestModel = currentModel;
         }
       }
     }
 
     if (messages && messages.length > 0) {
+      // Step 1: Pre-scan to identify any server telemetry across messages
+      const telemetryEvents: Array<{ mIdx: number; event: any }> = [];
+
       for (let mIdx = 0; mIdx < messages.length; mIdx++) {
         const msg = messages[mIdx];
         let eventFound: any = null;
@@ -233,7 +301,13 @@ export function VibezCheck({
         }
 
         if (eventFound) {
-          hasServerTelemetry = true;
+          telemetryEvents.push({ mIdx, event: eventFound });
+        }
+      }
+
+      if (telemetryEvents.length > 0) {
+        hasServerTelemetry = true;
+        for (const { mIdx, event: eventFound } of telemetryEvents) {
           const costVal = eventFound.cost;
           let msgBilled = 0;
           let msgWholesale = 0;
@@ -251,27 +325,61 @@ export function VibezCheck({
           const msgTok = eventFound.usage?.totalTokens ?? eventFound.tokens ?? 0;
           const msgPrompt = eventFound.usage?.inputTokens ?? eventFound.promptTokens ?? 0;
           const msgComp = eventFound.usage?.outputTokens ?? eventFound.completionTokens ?? 0;
+          const msgCached = eventFound.usage?.cachedTokens ?? 0;
+          const msgReasoning = eventFound.usage?.reasoningTokens ?? 0;
+          const currentModel = eventFound.model || model;
 
           billedUSD += msgBilled;
           wholesaleUSD += msgWholesale;
           totalTokens += msgTok;
           promptTokens += msgPrompt;
           completionTokens += msgComp;
-          cachedTokens += eventFound.usage?.cachedTokens ?? 0;
-          reasoningTokens += eventFound.usage?.reasoningTokens ?? 0;
+          cachedTokens += msgCached;
+          reasoningTokens += msgReasoning;
 
-          if (eventFound.model && !detectedModel) {
-            detectedModel = eventFound.model;
+          if (currentModel && !detectedModel) {
+            detectedModel = currentModel;
           }
 
+          recordModelUsage(currentModel, msgTok, msgPrompt, msgComp, msgBilled, msgWholesale, msgReasoning, msgCached);
+
+          const msg = messages[mIdx];
           if (msg.role === 'assistant') {
             latestBilledUSD = msgBilled;
             latestWholesaleUSD = msgWholesale;
             latestTokens = msgTok;
             latestPromptTokens = msgPrompt;
             latestCompletionTokens = msgComp;
+            latestModel = currentModel;
           }
-        } else {
+        }
+
+        // Check if there is a trailing unanswered user message (pending generation)
+        const lastTelemetryIdx = telemetryEvents[telemetryEvents.length - 1].mIdx;
+        if (lastTelemetryIdx < messages.length - 1) {
+          for (let i = lastTelemetryIdx + 1; i < messages.length; i++) {
+            const pendingMsg = messages[i];
+            if (pendingMsg.role === 'user') {
+              let text = '';
+              if (typeof pendingMsg.content === 'string') {
+                text = pendingMsg.content;
+              } else if (Array.isArray(pendingMsg.parts)) {
+                text = pendingMsg.parts
+                  .filter((p: any) => p?.type === 'text' && typeof p.text === 'string')
+                  .map((p: any) => p.text)
+                  .join(' ');
+              }
+              if (text) {
+                const pendingTok = Math.max(1, Math.ceil(text.length / 3.8));
+                promptTokens += pendingTok;
+                totalTokens += pendingTok;
+              }
+            }
+          }
+        }
+      } else {
+        // Pure Offline Dev Mode: Zero server telemetry found in entire conversation
+        for (const msg of messages) {
           let text = '';
           if (typeof msg.content === 'string') {
             text = msg.content;
@@ -295,20 +403,23 @@ export function VibezCheck({
             totalTokens += approxTokens;
           }
         }
-      }
 
-      if (!hasServerTelemetry && (promptTokens > 0 || completionTokens > 0)) {
-        const activeModel = detectedModel || model || 'gpt-4o';
-        const clean = activeModel.toLowerCase().replace(/^(openai|anthropic|google|xai|deepseek|mistral|groq)\//, '');
-        const rateKey = Object.keys(DEV_RATES).find((k) => clean.includes(k)) || 'default';
-        const rates = DEV_RATES[rateKey] || DEV_RATES.default;
-        wholesaleUSD =
-          (promptTokens / 1_000_000) * rates.input +
-          (completionTokens / 1_000_000) * rates.output;
-        billedUSD = wholesaleUSD * margin;
+        if (promptTokens > 0 || completionTokens > 0) {
+          const activeModel = detectedModel || model || 'gpt-4o';
+          const clean = activeModel.toLowerCase().replace(/^(openai|anthropic|google|xai|deepseek|mistral|groq)\//, '');
+          const rateKey = Object.keys(DEV_RATES).find((k) => clean.includes(k)) || 'default';
+          const rates = DEV_RATES[rateKey] || DEV_RATES.default;
+          wholesaleUSD =
+            (promptTokens / 1_000_000) * rates.input +
+            (completionTokens / 1_000_000) * rates.output;
+          billedUSD = wholesaleUSD * margin;
 
-        latestWholesaleUSD = (latestCompletionTokens / 1_000_000) * rates.output;
-        latestBilledUSD = latestWholesaleUSD * margin;
+          latestWholesaleUSD = (latestCompletionTokens / 1_000_000) * rates.output;
+          latestBilledUSD = latestWholesaleUSD * margin;
+          latestModel = activeModel;
+
+          recordModelUsage(activeModel, totalTokens, promptTokens, completionTokens, billedUSD, wholesaleUSD);
+        }
       }
     }
 
@@ -325,6 +436,8 @@ export function VibezCheck({
         ? Math.round((derivedMargin - 1) * 100)
         : Math.round((margin - 1) * 100);
 
+    const modelsList = Object.values(byModel).sort((a, b) => b.billedUSD - a.billedUSD);
+
     return {
       wholesaleUSD,
       billedUSD,
@@ -339,10 +452,13 @@ export function VibezCheck({
       latestTokens,
       latestPromptTokens,
       latestCompletionTokens,
+      latestModel,
       isDevMode,
       detectedModel,
       derivedMargin,
       effectiveMarginPercent,
+      byModel,
+      modelsList,
     };
   }, [events, messages, manualCost, manualTokens, model, margin, devMode]);
 
@@ -354,9 +470,10 @@ export function VibezCheck({
         profitUSD: stats.profitUSD,
         totalTokens: stats.totalTokens,
         isDevMode: stats.isDevMode,
+        byModel: stats.byModel,
       });
     }
-  }, [stats.billedUSD, stats.totalTokens, stats.isDevMode, onCostUpdate]);
+  }, [stats.billedUSD, stats.totalTokens, stats.isDevMode, stats.byModel, onCostUpdate]);
 
   const positionStyles: React.CSSProperties = useMemo(() => {
     const base: React.CSSProperties = { position: 'fixed', zIndex: 9999 };
@@ -384,9 +501,20 @@ export function VibezCheck({
     return num.toLocaleString();
   };
 
-  // Active view values based on activeTab (session vs latest turn)
-  const displayCostUSD = activeTab === 'turn' && stats.latestBilledUSD > 0 ? stats.latestBilledUSD : stats.billedUSD;
-  const displayTokens = activeTab === 'turn' && stats.latestTokens > 0 ? stats.latestTokens : stats.totalTokens;
+  // Active view values based on activeTab (session vs latest turn) or selectedModelFilter
+  const filteredModelStats = selectedModelFilter ? stats.byModel[selectedModelFilter] : null;
+
+  const displayCostUSD = filteredModelStats
+    ? filteredModelStats.billedUSD
+    : activeTab === 'turn' && stats.latestBilledUSD > 0
+    ? stats.latestBilledUSD
+    : stats.billedUSD;
+
+  const displayTokens = filteredModelStats
+    ? filteredModelStats.tokens
+    : activeTab === 'turn' && stats.latestTokens > 0
+    ? stats.latestTokens
+    : stats.totalTokens;
 
   // Preset Top-Up Options (like 25%, 50%, 75%, Max in the Aztec crypto UI)
   const presets = [
@@ -419,6 +547,8 @@ export function VibezCheck({
     activePill: isDark ? '#322B42' : '#FFFFFF',
     activePillText: isDark ? '#FFFFFF' : '#1C1917',
   };
+
+  const isMultiModel = stats.modelsList.length > 1;
 
   return (
     <div
@@ -493,6 +623,8 @@ export function VibezCheck({
                 <span style={{ fontWeight: 600, color: colors.textPrimary }}>
                   {typeof remainingBalanceUSD === 'number'
                     ? `$${remainingBalanceUSD.toFixed(2)}`
+                    : isMultiModel
+                    ? `${stats.modelsList.length} Models`
                     : stats.detectedModel
                     ? cleanModelName(stats.detectedModel)
                     : '539.21 Credits'}
@@ -542,24 +674,30 @@ export function VibezCheck({
               }}
             >
               <button
-                onClick={() => setActiveTab('session')}
+                onClick={() => {
+                  setActiveTab('session');
+                  setSelectedModelFilter(null);
+                }}
                 style={{
                   border: 'none',
                   borderRadius: '9999px',
                   padding: '4px 10px',
                   fontSize: '11px',
-                  fontWeight: activeTab === 'session' ? 600 : 500,
+                  fontWeight: activeTab === 'session' && !selectedModelFilter ? 600 : 500,
                   cursor: 'pointer',
-                  backgroundColor: activeTab === 'session' ? colors.activePill : 'transparent',
-                  color: activeTab === 'session' ? colors.activePillText : colors.textMuted,
+                  backgroundColor: activeTab === 'session' && !selectedModelFilter ? colors.activePill : 'transparent',
+                  color: activeTab === 'session' && !selectedModelFilter ? colors.activePillText : colors.textMuted,
                   transition: 'all 0.15s ease',
-                  boxShadow: activeTab === 'session' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                  boxShadow: activeTab === 'session' && !selectedModelFilter ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
                 }}
               >
                 Session
               </button>
               <button
-                onClick={() => setActiveTab('turn')}
+                onClick={() => {
+                  setActiveTab('turn');
+                  setSelectedModelFilter(null);
+                }}
                 style={{
                   border: 'none',
                   borderRadius: '9999px',
@@ -634,7 +772,11 @@ export function VibezCheck({
                   letterSpacing: '0.02em',
                 }}
               >
-                {heroUnit === 'usd' ? 'USD' : 'Tokens'}
+                {filteredModelStats
+                  ? filteredModelStats.displayName
+                  : heroUnit === 'usd'
+                  ? 'USD'
+                  : 'Tokens'}
               </div>
             </div>
 
@@ -807,6 +949,107 @@ export function VibezCheck({
                 )}
               </div>
             )}
+
+            {/* MULTI-MODEL BREAKDOWN (Automatically shows when >1 model is used) */}
+            {isMultiModel && (
+              <div
+                style={{
+                  marginTop: '10px',
+                  paddingTop: '10px',
+                  borderTop: `1px solid ${colors.border}`,
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '6px',
+                  }}
+                >
+                  <span style={{ fontSize: '10.5px', fontWeight: 600, color: colors.textSecondary }}>
+                    Model Distribution ({stats.modelsList.length})
+                  </span>
+                  {selectedModelFilter && (
+                    <button
+                      onClick={() => setSelectedModelFilter(null)}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: colors.accentPink,
+                        fontSize: '10px',
+                        cursor: 'pointer',
+                        padding: 0,
+                      }}
+                    >
+                      Clear Filter
+                    </button>
+                  )}
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  {stats.modelsList.map((m) => {
+                    const isSelected = selectedModelFilter === m.model;
+                    const pct = stats.totalTokens > 0 ? Math.round((m.tokens / stats.totalTokens) * 100) : 0;
+                    return (
+                      <div
+                        key={m.model}
+                        onClick={() => setSelectedModelFilter(isSelected ? null : m.model)}
+                        style={{
+                          padding: '6px 8px',
+                          borderRadius: '12px',
+                          backgroundColor: isSelected ? colors.chipBg : colors.cardBg,
+                          border: `1px solid ${isSelected ? colors.accentPink : colors.border}`,
+                          cursor: 'pointer',
+                          transition: 'all 0.15s ease',
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            fontSize: '11px',
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                            <span style={{ fontWeight: 600, color: colors.textPrimary }}>
+                              {m.displayName}
+                            </span>
+                            <span style={{ fontSize: '9.5px', color: colors.textMuted }}>
+                              ({m.turns} turn{m.turns > 1 ? 's' : ''})
+                            </span>
+                          </div>
+                          <span
+                            style={{
+                              fontWeight: 600,
+                              fontVariantNumeric: 'tabular-nums',
+                              color: colors.textPrimary,
+                            }}
+                          >
+                            ${m.billedUSD.toFixed(4)}
+                          </span>
+                        </div>
+
+                        <div
+                          style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            fontSize: '10px',
+                            color: colors.textSecondary,
+                            marginTop: '2px',
+                          }}
+                        >
+                          <span>{`${formatTokens(m.tokens)} tok (${pct}%)`}</span>
+                          <span>{`Prompt: ${formatTokens(m.promptTokens)} · Comp: ${formatTokens(m.completionTokens)}`}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* OPTIONAL DEVELOPER WHOLESALE & MARGIN SECTION (Hidden by default!) */}
@@ -885,7 +1128,11 @@ export function VibezCheck({
           >
             <div style={{ fontSize: '10.5px', color: colors.textMuted, lineHeight: 1.3 }}>
               <div>
-                Model: <span style={{ color: colors.textSecondary, fontWeight: 500 }}>{cleanModelName(stats.detectedModel) || model}</span>
+                Model: <span style={{ color: colors.textSecondary, fontWeight: 500 }}>
+                  {isMultiModel
+                    ? `${stats.modelsList.length} models active`
+                    : cleanModelName(stats.detectedModel) || model}
+                </span>
               </div>
               <div style={{ fontSize: '9.5px' }}>
                 {stats.isDevMode ? 'Dev Mode · Local Zero-DB' : 'Stripe Meter Active'}
@@ -966,7 +1213,20 @@ export function VibezCheck({
         >
           {`${formatTokens(stats.totalTokens)} tok`}
         </span>
-        {stats.detectedModel && (
+        {isMultiModel ? (
+          <>
+            <span style={{ color: colors.textMuted }}>·</span>
+            <span
+              style={{
+                fontSize: '11px',
+                color: colors.accentPink,
+                fontWeight: 600,
+              }}
+            >
+              {stats.modelsList.length} models
+            </span>
+          </>
+        ) : stats.detectedModel ? (
           <>
             <span style={{ color: colors.textMuted }}>·</span>
             <span
@@ -982,7 +1242,7 @@ export function VibezCheck({
               {cleanModelName(stats.detectedModel)}
             </span>
           </>
-        )}
+        ) : null}
         {stats.isDevMode && (
           <span
             style={{

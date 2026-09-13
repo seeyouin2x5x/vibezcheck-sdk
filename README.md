@@ -6,7 +6,7 @@
 [![npm version](https://img.shields.io/npm/v/vibezcheck.svg?color=cb3837)](https://npmjs.org/package/vibezcheck)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Strict-blue.svg)](https://www.typescriptlang.org/)
-[![Tests](https://img.shields.io/badge/Tests-94%20Passed-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/Tests-95%20Passed-brightgreen.svg)]()
 [![Latency](https://img.shields.io/badge/Latency-0ms%20Added-orange.svg)]()
 
 ---
@@ -25,19 +25,22 @@ return vibezcheck.toResponse(result);
 
 ---
 
-## ⚡ What's New in v0.5.6
+## ⚡ What's New in v0.5.8
 
-* **🪄 Zero-Prop Client UIs**: `<VibezReceipt message={message} />` and `<VibezCheck messages={messages} />` auto-derive model slugs, exact tokens, dollar micro-costs, profit margins (`+30% Margin`), and latency straight from the telemetry stream. No manual `model`, `margin`, or `cost` props required.
-* **📡 Universal Stream Injector (`vibezcheck.toResponse`)**: Intercepts AI SDK stream completion chunks to attach verified telemetry (`data-vibezcheck` & `message-metadata` SSE for v5/v6/v7, or `2:[{...}]` annotations for v4) with **0ms TTFB overhead**.
-* **🛡️ Zero Context Window Pollution**: Telemetry travels out-of-band. When AI SDK's `convertToModelMessages(messages)` prepares future conversation turns, metadata parts are automatically omitted—keeping your LLM context pure and preventing runaway token loops.
-* **🎨 Scoped Zero-Config Styling**: Built-in inline fallback styles guarantee that receipts and HUD components look polished out-of-the-box, even if your Tailwind configuration ignores `node_modules`.
+* **🎨 Aztec Web3 Fintech Redesign**: Complete aesthetic overhaul inspired by modern Web3 luxury cards. Features warm creamy surfaces (`rounded-[28px]`), obsidian dark mode, preset pills (`[$5] [$10] [$25] [Max]`), and a segmented `[Session | Latest Turn]` capsule switcher.
+* **⇅ Interactive USD ⇄ Token Unit Toggle**: Click the `⇅` icon or the hero number to seamlessly flip the primary display between **Dollar Cost** (`$0.0028 USD`) and **Token Count** (`1,420 Tokens`).
+* **🤖 Multi-Model Session Breakdown**: Automatically detects when different models are used across the session (e.g., routing between `gpt-4o-mini`, `claude-3-5-sonnet`, and `gemini-1.5-flash`). Displays a clean **Model Distribution** split with exact tokens, percentage, and cost per model.
+* **🎯 100% Precise Token Counting**: Completely eliminates prompt double-counting. Server-reported tokens from OpenAI/Anthropic/Gemini are authoritative, guaranteeing 1:1 parity between message badges and the global HUD.
+* **🛡️ Wholesale & Margin Privacy by Default**: End-users and customers see **zero wholesale API costs and zero profit margins** by default. Developers can opt-in using `showMargin={true}` and `showWholesale={true}`.
+* **📡 Universal Stream Injector (`vibezcheck.toResponse`)**: Attaches verified telemetry (`data-vibezcheck` & `message-metadata` SSE for v5/v6/v7, or `2:[{...}]` for v4) with **0ms TTFB overhead**.
+* **🧹 Clean Context Window**: Telemetry travels out-of-band. When AI SDK's `convertToModelMessages(messages)` prepares future turns, metadata is stripped—preventing context bloat and token waste.
 
 ---
 
 ## 🚀 Key Features
 
 * **⚡ 0ms Added Latency**: Direct transparent proxy stream; no external server redirects, no pre-buffering, and zero impact on first-token response time.
-* **🛡️ Built-in $0.50 Circuit Breaker**: Auto-trips if an agent or query exceeds the safety fuse box, preventing infinite loops and surprise $1,000 bills.
+* **🛡️ Built-in $0.50 Circuit Breaker**: Auto-trips if an agent or query exceeds the safety fuse box, preventing infinite loops and runaway bills.
 * **🛟 In-Flight Abort Trapper**: Accurately meters and debits tokens even if the client closes their laptop lid or navigates away mid-stream.
 * **🪙 BigInt Nano-USD Precision**: Sub-cent financial math ($1 = $10^9$ Nano-USD) eliminating IEEE 754 floating-point drift.
 * **💰 1-Line Profit Margins**: Turn wholesale API costs into retail revenue with `pricing: { margin: 1.3 }` (+30% markup).
@@ -63,14 +66,18 @@ npm install vibezcheck ai @ai-sdk/openai @ai-sdk/react stripe
 Wrap any model with `vibezcheck()`, and return the response using `vibezcheck.toResponse()`:
 
 ```typescript
-import { streamText } from 'ai';
+import {
+  convertToModelMessages,
+  streamText,
+  UIMessage,
+} from 'ai';
 import { openai } from '@ai-sdk/openai';
 import { vibezcheck } from 'vibezcheck';
 
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
-  const { messages } = await req.json();
+  const { messages }: { messages: UIMessage[] } = await req.json();
 
   const result = streamText({
     // Wrap any provider (OpenAI, Anthropic, Google, DeepSeek, etc.)
@@ -79,7 +86,8 @@ export async function POST(req: Request) {
       pricing: { margin: 1.3 },   // +30% profit margin
       maxCostPerCallUSD: 0.50,    // Safety fuse box ($0.50 cap)
     }),
-    messages,
+    instructions: 'You are a helpful and concise AI assistant.',
+    messages: await convertToModelMessages(messages),
   });
 
   // ✦ Universal telemetry stream injector (works with v4, v5, v6, and v7)
@@ -89,30 +97,35 @@ export async function POST(req: Request) {
 
 ### 2. Frontend Client (`app/page.tsx`)
 
-Render message bubbles with `<VibezReceipt />` and float the aggregated `<VibezCheck />` HUD:
+Render message bubbles with `<VibezReceipt />` and float the interactive `<VibezCheck />` HUD:
 
 ```tsx
 'use client';
 
 import { useChat } from '@ai-sdk/react';
+import { DefaultChatTransport } from 'ai';
 import { useState } from 'react';
 import { VibezReceipt, VibezCheck } from 'vibezcheck/ui';
 
 export default function ChatPage() {
   const [input, setInput] = useState('');
-  const { messages, sendMessage } = useChat();
+  const { messages, sendMessage, status } = useChat({
+    transport: new DefaultChatTransport({
+      api: '/api/chat',
+    }),
+  });
 
   return (
     <main className="flex flex-col w-full max-w-lg py-20 mx-auto px-4 min-h-screen">
       <div className="flex-1 space-y-4 mb-24">
         {messages.map((message) => (
-          <div key={message.id} className="p-3 rounded-xl border border-zinc-200 dark:border-zinc-800">
-            <div className="text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1">
+          <div key={message.id} className="p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800">
+            <div className="text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1.5">
               {message.role === 'user' ? 'You' : 'Assistant'}
             </div>
 
             {/* Display message content */}
-            <div className="text-sm whitespace-pre-wrap">
+            <div className="text-sm whitespace-pre-wrap leading-relaxed">
               {message.parts
                 ? message.parts.map((part, i) => (part.type === 'text' ? part.text : null))
                 : message.content}
@@ -120,7 +133,7 @@ export default function ChatPage() {
 
             {/* ✦ Zero-Prop Micro-Receipt: auto-derives tokens, micro-cost, model, & latency */}
             {message.role === 'assistant' && (
-              <div className="mt-2 flex justify-end">
+              <div className="mt-3 flex justify-end">
                 <VibezReceipt message={message} />
               </div>
             )}
@@ -137,18 +150,29 @@ export default function ChatPage() {
         }}
         className="fixed bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-md"
       >
-        <div className="max-w-lg mx-auto">
+        <div className="max-w-lg mx-auto flex gap-2">
           <input
-            className="w-full p-3 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-sm"
+            className="flex-1 p-3 text-sm rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-sm"
             value={input}
             placeholder="Ask something..."
             onChange={(e) => setInput(e.target.value)}
           />
+          <button
+            type="submit"
+            disabled={status === 'streaming' || !input.trim()}
+            className="px-5 py-3 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 text-sm font-semibold rounded-xl"
+          >
+            Send
+          </button>
         </div>
       </form>
 
-      {/* ✦ Zero-Prop Financial HUD: aggregated conversation tokens, cost, & active model */}
-      <VibezCheck messages={messages} />
+      {/* ✦ Aztec Fintech HUD: aggregates tokens & costs with multi-model breakdown */}
+      <VibezCheck
+        messages={messages}
+        remainingBalanceUSD={14.50}
+        onTopUp={(amount) => console.log('Top up requested:', amount)}
+      />
     </main>
   );
 }
@@ -156,11 +180,32 @@ export default function ChatPage() {
 
 ---
 
-## 🧩 Zero-Prop Client Components
+## 🧩 Client Components & Controls
 
 Import from either `vibezcheck/ui` or `vibezcheck/react`:
 
-### 1. `<VibezReceipt />` (Per-Message Micro-Badge)
+### 1. `<VibezCheck />` (Aztec Fintech HUD)
+
+Floating pill launcher and expandable Web3 card showing real-time financial metrics.
+
+```tsx
+<VibezCheck
+  messages={messages}
+  remainingBalanceUSD={25.00}
+  showMargin={false}      // Default: false (hides profit margin from customers)
+  showWholesale={false}   // Default: false (hides wholesale API costs from customers)
+  onTopUp={(amount) => triggerCheckout(amount)}
+/>
+```
+
+#### Interactive Features:
+* **⇅ Unit Swap**: Click the `⇅` button to toggle the hero between **Dollar Cost** and **Tokens**.
+* **Segmented Controls**: Switch between `[Session]` (conversation total) and `[Latest Turn]` (last response).
+* **Preset Pills**: Click `[$5]`, `[$10]`, `[$25]`, or `[Max]` to trigger pre-filled credit top-ups.
+* **Multi-Model Distribution**: If you route between multiple models, an automatic **"By Model"** breakdown appears with exact token counts, cost splits, and turn counts per model.
+* **Privacy by Default**: Developer wholesale prices and margins remain completely hidden from end-users.
+
+### 2. `<VibezReceipt />` (Per-Message Micro-Badge)
 
 Displays verified tokens, cost in USD, model slug, and latency under individual assistant messages.
 
@@ -170,19 +215,34 @@ Displays verified tokens, cost in USD, model slug, and latency under individual 
 
 * **Zero Required Props**: Reads telemetry from `message.parts` (`data-vibezcheck`), `message.annotations`, and `message.metadata`.
 * **Variants**: `variant="pill"` (default), `variant="minimal"`, or `variant="card"`.
-* **Scoped Styling**: Ships with inline fallback styling so it never breaks even without Tailwind CSS.
+* **Scoped Styling**: Self-contained inline fallback styling so it looks gorgeous even without Tailwind CSS.
 
-### 2. `<VibezCheck />` (Global Conversation HUD)
+---
 
-Floating pill and expandable popover showing real-time conversation metrics.
+## 🤖 Multi-Model Session Support
 
-```tsx
-<VibezCheck messages={messages} />
+When building agentic routers or multi-step reasoning agents that use multiple models in a single chat:
+
+```typescript
+// Turn 1: Quick classification
+const fastResult = streamText({
+  model: vibezcheck(openai('gpt-4o-mini'), { customer }),
+  messages,
+});
+
+// Turn 2: Complex deep reasoning
+const deepResult = streamText({
+  model: vibezcheck(anthropic('claude-3-5-sonnet'), { customer }),
+  messages,
+});
 ```
 
-* **Aggregated Metrics**: Automatically sums input, output, and reasoning tokens across all messages.
-* **Auto-Derived Model & Margin**: Displays the active model badge (e.g. `gpt-4o-mini`) and configured markup (e.g. `+30% Margin`).
-* **Optional Top-Up**: Pass `onTopUp={() => openBillingModal()}` to display an integrated credit top-up button.
+`<VibezCheck />` automatically aggregates both:
+* **Header & Pill**: Shows `2 models` active.
+* **Token Breakdown**: Displays a clean breakdown:
+  * `gpt-4o-mini (1 turn)`: 31 tok · $0.0001
+  * `claude-3-5-sonnet (1 turn)`: 420 tok · $0.0068
+* Click any model in the list to filter the hero metrics to that specific model!
 
 ---
 
@@ -205,15 +265,7 @@ export async function POST(req: Request) {
     messages,
   });
 
-  // Recommended: pass result directly
   return vibezcheck.toResponse(result);
-
-  // Or wrap custom UI message stream responses:
-  // return vibezcheck.toResponse(
-  //   createUIMessageStreamResponse({
-  //     stream: toUIMessageStream({ stream: result.stream }),
-  //   })
-  // );
 }
 ```
 

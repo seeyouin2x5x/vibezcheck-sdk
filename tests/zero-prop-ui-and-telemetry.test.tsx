@@ -120,7 +120,8 @@ describe('Zero-Prop UI & Native Stream Telemetry Suite (v0.5.7)', () => {
 
       expect(defaultHtml).toContain('vibezcheck-ui-root');
       expect(defaultHtml).toContain('$0.0013');
-      expect(defaultHtml).toContain('79 tok');
+      // Exact verified tokens from telemetry: 75 tok (no double counting!)
+      expect(defaultHtml).toContain('75 tok');
       expect(defaultHtml).toContain('gpt-4o-mini');
       // Hidden by default!
       expect(defaultHtml).not.toContain('+30% Margin');
@@ -134,7 +135,7 @@ describe('Zero-Prop UI & Native Stream Telemetry Suite (v0.5.7)', () => {
       expect(devHtml).toContain('Wholesale API');
     });
 
-    it('should aggregate across multiple message turns seamlessly', () => {
+    it('should aggregate across multiple message turns seamlessly without double counting', () => {
       const messages = [
         { role: 'user', content: 'Turn 1' },
         {
@@ -168,10 +169,59 @@ describe('Zero-Prop UI & Native Stream Telemetry Suite (v0.5.7)', () => {
 
       // Total billed = 0.0010 + 0.0020 = 0.0030
       expect(html).toContain('$0.0030');
-      // Total tokens = 100 + 200 + user prompt tokens = 304 tok
-      expect(html).toContain('304 tok');
+      // Exact authoritative tokens = 100 + 200 = 300 tok (no double counting!)
+      expect(html).toContain('300 tok');
       expect(html).toContain('gpt-4o');
       expect(html).toContain('+25% Margin');
+    });
+
+    it('should display multi-model distribution breakdown when multiple models are used in a session', () => {
+      const messages = [
+        { role: 'user', content: 'Translate this' },
+        {
+          role: 'assistant',
+          content: 'Bonjour le monde',
+          parts: [
+            {
+              type: 'data-vibezcheck',
+              data: {
+                model: 'gpt-4o-mini',
+                cost: { billedUSD: 0.0001, wholesaleUSD: 0.00008 },
+                usage: { totalTokens: 31, inputTokens: 21, outputTokens: 10 },
+              },
+            },
+          ],
+        },
+        { role: 'user', content: 'Now write a poem about space' },
+        {
+          role: 'assistant',
+          content: 'Stars ignite the cosmic velvet...',
+          parts: [
+            {
+              type: 'data-vibezcheck',
+              data: {
+                model: 'claude-3-5-sonnet',
+                cost: { billedUSD: 0.0068, wholesaleUSD: 0.0050 },
+                usage: { totalTokens: 420, inputTokens: 120, outputTokens: 300 },
+              },
+            },
+          ],
+        },
+      ];
+
+      const html = renderToString(<VibezCheck messages={messages} defaultOpen={true} />);
+
+      // Aggregated totals: 31 + 420 = 451 tok, $0.0001 + $0.0068 = $0.0069
+      expect(html).toContain('451 tok');
+      expect(html).toContain('$0.0069');
+
+      // Multi-model indicator
+      expect(html).toContain('2 models');
+      expect(html).toContain('Model Distribution');
+      expect(html).toContain('gpt-4o-mini');
+      expect(html).toContain('claude-3-5-sonnet');
+      expect(html).toContain('31 tok');
+      expect(html).toContain('420 tok');
     });
 
     it('should render cleanly without onTopUp callback', () => {
