@@ -115,15 +115,23 @@ describe('Zero-Prop UI & Native Stream Telemetry Suite (v0.5.6)', () => {
         },
       ];
 
-      // ZERO PROPS beyond messages! No model, no margin, no onTopUp!
-      // defaultOpen={true} expands the financial meter HUD popover to check derived margin & breakdown
-      const html = renderToString(<VibezCheck messages={messages} defaultOpen={true} />);
+      // ZERO PROPS beyond messages! By default, wholesale and margin are hidden from customers
+      const defaultHtml = renderToString(<VibezCheck messages={messages} defaultOpen={true} />);
 
-      expect(html).toContain('vibezcheck-ui-root');
-      expect(html).toContain('$0.0013');
-      expect(html).toContain('79 tok');
-      expect(html).toContain('gpt-4o-mini');
-      expect(html).toContain('+30% Margin');
+      expect(defaultHtml).toContain('vibezcheck-ui-root');
+      expect(defaultHtml).toContain('$0.0013');
+      expect(defaultHtml).toContain('79 tok');
+      expect(defaultHtml).toContain('gpt-4o-mini');
+      // Hidden by default!
+      expect(defaultHtml).not.toContain('+30% Margin');
+      expect(defaultHtml).not.toContain('Wholesale API');
+
+      // When showMargin and showWholesale are true, developer economics are shown
+      const devHtml = renderToString(
+        <VibezCheck messages={messages} defaultOpen={true} showMargin={true} showWholesale={true} />
+      );
+      expect(devHtml).toContain('+30% Margin');
+      expect(devHtml).toContain('Wholesale API');
     });
 
     it('should aggregate across multiple message turns seamlessly', () => {
@@ -156,7 +164,7 @@ describe('Zero-Prop UI & Native Stream Telemetry Suite (v0.5.6)', () => {
         },
       ];
 
-      const html = renderToString(<VibezCheck messages={messages} defaultOpen={true} />);
+      const html = renderToString(<VibezCheck messages={messages} defaultOpen={true} showMargin={true} />);
 
       // Total billed = 0.0010 + 0.0020 = 0.0030
       expect(html).toContain('$0.0030');
@@ -168,9 +176,9 @@ describe('Zero-Prop UI & Native Stream Telemetry Suite (v0.5.6)', () => {
 
     it('should render cleanly without onTopUp callback', () => {
       const messages = [{ role: 'user', content: 'Hi' }];
-      const html = renderToString(<VibezCheck messages={messages} />);
+      const html = renderToString(<VibezCheck messages={messages} defaultOpen={true} />);
       expect(html).toContain('vibezcheck-ui-root');
-      expect(html).not.toContain('+ Add / Top Up Credits');
+      expect(html).not.toContain('Top Up ▶');
     });
   });
 

@@ -10,22 +10,34 @@ export interface VibezCheckProps {
   model?: string;
   /** Developer profit margin multiplier (default: 1.25 for +25% margin) */
   margin?: number;
+  /**
+   * Whether to display developer wholesale API costs.
+   * Default: false (hidden from end-users)
+   */
+  showWholesale?: boolean;
+  /**
+   * Whether to display developer profit margin percentage and net profit.
+   * Default: false (hidden from end-users)
+   */
+  showMargin?: boolean;
   /** Manual total cost override in USD */
   totalCostUSD?: number;
   /** Manual total tokens override */
   totalTokens?: number;
   /** Remaining customer credit balance in USD */
   remainingBalanceUSD?: number;
-  /** Screen position (default: 'bottom-center') */
-  position?: 'bottom-center' | 'bottom-right' | 'bottom-left' | 'top-center';
+  /** Screen position (default: 'bottom-left') */
+  position?: 'bottom-center' | 'bottom-right' | 'bottom-left' | 'top-center' | 'top-right' | 'top-left';
   /** Color theme (default: 'auto') */
   theme?: 'dark' | 'light' | 'auto';
   /** Force dev mode banner on/off (defaults to auto-detect) */
   devMode?: boolean;
   /** Additional CSS class names */
   className?: string;
-  /** Callback triggered when user clicks '+ Top Up Credits' */
-  onTopUp?: () => void;
+  /** Custom header title (default: 'Session Usage') */
+  title?: string;
+  /** Callback triggered when user clicks 'Top Up' button or preset amount pills */
+  onTopUp?: (amount?: number) => void;
   /** Callback fired whenever cost or token counts update */
   onCostUpdate?: (summary: {
     totalCostUSD: number;
@@ -62,15 +74,21 @@ function cleanModelName(raw?: string): string | undefined {
 /**
  * ✦ <VibezCheck /> (from 'vibezcheck/ui' or 'vibezcheck/react')
  *
- * The 1-Line Financial Meter HUD & Floating Badge.
- * Works 100% out of the box in local dev mode with ZERO database and ZERO Stripe setup.
- * Dynamically adapts to Light and Dark mode, with clean typography and zero odd colors.
+ * An ultra-modern, interactive fintech AI financial HUD inspired by Aztec Web3 design.
+ * Features:
+ * - Huge hero typography with interactive USD ⇄ Token unit toggle (⇅)
+ * - Segmented Session ⇄ Latest Turn pill switcher
+ * - Interactive preset pills ([$5] [$10] [$25] [Max])
+ * - Hidden wholesale pricing and margin by default (controlled via showWholesale & showMargin props)
+ * - Soft creamy ivory card with rounded-3xl corners and vibrant orchid action buttons
  */
 export function VibezCheck({
   messages,
   events,
   model = 'gpt-4o',
   margin = 1.25,
+  showWholesale = false,
+  showMargin = false,
   totalCostUSD: manualCost,
   totalTokens: manualTokens,
   remainingBalanceUSD,
@@ -78,12 +96,19 @@ export function VibezCheck({
   theme = 'auto',
   devMode,
   className = '',
+  title = 'Session Usage',
   onTopUp,
   onCostUpdate,
   defaultOpen,
 }: VibezCheckProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen ?? false);
   const [isDarkDoc, setIsDarkDoc] = useState(false);
+
+  // Interactive UI states
+  const [heroUnit, setHeroUnit] = useState<'usd' | 'tokens'>('usd');
+  const [activeTab, setActiveTab] = useState<'session' | 'turn'>('session');
+  const [selectedPreset, setSelectedPreset] = useState<number | null>(null);
+  const [detailsExpanded, setDetailsExpanded] = useState(true);
 
   // Dynamic Theme Observer: Reacts to dark/light toggle immediately
   useEffect(() => {
@@ -125,24 +150,48 @@ export function VibezCheck({
     let reasoningTokens = 0;
     let detectedModel: string | undefined = undefined;
 
+    // Latest turn specific telemetry
+    let latestBilledUSD = 0;
+    let latestWholesaleUSD = 0;
+    let latestTokens = 0;
+    let latestPromptTokens = 0;
+    let latestCompletionTokens = 0;
+
     if (events && events.length > 0) {
       hasServerTelemetry = true;
-      for (const ev of events) {
-        billedUSD += ev.cost?.billedUSD ?? ev.cost?.totalUSD ?? 0;
-        wholesaleUSD += ev.cost?.wholesaleTotalUSD ?? ev.cost?.wholesaleUSD ?? ev.cost?.billedUSD ?? 0;
-        totalTokens += ev.usage?.totalTokens ?? 0;
-        promptTokens += ev.usage?.inputTokens ?? 0;
-        completionTokens += ev.usage?.outputTokens ?? 0;
+      for (let i = 0; i < events.length; i++) {
+        const ev = events[i];
+        const evBilled = ev.cost?.billedUSD ?? ev.cost?.totalUSD ?? 0;
+        const evWholesale = ev.cost?.wholesaleTotalUSD ?? ev.cost?.wholesaleUSD ?? ev.cost?.billedUSD ?? 0;
+        const evTokens = ev.usage?.totalTokens ?? 0;
+        const evPrompt = ev.usage?.inputTokens ?? 0;
+        const evComp = ev.usage?.outputTokens ?? 0;
+
+        billedUSD += evBilled;
+        wholesaleUSD += evWholesale;
+        totalTokens += evTokens;
+        promptTokens += evPrompt;
+        completionTokens += evComp;
         cachedTokens += ev.usage?.cachedTokens ?? 0;
         reasoningTokens += ev.usage?.reasoningTokens ?? 0;
+
         if (ev.model && !detectedModel) {
           detectedModel = ev.model;
+        }
+
+        if (i === events.length - 1) {
+          latestBilledUSD = evBilled;
+          latestWholesaleUSD = evWholesale;
+          latestTokens = evTokens;
+          latestPromptTokens = evPrompt;
+          latestCompletionTokens = evComp;
         }
       }
     }
 
     if (messages && messages.length > 0) {
-      for (const msg of messages) {
+      for (let mIdx = 0; mIdx < messages.length; mIdx++) {
+        const msg = messages[mIdx];
         let eventFound: any = null;
 
         // 1. AI SDK v4 Message Annotations
@@ -178,7 +227,7 @@ export function VibezCheck({
           eventFound = msg.metadata;
         }
 
-        // 4. Message Direct Provider Metadata
+        // 4. Direct Provider Metadata
         if (!eventFound && msg.providerMetadata?.vibezcheck) {
           eventFound = msg.providerMetadata.vibezcheck;
         }
@@ -199,16 +248,28 @@ export function VibezCheck({
             msgWholesale = eventFound.costUSD;
           }
 
+          const msgTok = eventFound.usage?.totalTokens ?? eventFound.tokens ?? 0;
+          const msgPrompt = eventFound.usage?.inputTokens ?? eventFound.promptTokens ?? 0;
+          const msgComp = eventFound.usage?.outputTokens ?? eventFound.completionTokens ?? 0;
+
           billedUSD += msgBilled;
           wholesaleUSD += msgWholesale;
-          totalTokens += eventFound.usage?.totalTokens ?? eventFound.tokens ?? 0;
-          promptTokens += eventFound.usage?.inputTokens ?? eventFound.promptTokens ?? 0;
-          completionTokens += eventFound.usage?.outputTokens ?? eventFound.completionTokens ?? 0;
+          totalTokens += msgTok;
+          promptTokens += msgPrompt;
+          completionTokens += msgComp;
           cachedTokens += eventFound.usage?.cachedTokens ?? 0;
           reasoningTokens += eventFound.usage?.reasoningTokens ?? 0;
 
           if (eventFound.model && !detectedModel) {
             detectedModel = eventFound.model;
+          }
+
+          if (msg.role === 'assistant') {
+            latestBilledUSD = msgBilled;
+            latestWholesaleUSD = msgWholesale;
+            latestTokens = msgTok;
+            latestPromptTokens = msgPrompt;
+            latestCompletionTokens = msgComp;
           }
         } else {
           let text = '';
@@ -228,6 +289,8 @@ export function VibezCheck({
               promptTokens += approxTokens;
             } else {
               completionTokens += approxTokens;
+              latestCompletionTokens = approxTokens;
+              latestTokens = approxTokens;
             }
             totalTokens += approxTokens;
           }
@@ -243,6 +306,9 @@ export function VibezCheck({
           (promptTokens / 1_000_000) * rates.input +
           (completionTokens / 1_000_000) * rates.output;
         billedUSD = wholesaleUSD * margin;
+
+        latestWholesaleUSD = (latestCompletionTokens / 1_000_000) * rates.output;
+        latestBilledUSD = latestWholesaleUSD * margin;
       }
     }
 
@@ -268,6 +334,11 @@ export function VibezCheck({
       completionTokens,
       cachedTokens,
       reasoningTokens,
+      latestBilledUSD,
+      latestWholesaleUSD,
+      latestTokens,
+      latestPromptTokens,
+      latestCompletionTokens,
       isDevMode,
       detectedModel,
       derivedMargin,
@@ -291,15 +362,19 @@ export function VibezCheck({
     const base: React.CSSProperties = { position: 'fixed', zIndex: 9999 };
     switch (position) {
       case 'bottom-center':
-        return { ...base, bottom: '20px', left: '50%', transform: 'translateX(-50%)' };
+        return { ...base, bottom: '24px', left: '50%', transform: 'translateX(-50%)' };
       case 'bottom-right':
-        return { ...base, bottom: '20px', right: '20px' };
+        return { ...base, bottom: '24px', right: '24px' };
       case 'bottom-left':
-        return { ...base, bottom: '20px', left: '20px' };
+        return { ...base, bottom: '24px', left: '24px' };
       case 'top-center':
-        return { ...base, top: '20px', left: '50%', transform: 'translateX(-50%)' };
+        return { ...base, top: '24px', left: '50%', transform: 'translateX(-50%)' };
+      case 'top-right':
+        return { ...base, top: '24px', right: '24px' };
+      case 'top-left':
+        return { ...base, top: '24px', left: '24px' };
       default:
-        return { ...base, bottom: '20px', left: '20px' };
+        return { ...base, bottom: '24px', left: '24px' };
     }
   }, [position]);
 
@@ -309,252 +384,600 @@ export function VibezCheck({
     return num.toLocaleString();
   };
 
+  // Active view values based on activeTab (session vs latest turn)
+  const displayCostUSD = activeTab === 'turn' && stats.latestBilledUSD > 0 ? stats.latestBilledUSD : stats.billedUSD;
+  const displayTokens = activeTab === 'turn' && stats.latestTokens > 0 ? stats.latestTokens : stats.totalTokens;
+
+  // Preset Top-Up Options (like 25%, 50%, 75%, Max in the Aztec crypto UI)
+  const presets = [
+    { label: '$5', value: 5 },
+    { label: '$10', value: 10 },
+    { label: '$25', value: 25 },
+    { label: 'Max', value: 100 },
+  ];
+
+  const handlePresetClick = (amount: number) => {
+    setSelectedPreset(amount);
+    if (onTopUp) {
+      onTopUp(amount);
+    }
+  };
+
+  // Theme palettes matching the Aztec reference image
+  const colors = {
+    cardBg: isDark ? '#191622' : '#FAF8F5',
+    innerBg: isDark ? '#231F30' : '#F2EFE9',
+    border: isDark ? 'rgba(255, 255, 255, 0.08)' : '#EAE6DF',
+    textPrimary: isDark ? '#F5F3F8' : '#1C1917',
+    textSecondary: isDark ? '#9E97A9' : '#78716C',
+    textMuted: isDark ? '#6B6577' : '#A8A29E',
+    accentPink: '#EC4899',
+    accentPillBg: isDark ? 'rgba(236, 72, 153, 0.15)' : '#FDF2F8',
+    accentPillText: isDark ? '#F472B6' : '#BE185D',
+    chipBg: isDark ? '#282435' : '#EFECE6',
+    pillTrack: isDark ? '#13111A' : '#221F28',
+    activePill: isDark ? '#322B42' : '#FFFFFF',
+    activePillText: isDark ? '#FFFFFF' : '#1C1917',
+  };
+
   return (
-    <div style={positionStyles} className={`vibezcheck-ui-root vibezcheck-root font-sans select-none ${className}`}>
-      {/* Attached Popover Card */}
+    <div
+      style={positionStyles}
+      className={`vibezcheck-ui-root vibezcheck-root font-sans select-none ${className}`}
+    >
+      {/* Attached Popover Card (Direct Aztec Card Inspiration) */}
       {isOpen && (
         <div
-          className={`mb-2.5 p-4 rounded-xl border shadow-2xl w-[320px] space-y-3 transition-all animate-in fade-in slide-in-from-bottom-2 ${
-            isDark
-              ? 'bg-zinc-900/98 border-zinc-800 text-zinc-100 shadow-zinc-950/60'
-              : 'bg-white/98 border-zinc-200 text-zinc-900 shadow-zinc-900/10'
-          }`}
+          className="vibezcheck-popover-card mb-3 transition-all animate-in fade-in slide-in-from-bottom-3"
           style={{
-            backdropFilter: 'blur(16px)',
-            WebkitBackdropFilter: 'blur(16px)',
-            backgroundColor: isDark ? 'rgba(24, 24, 27, 0.98)' : 'rgba(255, 255, 255, 0.98)',
-            borderColor: isDark ? '#27272a' : '#e4e4e7',
-            borderWidth: '1px',
-            borderStyle: 'solid',
-            borderRadius: '0.75rem',
-            padding: '1rem',
-            width: '320px',
-            color: isDark ? '#f4f4f5' : '#18181b',
+            width: '340px',
+            backgroundColor: colors.cardBg,
+            borderRadius: '28px',
+            border: `1px solid ${colors.border}`,
+            padding: '20px',
+            boxShadow: isDark
+              ? '0 28px 60px -12px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.06)'
+              : '0 24px 50px -12px rgba(28, 25, 23, 0.12), 0 4px 16px rgba(0, 0, 0, 0.03)',
+            color: colors.textPrimary,
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
           }}
         >
-          {/* Header */}
+          {/* Header Row (like "Request Withdrawal" & "Balance: 539.21 Aztec") */}
           <div
-            className={`flex items-center justify-between pb-2 border-b ${
-              isDark ? 'border-zinc-800' : 'border-zinc-100'
-            }`}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '16px',
+            }}
           >
-            <div className="flex items-center gap-1.5">
-              <span className="text-emerald-500 dark:text-emerald-400 font-bold text-xs">✦</span>
-              <span className="font-semibold text-xs tracking-tight">VibezCheck</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span
-                className={`text-[9.5px] font-mono px-1.5 py-0.5 rounded border ${
-                  isDark
-                    ? 'bg-zinc-800 text-zinc-400 border-zinc-700/60'
-                    : 'bg-zinc-100 text-zinc-500 border-zinc-200'
-                }`}
+                style={{
+                  color: colors.accentPink,
+                  fontSize: '14px',
+                  fontWeight: 700,
+                  display: 'inline-block',
+                }}
               >
-                {stats.detectedModel || 'Financial Meter'}
+                ✦
+              </span>
+              <span
+                style={{
+                  fontWeight: 600,
+                  fontSize: '15px',
+                  letterSpacing: '-0.01em',
+                  color: colors.textPrimary,
+                }}
+              >
+                {title}
               </span>
             </div>
-            <button
-              onClick={() => setIsOpen(false)}
-              className={`text-xs p-1 rounded transition ${
-                isDark
-                  ? 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800'
-                  : 'text-zinc-400 hover:text-zinc-800 hover:bg-zinc-100'
-              }`}
-              aria-label="Close"
-            >
-              ✕
-            </button>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div
+                style={{
+                  backgroundColor: colors.chipBg,
+                  color: colors.textSecondary,
+                  fontSize: '11px',
+                  fontWeight: 500,
+                  padding: '3px 9px',
+                  borderRadius: '9999px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                }}
+              >
+                <span style={{ color: colors.textMuted }}>Balance</span>
+                <span style={{ fontWeight: 600, color: colors.textPrimary }}>
+                  {typeof remainingBalanceUSD === 'number'
+                    ? `$${remainingBalanceUSD.toFixed(2)}`
+                    : stats.detectedModel
+                    ? cleanModelName(stats.detectedModel)
+                    : '539.21 Credits'}
+                </span>
+              </div>
+
+              <button
+                onClick={() => setIsOpen(false)}
+                aria-label="Close"
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: colors.textMuted,
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  padding: '2px 6px',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'color 0.15s ease',
+                }}
+              >
+                ✕
+              </button>
+            </div>
           </div>
 
-          {/* Customer Billed Hero Card */}
+          {/* Interactive Mode Pills & Segmented Switch (like Stake | Redeem and 25% 50% 75% Max) */}
           <div
-            className={`rounded-lg p-3 space-y-2 border ${
-              isDark
-                ? 'bg-zinc-800/40 border-zinc-800/90'
-                : 'bg-zinc-50/90 border-zinc-100'
-            }`}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '16px',
+              gap: '6px',
+            }}
           >
-            <div className="flex items-center justify-between">
-              <span
-                className={`text-[10px] uppercase font-semibold tracking-wider ${
-                  isDark ? 'text-zinc-400' : 'text-zinc-500'
-                }`}
+            {/* Segmented Session ⇄ Turn Pill Switcher */}
+            <div
+              style={{
+                backgroundColor: colors.pillTrack,
+                padding: '3px',
+                borderRadius: '9999px',
+                display: 'inline-flex',
+                alignItems: 'center',
+              }}
+            >
+              <button
+                onClick={() => setActiveTab('session')}
+                style={{
+                  border: 'none',
+                  borderRadius: '9999px',
+                  padding: '4px 10px',
+                  fontSize: '11px',
+                  fontWeight: activeTab === 'session' ? 600 : 500,
+                  cursor: 'pointer',
+                  backgroundColor: activeTab === 'session' ? colors.activePill : 'transparent',
+                  color: activeTab === 'session' ? colors.activePillText : colors.textMuted,
+                  transition: 'all 0.15s ease',
+                  boxShadow: activeTab === 'session' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                }}
               >
-                Customer Billed Total
+                Session
+              </button>
+              <button
+                onClick={() => setActiveTab('turn')}
+                style={{
+                  border: 'none',
+                  borderRadius: '9999px',
+                  padding: '4px 10px',
+                  fontSize: '11px',
+                  fontWeight: activeTab === 'turn' ? 600 : 500,
+                  cursor: 'pointer',
+                  backgroundColor: activeTab === 'turn' ? colors.activePill : 'transparent',
+                  color: activeTab === 'turn' ? colors.activePillText : colors.textMuted,
+                  transition: 'all 0.15s ease',
+                  boxShadow: activeTab === 'turn' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                }}
+              >
+                Latest Turn
+              </button>
+            </div>
+
+            {/* Quick Top-Up / Filter Preset Pills (Aztec style: 25%, 50%, 75%, Max) */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              {presets.map((preset) => (
+                <button
+                  key={preset.label}
+                  onClick={() => handlePresetClick(preset.value)}
+                  style={{
+                    border: 'none',
+                    borderRadius: '9999px',
+                    padding: '4px 7px',
+                    fontSize: '10.5px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    backgroundColor: selectedPreset === preset.value ? colors.accentPink : colors.accentPillBg,
+                    color: selectedPreset === preset.value ? '#FFFFFF' : colors.accentPillText,
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Huge Hero Metric Display (Direct Aztec Inspiration: 134.80 Aztec / $ 70.10 ⇅) */}
+          <div style={{ marginBottom: '18px' }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'baseline',
+                justifyContent: 'space-between',
+              }}
+            >
+              <div
+                onClick={() => setHeroUnit(heroUnit === 'usd' ? 'tokens' : 'usd')}
+                title="Click to toggle between USD and Token view"
+                style={{
+                  fontSize: '34px',
+                  fontWeight: 700,
+                  letterSpacing: '-0.03em',
+                  fontVariantNumeric: 'tabular-nums',
+                  cursor: 'pointer',
+                  lineHeight: 1.1,
+                  color: colors.textPrimary,
+                }}
+              >
+                {heroUnit === 'usd' ? `$${displayCostUSD.toFixed(4)}` : formatTokens(displayTokens)}
+              </div>
+
+              <div
+                style={{
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  color: colors.textSecondary,
+                  letterSpacing: '0.02em',
+                }}
+              >
+                {heroUnit === 'usd' ? 'USD' : 'Tokens'}
+              </div>
+            </div>
+
+            {/* Secondary conversion row with interactive swap icon (⇅) */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginTop: '4px',
+                color: colors.textSecondary,
+                fontSize: '12px',
+              }}
+            >
+              <span style={{ fontVariantNumeric: 'tabular-nums' }}>
+                {heroUnit === 'usd'
+                  ? `≈ ${formatTokens(displayTokens)} tokens`
+                  : `≈ $${displayCostUSD.toFixed(4)} USD`}
               </span>
-              <span
-                className={`text-[9.5px] font-mono font-medium px-1.5 py-0.5 rounded border ${
-                  isDark
-                    ? 'bg-emerald-950/40 text-emerald-400 border-emerald-800/40'
-                    : 'bg-emerald-50 text-emerald-700 border-emerald-200/80'
-                }`}
+
+              <button
+                onClick={() => setHeroUnit(heroUnit === 'usd' ? 'tokens' : 'usd')}
+                title="Swap primary unit"
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: colors.textMuted,
+                  cursor: 'pointer',
+                  fontSize: '13px',
+                  padding: '2px 4px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  transition: 'color 0.15s ease',
+                }}
               >
-                {`+${stats.effectiveMarginPercent}% Margin`}
+                ⇅
+              </button>
+            </div>
+          </div>
+
+          {/* Inner Nested Surface (Aztec: "You will receive ... 128.06 Aztec") */}
+          <div
+            style={{
+              backgroundColor: colors.innerBg,
+              borderRadius: '20px',
+              padding: '16px',
+              marginBottom: '14px',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: '8px',
+              }}
+            >
+              <span
+                style={{
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  color: colors.textSecondary,
+                }}
+              >
+                Token Breakdown
+              </span>
+
+              {/* Mini toggle switch for detailed breakdown */}
+              <div
+                onClick={() => setDetailsExpanded(!detailsExpanded)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  cursor: 'pointer',
+                  fontSize: '10px',
+                  color: colors.textMuted,
+                }}
+              >
+                <span>Live View</span>
+                <div
+                  style={{
+                    width: '26px',
+                    height: '14px',
+                    backgroundColor: detailsExpanded ? colors.accentPink : colors.border,
+                    borderRadius: '9999px',
+                    position: 'relative',
+                    transition: 'background-color 0.2s ease',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: '10px',
+                      height: '10px',
+                      backgroundColor: '#FFFFFF',
+                      borderRadius: '50%',
+                      position: 'absolute',
+                      top: '2px',
+                      left: detailsExpanded ? '14px' : '2px',
+                      transition: 'left 0.2s ease',
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Inner primary metric */}
+            <div
+              style={{
+                fontSize: '24px',
+                fontWeight: 700,
+                letterSpacing: '-0.02em',
+                fontVariantNumeric: 'tabular-nums',
+                color: colors.textPrimary,
+                marginBottom: '10px',
+              }}
+            >
+              {formatTokens(displayTokens)}
+              <span
+                style={{
+                  fontSize: '12px',
+                  fontWeight: 500,
+                  color: colors.textSecondary,
+                  marginLeft: '6px',
+                }}
+              >
+                tok
               </span>
             </div>
 
-            <div
-              className={`font-mono text-2xl font-bold tracking-tight tabular-nums ${
-                isDark ? 'text-white' : 'text-zinc-900'
-              }`}
-            >
-              {`$${stats.billedUSD.toFixed(4)}`}
-            </div>
+            {/* Granular token metrics */}
+            {detailsExpanded && (
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '5px',
+                  fontSize: '11px',
+                  borderTop: `1px solid ${colors.border}`,
+                  paddingTop: '8px',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ color: colors.textMuted }}>Prompt / Input:</span>
+                  <span style={{ fontWeight: 600, fontVariantNumeric: 'tabular-nums', color: colors.textPrimary }}>
+                    {formatTokens(stats.promptTokens)}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ color: colors.textMuted }}>Completion / Output:</span>
+                  <span style={{ fontWeight: 600, fontVariantNumeric: 'tabular-nums', color: colors.textPrimary }}>
+                    {formatTokens(stats.completionTokens)}
+                  </span>
+                </div>
+                {stats.reasoningTokens > 0 && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ color: colors.textMuted }}>↳ Reasoning Tokens:</span>
+                    <span style={{ fontWeight: 600, fontVariantNumeric: 'tabular-nums', color: colors.accentPink }}>
+                      {formatTokens(stats.reasoningTokens)}
+                    </span>
+                  </div>
+                )}
+                {stats.cachedTokens > 0 && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: '#10B981' }}>
+                    <span>↳ Cache Discount:</span>
+                    <span style={{ fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
+                      -{formatTokens(stats.cachedTokens)}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
 
+          {/* OPTIONAL DEVELOPER WHOLESALE & MARGIN SECTION (Hidden by default!) */}
+          {(showWholesale || showMargin) && (
             <div
-              className={`grid grid-cols-2 gap-2 pt-1 border-t text-xs ${
-                isDark ? 'border-zinc-800' : 'border-zinc-200/60'
-              }`}
+              style={{
+                backgroundColor: isDark ? 'rgba(236, 72, 153, 0.08)' : '#FDF2F8',
+                border: `1px solid ${isDark ? 'rgba(236, 72, 153, 0.2)' : '#FCE7F3'}`,
+                borderRadius: '16px',
+                padding: '12px',
+                marginBottom: '14px',
+                fontSize: '11px',
+              }}
             >
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '6px',
+                }}
+              >
+                <span style={{ fontWeight: 600, color: colors.accentPillText }}>
+                  Developer Economics
+                </span>
+                {showMargin && (
+                  <span
+                    style={{
+                      fontSize: '10px',
+                      fontWeight: 700,
+                      backgroundColor: colors.accentPillBg,
+                      color: colors.accentPillText,
+                      padding: '2px 6px',
+                      borderRadius: '9999px',
+                      border: `1px solid ${isDark ? 'rgba(236, 72, 153, 0.3)' : '#FBCFE8'}`,
+                    }}
+                  >
+                    {`+${stats.effectiveMarginPercent}% Margin`}
+                  </span>
+                )}
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px' }}>
+                {showWholesale && (
+                  <div>
+                    <span style={{ display: 'block', fontSize: '10px', color: colors.textMuted }}>
+                      Wholesale API:
+                    </span>
+                    <span style={{ fontWeight: 600, fontVariantNumeric: 'tabular-nums', color: colors.textPrimary }}>
+                      ${stats.wholesaleUSD.toFixed(4)}
+                    </span>
+                  </div>
+                )}
+                {showMargin && (
+                  <div style={{ textAlign: 'right' }}>
+                    <span style={{ display: 'block', fontSize: '10px', color: colors.textMuted }}>
+                      Net Retail Profit:
+                    </span>
+                    <span style={{ fontWeight: 600, fontVariantNumeric: 'tabular-nums', color: '#10B981' }}>
+                      +${stats.profitUSD.toFixed(4)}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Footer Row (Aztec: Exchange Rate & "Withdraw ▶" button) */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              paddingTop: '4px',
+            }}
+          >
+            <div style={{ fontSize: '10.5px', color: colors.textMuted, lineHeight: 1.3 }}>
               <div>
-                <span className={`block text-[10px] ${isDark ? 'text-zinc-500' : 'text-zinc-400'}`}>
-                  Provider Wholesale:
-                </span>
-                <span className={`font-mono text-[11px] ${isDark ? 'text-zinc-300' : 'text-zinc-700'}`}>
-                  {`$${stats.wholesaleUSD.toFixed(4)}`}
-                </span>
+                Model: <span style={{ color: colors.textSecondary, fontWeight: 500 }}>{cleanModelName(stats.detectedModel) || model}</span>
               </div>
-              <div className="text-right">
-                <span className={`block text-[10px] ${isDark ? 'text-zinc-500' : 'text-zinc-400'}`}>
-                  Net Profit:
-                </span>
-                <span className="font-mono text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
-                  {`+$${stats.profitUSD.toFixed(4)}`}
-                </span>
+              <div style={{ fontSize: '9.5px' }}>
+                {stats.isDevMode ? 'Dev Mode · Local Zero-DB' : 'Stripe Meter Active'}
               </div>
             </div>
-          </div>
 
-          {/* Token Breakdown Card */}
-          <div
-            className={`rounded-lg p-3 space-y-1.5 text-xs border ${
-              isDark
-                ? 'bg-zinc-800/20 border-zinc-800/80'
-                : 'bg-zinc-50/50 border-zinc-100'
-            }`}
-          >
-            <div className="flex justify-between items-center">
-              <span className={isDark ? 'text-zinc-400' : 'text-zinc-500'}>Prompt Tokens:</span>
-              <span className={`font-mono tabular-nums ${isDark ? 'text-zinc-300' : 'text-zinc-700'}`}>
-                {formatTokens(stats.promptTokens)}
-              </span>
-            </div>
-            {stats.cachedTokens > 0 && (
-              <div className="flex justify-between items-center text-[10.5px] text-emerald-600 dark:text-emerald-400">
-                <span>↳ Cache Savings (85% off):</span>
-                <span className="font-mono tabular-nums">-{formatTokens(stats.cachedTokens)}</span>
-              </div>
-            )}
-            <div className="flex justify-between items-center">
-              <span className={isDark ? 'text-zinc-400' : 'text-zinc-500'}>Completion Tokens:</span>
-              <span className={`font-mono tabular-nums ${isDark ? 'text-zinc-300' : 'text-zinc-700'}`}>
-                {formatTokens(stats.completionTokens)}
-              </span>
-            </div>
-            {stats.reasoningTokens > 0 && (
-              <div className="flex justify-between items-center text-[10.5px] text-zinc-500 dark:text-zinc-400">
-                <span>↳ Reasoning / Thinking:</span>
-                <span className="font-mono tabular-nums">{formatTokens(stats.reasoningTokens)}</span>
-              </div>
-            )}
-            <div
-              className={`flex justify-between items-center pt-1.5 border-t font-semibold ${
-                isDark ? 'border-zinc-800 text-zinc-100' : 'border-zinc-200/60 text-zinc-900'
-              }`}
-            >
-              <span>Total Tokens:</span>
-              <span className="font-mono tabular-nums">{formatTokens(stats.totalTokens)}</span>
-            </div>
-          </div>
-
-          {/* Remaining Balance & Top Up Action */}
-          {typeof remainingBalanceUSD === 'number' && (
-            <div className="flex justify-between items-center text-xs px-1">
-              <span className={isDark ? 'text-zinc-400' : 'text-zinc-500'}>Remaining Balance:</span>
-              <span
-                className={`font-mono font-semibold tabular-nums ${
-                  remainingBalanceUSD < 1 ? 'text-amber-500' : isDark ? 'text-zinc-200' : 'text-zinc-800'
-                }`}
+            {/* Vibrant Orchid / Magenta Action Button (Aztec "Withdraw ▶" button) */}
+            {onTopUp && (
+              <button
+                onClick={() => onTopUp(selectedPreset || undefined)}
+                style={{
+                  backgroundColor: colors.accentPink,
+                  color: '#FFFFFF',
+                  border: 'none',
+                  borderRadius: '9999px',
+                  padding: '9px 18px',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  boxShadow: '0 4px 14px rgba(236, 72, 153, 0.35)',
+                  transition: 'transform 0.15s ease, opacity 0.15s ease',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.92')}
+                onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
               >
-                ${remainingBalanceUSD.toFixed(2)}
-              </span>
-            </div>
-          )}
-
-          {onTopUp && (
-            <button
-              onClick={onTopUp}
-              className={`w-full py-1.5 px-3 rounded-lg font-medium text-xs transition cursor-pointer shadow-sm active:scale-98 ${
-                isDark
-                  ? 'bg-zinc-100 hover:bg-white text-zinc-900'
-                  : 'bg-zinc-900 hover:bg-zinc-800 text-white'
-              }`}
-            >
-              + Add / Top Up Credits
-            </button>
-          )}
-
-          {/* Environment Footer */}
-          <div className="flex items-center gap-2 pt-0.5 text-[10px]">
-            <span className="relative flex h-1.5 w-1.5 shrink-0">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
-            </span>
-            <span className={isDark ? 'text-zinc-500' : 'text-zinc-400'}>
-              {stats.isDevMode
-                ? 'Zero-DB Dev Mode · Running in local memory'
-                : 'Live Stripe Usage Meter Active'}
-            </span>
+                <span>Top Up</span>
+                <span style={{ fontSize: '10px' }}>▶</span>
+              </button>
+            )}
           </div>
         </div>
       )}
 
-      {/* Floating Bottom Pill */}
+      {/* Floating Bottom Launcher Pill (Matches the same Aztec luxury design) */}
       <div
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center gap-2 px-3 py-1.5 rounded-full border shadow-lg cursor-pointer transition-all select-none hover:scale-[1.02] active:scale-[0.98] ${
-          isDark
-            ? 'bg-zinc-900/95 hover:bg-zinc-850 text-zinc-100 border-zinc-800 shadow-zinc-950/40 hover:border-zinc-700'
-            : 'bg-white/95 hover:bg-zinc-50 text-zinc-900 border-zinc-200 shadow-zinc-900/5 hover:border-zinc-300'
-        }`}
+        className="vibezcheck-floating-pill"
         style={{
-          backdropFilter: 'blur(12px)',
-          WebkitBackdropFilter: 'blur(12px)',
           display: 'flex',
           alignItems: 'center',
-          gap: '0.5rem',
-          padding: '0.375rem 0.75rem',
+          gap: '8px',
+          padding: '6px 14px',
           borderRadius: '9999px',
-          borderWidth: '1px',
-          borderStyle: 'solid',
-          borderColor: isDark ? '#27272a' : '#e4e4e7',
-          backgroundColor: isDark ? 'rgba(24, 24, 27, 0.95)' : 'rgba(255, 255, 255, 0.95)',
-          color: isDark ? '#f4f4f5' : '#18181b',
+          border: `1px solid ${colors.border}`,
+          backgroundColor: colors.cardBg,
+          color: colors.textPrimary,
+          boxShadow: isDark
+            ? '0 12px 30px -8px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05)'
+            : '0 12px 28px -8px rgba(28, 25, 23, 0.1), 0 2px 8px rgba(0, 0, 0, 0.03)',
           cursor: 'pointer',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          transition: 'transform 0.15s ease, box-shadow 0.15s ease',
         }}
-        title="Click to open VibezCheck Financial Meter"
+        title="Click to toggle VibezCheck Financial Meter"
       >
-        <span className="text-emerald-500 dark:text-emerald-400 font-bold text-xs shrink-0">✦</span>
+        <span style={{ color: colors.accentPink, fontWeight: 700, fontSize: '12px' }}>✦</span>
         <span
-          className={`font-mono font-medium text-xs tabular-nums ${
-            isDark ? 'text-zinc-100' : 'text-zinc-900'
-          }`}
+          style={{
+            fontWeight: 600,
+            fontSize: '12px',
+            fontVariantNumeric: 'tabular-nums',
+            color: colors.textPrimary,
+          }}
         >
           {`$${stats.billedUSD.toFixed(4)}`}
         </span>
-        <span className={isDark ? 'text-zinc-700' : 'text-zinc-300'}>·</span>
+        <span style={{ color: colors.textMuted }}>·</span>
         <span
-          className={`font-mono text-xs tabular-nums ${
-            isDark ? 'text-zinc-400' : 'text-zinc-500'
-          }`}
+          style={{
+            fontSize: '12px',
+            color: colors.textSecondary,
+            fontVariantNumeric: 'tabular-nums',
+          }}
         >
           {`${formatTokens(stats.totalTokens)} tok`}
         </span>
         {stats.detectedModel && (
           <>
-            <span className={isDark ? 'text-zinc-700' : 'text-zinc-300'}>·</span>
+            <span style={{ color: colors.textMuted }}>·</span>
             <span
-              className={`font-mono text-[11px] truncate max-w-[90px] ${
-                isDark ? 'text-zinc-400' : 'text-zinc-500'
-              }`}
+              style={{
+                fontSize: '11px',
+                color: colors.textSecondary,
+                maxWidth: '85px',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
             >
               {cleanModelName(stats.detectedModel)}
             </span>
@@ -562,19 +985,30 @@ export function VibezCheck({
         )}
         {stats.isDevMode && (
           <span
-            className={`text-[9px] font-mono font-medium uppercase tracking-wider px-1.5 py-0.2 rounded border ${
-              isDark
-                ? 'bg-zinc-800 text-zinc-400 border-zinc-700/60'
-                : 'bg-zinc-100 text-zinc-500 border-zinc-200'
-            }`}
+            style={{
+              fontSize: '9px',
+              fontWeight: 700,
+              letterSpacing: '0.05em',
+              textTransform: 'uppercase',
+              padding: '1px 5px',
+              borderRadius: '9999px',
+              backgroundColor: isDark ? '#2D283A' : '#EFECE6',
+              color: colors.textSecondary,
+              border: `1px solid ${colors.border}`,
+            }}
           >
             DEV
           </span>
         )}
         <svg
-          className={`w-3 h-3 text-zinc-400 transition-transform duration-200 ml-0.5 ${
-            isOpen ? 'rotate-180' : ''
-          }`}
+          style={{
+            width: '12px',
+            height: '12px',
+            color: colors.textMuted,
+            marginLeft: '2px',
+            transform: isOpen ? 'rotate(180deg)' : 'none',
+            transition: 'transform 0.2s ease',
+          }}
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
