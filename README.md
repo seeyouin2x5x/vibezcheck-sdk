@@ -45,7 +45,13 @@ When you build an AI app, chatbot, or agent:
 
 Here is a complete, copy-paste ready AI chatbot with live per-message spending receipts and the floating financial HUD:
 
-### 1. Server Route (`app/api/chat/route.ts`)
+### 1. Install Dependencies
+
+```bash
+npm install vibezcheck ai @ai-sdk/openai @ai-sdk/react stripe
+```
+
+### 2. Server Route (`app/api/chat/route.ts`)
 
 ```typescript
 import { convertToModelMessages, streamText, UIMessage } from 'ai';
@@ -73,7 +79,7 @@ export async function POST(req: Request) {
 }
 ```
 
-### 2. Frontend Client (`app/page.tsx`)
+### 3. Frontend Client (`app/page.tsx`)
 
 ```tsx
 'use client';
@@ -170,7 +176,7 @@ export default function ChatPage() {
 }
 ```
 
-### 3. Environment Variables (`.env.local`)
+### 4. Environment Variables (`.env.local`)
 
 ```env
 OPENAI_API_KEY=sk-...
@@ -216,7 +222,7 @@ VibezCheck automatically detects every model used and lists them in the HUD:
 * `gpt-4o-mini (1 turn)`: 31 tok · $0.0001
 * `claude-3-5-sonnet (1 turn)`: 420 tok · $0.0068
 
-Click any model in the list to see its specific spending.
+Click any model to see its specific spending.
 
 ---
 
@@ -227,14 +233,6 @@ When you want to charge real money, VibezCheck has built-in Stripe helpers:
 * **Prepaid Credits**: Let users buy credit balance with Stripe Checkout (`BillingHelper.createTopUpSession`).
 * **Customer API Keys**: Issue `vz_live_...` keys saved in Stripe customer metadata (`ApiKeyAuth`).
 * **Agent Session Ceilings**: Limit a multi-step agent to a hard $1.00 budget with `AgentSession`.
-
----
-
-## 📦 Installation
-
-```bash
-npm install vibezcheck ai @ai-sdk/openai @ai-sdk/react stripe
-```
 
 ---
 
