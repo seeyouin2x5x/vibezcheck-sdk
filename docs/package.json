@@ -19,7 +19,8 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tailwind-merge": "^2.6.0",
-    "vibezcheck": "^0.5.3"
+    "vibezcheck": "^0.5.5",
+    "@vercel/analytics": "^1.5.0"
   },
   "devDependencies": {
     "@types/node": "^22.10.5",

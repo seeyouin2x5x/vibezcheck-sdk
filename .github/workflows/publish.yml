@@ -1,4 +1,4 @@
-name: CI & Publish to NPM
+name: CI & Deployment
 
 on:
   push:
@@ -9,30 +9,38 @@ on:
     branches: [main]
   workflow_dispatch:
     inputs:
-      publish:
-        description: 'Publish to NPM after build and tests?'
-        required: true
+      force_publish:
+        description: 'Force publish to NPM regardless of version check'
+        required: false
         type: boolean
         default: false
 
+permissions:
+  contents: write
+  id-token: write
+
 jobs:
-  test-and-build:
+  test:
+    name: Test & Build (Node ${{ matrix.node-version }})
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x, 22.x]
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          registry-url: 'https://registry.npmjs.org'
-
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 10
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
@@ -40,18 +48,81 @@ jobs:
       - name: Build Package
         run: pnpm build
 
-      - name: Run Tests
+      - name: Run Test Suite
         run: pnpm test
 
+  publish:
+    name: Publish to NPM & Create Release
+    needs: [test]
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Package
+        run: pnpm build
+
+      - name: Check NPM Version Status
+        id: check-version
+        run: |
+          PKG_NAME=$(node -p "require('./package.json').name")
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          echo "Package: $PKG_NAME"
+          echo "Current Version: $PKG_VERSION"
+          echo "package_name=$PKG_NAME" >> "$GITHUB_OUTPUT"
+          echo "package_version=$PKG_VERSION" >> "$GITHUB_OUTPUT"
+
+          if npm view "$PKG_NAME@$PKG_VERSION" version > /dev/null 2>&1; then
+            echo "version_exists=true" >> "$GITHUB_OUTPUT"
+            echo "Version $PKG_NAME@$PKG_VERSION is already published on NPM."
+          else
+            echo "version_exists=false" >> "$GITHUB_OUTPUT"
+            echo "Version $PKG_NAME@$PKG_VERSION is not yet published on NPM. Ready to publish."
+          fi
+
       - name: Publish to NPM
-        if: startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/main' || github.event.inputs.publish == 'true'
+        if: steps.check-version.outputs.version_exists == 'false' || github.event.inputs.force_publish == 'true'
         run: |
           if [ -z "$NODE_AUTH_TOKEN" ]; then
-            echo "::warning::NPM_TOKEN secret is not set in GitHub repository secrets. Skipping publish step."
+            echo "::warning::NPM_TOKEN or NODE_AUTH_TOKEN secret is not set in repository secrets. Skipping publish step."
             exit 0
           fi
-          echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > .npmrc
-          pnpm config set //registry.npmjs.org/:_authToken "${NODE_AUTH_TOKEN}"
-          pnpm publish --access public --no-git-checks
+          echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > ~/.npmrc
+          pnpm publish --access public --no-git-checks --provenance || pnpm publish --access public --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN || secrets.NODE_AUTH_TOKEN || secrets.NPM_AUTH_TOKEN }}
+
+      - name: Create GitHub Release
+        if: steps.check-version.outputs.version_exists == 'false' || startsWith(github.ref, 'refs/tags/v')
+        run: |
+          TAG="v${{ steps.check-version.outputs.package_version }}"
+          echo "Target tag: $TAG"
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            echo "GitHub release $TAG already exists."
+          else
+            echo "Creating GitHub release $TAG..."
+            gh release create "$TAG" \
+              --title "v${{ steps.check-version.outputs.package_version }}" \
+              --generate-notes || echo "Release creation skipped or already exists."
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
