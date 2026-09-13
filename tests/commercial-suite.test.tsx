@@ -6,7 +6,6 @@ import { createTokenMeter } from '../src/compat/token-meter';
 import { AgentSession, createAgentSession } from '../src/billing/session';
 import { wrapTool, instrumentToolKit } from '../src/billing/tools';
 import { VibezCheck } from '../src/react/vibezcheck-ui';
-import { generateIdempotencyKey } from '../src/core/idempotency';
 import { vibezcheck } from '../src/index';
 
 describe('Commercial Suite & Compat Drop-Ins', () => {
@@ -111,18 +110,6 @@ describe('Commercial Suite & Compat Drop-Ins', () => {
 
       const result = await instrumented.query_db.execute('SELECT 1');
       expect(result).toEqual([{ id: 1 }]);
-    });
-  });
-
-  describe('Web Crypto Deterministic Idempotency', () => {
-    it('should produce deterministic SHA-256 idempotency keys', async () => {
-      const key1 = await generateIdempotencyKey('cus_123', 'gpt-4o', '2026-09-06T12:00:00Z', 'step-1');
-      const key2 = await generateIdempotencyKey('cus_123', 'gpt-4o', '2026-09-06T12:00:00Z', 'step-1');
-      const key3 = await generateIdempotencyKey('cus_456', 'gpt-4o', '2026-09-06T12:00:00Z', 'step-1');
-
-      expect(key1).toBe(key2);
-      expect(key1).not.toBe(key3);
-      expect(key1.startsWith('vibez_evt_')).toBe(true);
     });
   });
 

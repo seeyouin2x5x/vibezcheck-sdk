@@ -26,7 +26,6 @@ export default defineConfig({
     'stripe',
     'openai',
     '@anthropic-ai/sdk',
-    '@google/generative-ai',
     'ai',
     '@ai-sdk/provider',
     '@ai-sdk/openai',
