@@ -3,6 +3,7 @@ import { withBilling, type WithBillingOptions } from './with-billing';
 import { calculateCost } from '../pricing/calculator';
 import { createMeter, VibezMeter } from '../meter/client';
 import { toResponse } from './to-response';
+import { createAgentSession, type AgentSession, type AgentSessionOptions } from '../billing/session';
 
 export interface VibezCheckModelOptions extends WithBillingOptions {
   /** OpenAI / Anthropic / AI Gateway API Key override */
@@ -11,22 +12,8 @@ export interface VibezCheckModelOptions extends WithBillingOptions {
   baseURL?: string;
 }
 
-export interface VibezSessionOptions {
-  customer?: CustomerParam;
-  stripeApiKey?: string;
-  pricing?: WithBillingOptions['pricing'];
-  billing?: WithBillingOptions['billing'];
-  metadata?: Record<string, string | number | boolean>;
-}
-
-export interface VibezSession {
-  /** Creates a metered model bound to this session customer */
-  model: (modelOrId: any, options?: VibezCheckModelOptions) => any;
-  /** Tracks a non-LLM tool execution cost (e.g. search, scraper, image gen) */
-  trackTool: (name: string, options: { costUSD: number; metadata?: Record<string, any> }) => Promise<void>;
-  /** Underlying meter instance */
-  meter: VibezMeter;
-}
+export type VibezSessionOptions = AgentSessionOptions;
+export type VibezSession = AgentSession;
 
 /**
  * Creates or resolves an AI SDK compatible LanguageModel with built-in VibezCheck billing & metering.
@@ -223,71 +210,10 @@ export function createVibezModel(
 }
 
 /**
- * Creates a scoped session for unified multi-call and tool tracking.
+ * Creates a scoped agent session for unified multi-call and tool tracking.
+ * Alias for createAgentSession from vibezcheck/billing.
  */
-export function createVibezSession(sessionOptions: VibezSessionOptions = {}): VibezSession {
-  const meter = createMeter({
-    apiKey: sessionOptions.stripeApiKey,
-  });
-
-  const customerId =
-    typeof sessionOptions.customer === 'string'
-      ? sessionOptions.customer
-      : sessionOptions.customer?.id;
-
-  return {
-    meter,
-    model: (modelOrId: any, callOptions: VibezCheckModelOptions = {}) => {
-      return createVibezModel(modelOrId, {
-        customer: sessionOptions.customer,
-        pricing: sessionOptions.pricing,
-        billing: sessionOptions.billing,
-        meter,
-        metadata: {
-          ...sessionOptions.metadata,
-          ...callOptions.metadata,
-        },
-        ...callOptions,
-      });
-    },
-    trackTool: async (name: string, { costUSD, metadata }: { costUSD: number; metadata?: Record<string, any> }) => {
-      // Record non-LLM tool usage as a custom usage event
-      const event: UsageEvent = {
-        timestamp: new Date().toISOString(),
-        model: `tool:${name}`,
-        provider: 'tool',
-        usage: {
-          inputTokens: 0,
-          outputTokens: 0,
-          totalTokens: 0,
-        },
-        cost: {
-          inputCostUSD: 0,
-          outputCostUSD: costUSD,
-          totalUSD: costUSD,
-          currency: 'USD',
-        },
-        customerId,
-        metadata: {
-          ...sessionOptions.metadata,
-          ...metadata,
-          tool: name,
-        },
-      };
-
-      meter.recordUsage({
-        model: `tool:${name}`,
-        provider: 'tool',
-        inputTokens: 0,
-        outputTokens: 0,
-        customerId,
-        metadata: event.metadata,
-      });
-
-      await meter.flush();
-    },
-  };
-}
+export const createVibezSession = createAgentSession;
 
 // Attach session & toResponse helpers to createVibezModel function
 export const vibezcheck: typeof createVibezModel & {

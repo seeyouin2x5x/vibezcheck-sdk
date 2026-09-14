@@ -1,4 +1,4 @@
-export * from './sessions';
+export * from './portal';
 export * from './session';
 export * from './tools';
 export * from './stop-condition';

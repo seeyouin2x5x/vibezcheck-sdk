@@ -8,7 +8,7 @@ import { createVibezModel, createVibezSession, type VibezCheckModelOptions } fro
 import { vibezcheckMiddleware } from './ai-sdk/middleware';
 import { CustomerManager, createCustomerManager } from './customers/manager';
 import { ApiKeyAuth, createApiKeyAuth, extractAuthToken } from './auth';
-import { BillingHelper, createBillingHelper } from './billing/sessions';
+import { BillingHelper, createBillingHelper } from './billing/portal';
 import { AgentSession, createAgentSession } from './billing/session';
 import { wrapTool, instrumentToolKit, createTools } from './billing/tools';
 import { isBudgetExceeded, stopWhenBudgetExceeded } from './billing/stop-condition';
