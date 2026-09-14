@@ -75,6 +75,11 @@
       "import": "./dist/react/index.mjs",
       "require": "./dist/react/index.js"
     },
+    "./database": {
+      "types": "./dist/database/index.d.ts",
+      "import": "./dist/database/index.mjs",
+      "require": "./dist/database/index.js"
+    },
     "./middleware": {
       "types": "./dist/ai-sdk/middleware.d.ts",
       "import": "./dist/ai-sdk/middleware.mjs",

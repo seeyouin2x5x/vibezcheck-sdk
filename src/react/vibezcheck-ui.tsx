@@ -15,6 +15,13 @@ export interface ModelUsageDetail {
   turns: number;
 }
 
+export interface ToolUsageDetail {
+  name: string;
+  calls: number;
+  costUSD: number;
+  latencyMs?: number;
+}
+
 export interface VibezCheckProps {
   /** Messages array from AI SDK useChat() — automatically aggregates tokens & costs */
   messages?: any[];
@@ -34,6 +41,8 @@ export interface VibezCheckProps {
    * Default: false (hidden from end-users)
    */
   showMargin?: boolean;
+  /** Optional tool rate card in USD (e.g. { web_search: 0.01 }) */
+  toolCosts?: Record<string, number>;
   /** Manual total cost override in USD */
   totalCostUSD?: number;
   /** Manual total tokens override */
@@ -60,10 +69,13 @@ export interface VibezCheckProps {
     totalTokens: number;
     isDevMode: boolean;
     byModel?: Record<string, ModelUsageDetail>;
+    byTool?: Record<string, ToolUsageDetail>;
+    toolCostUSD?: number;
   }) => void;
   /** Whether popover is initially open (default: false) */
   defaultOpen?: boolean;
 }
+
 
 // Built-in fallback rate cards per 1M tokens for local Zero-DB Dev Mode
 const DEV_RATES: Record<string, { input: number; output: number }> = {
@@ -106,6 +118,7 @@ export function VibezCheck({
   margin = 1.25,
   showWholesale = false,
   showMargin = false,
+  toolCosts,
   totalCostUSD: manualCost,
   totalTokens: manualTokens,
   remainingBalanceUSD,
@@ -124,6 +137,7 @@ export function VibezCheck({
   // Interactive UI states
   const [heroUnit, setHeroUnit] = useState<'usd' | 'tokens'>('usd');
   const [activeTab, setActiveTab] = useState<'session' | 'turn'>('session');
+  const [breakdownTab, setBreakdownTab] = useState<'models' | 'tools'>('models');
   const [selectedPreset, setSelectedPreset] = useState<number | null>(null);
   const [detailsExpanded, setDetailsExpanded] = useState(true);
   const [selectedModelFilter, setSelectedModelFilter] = useState<string | null>(null);
@@ -170,6 +184,9 @@ export function VibezCheck({
 
     // Multi-model map
     const byModel: Record<string, ModelUsageDetail> = {};
+    const byTool: Record<string, ToolUsageDetail> = {};
+    let toolCostUSD = 0;
+    let toolCallCount = 0;
 
     // Latest turn specific telemetry
     let latestBilledUSD = 0;
@@ -178,6 +195,29 @@ export function VibezCheck({
     let latestPromptTokens = 0;
     let latestCompletionTokens = 0;
     let latestModel: string | undefined = undefined;
+
+    const recordToolUsage = (
+      toolName: string,
+      cost: number = 0,
+      latency?: number
+    ) => {
+      if (!toolName) return;
+      if (!byTool[toolName]) {
+        byTool[toolName] = {
+          name: toolName,
+          calls: 0,
+          costUSD: 0,
+          latencyMs: latency,
+        };
+      }
+      byTool[toolName].calls += 1;
+      byTool[toolName].costUSD = Number((byTool[toolName].costUSD + cost).toFixed(6));
+      if (latency !== undefined) {
+        byTool[toolName].latencyMs = (byTool[toolName].latencyMs ?? 0) + latency;
+      }
+      toolCallCount += 1;
+      toolCostUSD = Number((toolCostUSD + cost).toFixed(6));
+    };
 
     const recordModelUsage = (
       rawModel: string | undefined,
@@ -235,6 +275,21 @@ export function VibezCheck({
         completionTokens += evComp;
         cachedTokens += evCached;
         reasoningTokens += evReasoning;
+
+        // Extract tool calls from event
+        if (Array.isArray((ev as any).toolCalls)) {
+          for (const tc of (ev as any).toolCalls) {
+            const tName = tc.name || tc.toolName || 'tool';
+            const tCost = tc.costUSD ?? tc.cost ?? toolCosts?.[tName] ?? 0;
+            recordToolUsage(tName, tCost, tc.latencyMs);
+          }
+        } else if ((ev as any).metadata?.toolCalls && Array.isArray((ev as any).metadata.toolCalls)) {
+          for (const tc of (ev as any).metadata.toolCalls) {
+            const tName = tc.name || tc.toolName || 'tool';
+            const tCost = tc.costUSD ?? tc.cost ?? toolCosts?.[tName] ?? 0;
+            recordToolUsage(tName, tCost, tc.latencyMs);
+          }
+        }
 
         const currentModel = ev.model || model;
         if (currentModel && !detectedModel) {
@@ -307,6 +362,8 @@ export function VibezCheck({
 
       if (telemetryEvents.length > 0) {
         hasServerTelemetry = true;
+        let hasTelemetryToolCalls = false;
+
         for (const { mIdx, event: eventFound } of telemetryEvents) {
           const costVal = eventFound.cost;
           let msgBilled = 0;
@@ -329,6 +386,10 @@ export function VibezCheck({
           const msgReasoning = eventFound.usage?.reasoningTokens ?? 0;
           const currentModel = eventFound.model || model;
 
+          if (currentModel && !detectedModel) {
+            detectedModel = currentModel;
+          }
+
           billedUSD += msgBilled;
           wholesaleUSD += msgWholesale;
           totalTokens += msgTok;
@@ -337,8 +398,14 @@ export function VibezCheck({
           cachedTokens += msgCached;
           reasoningTokens += msgReasoning;
 
-          if (currentModel && !detectedModel) {
-            detectedModel = currentModel;
+          // Check for server-tracked toolCalls in telemetry
+          if (Array.isArray(eventFound.toolCalls) && eventFound.toolCalls.length > 0) {
+            hasTelemetryToolCalls = true;
+            for (const tc of eventFound.toolCalls) {
+              const tName = tc.name || tc.toolName || 'tool';
+              const tCost = tc.costUSD ?? tc.cost ?? toolCosts?.[tName] ?? 0;
+              recordToolUsage(tName, tCost, tc.latencyMs);
+            }
           }
 
           recordModelUsage(currentModel, msgTok, msgPrompt, msgComp, msgBilled, msgWholesale, msgReasoning, msgCached);
@@ -351,6 +418,28 @@ export function VibezCheck({
             latestPromptTokens = msgPrompt;
             latestCompletionTokens = msgComp;
             latestModel = currentModel;
+          }
+        }
+
+        // If server telemetry did not include explicit toolCalls, extract from message parts
+        if (!hasTelemetryToolCalls) {
+          for (const msg of messages) {
+            if (Array.isArray(msg.parts)) {
+              for (const part of msg.parts) {
+                if (part?.type === 'tool-call' || part?.type === 'tool-invocation') {
+                  const toolName = part.toolName || part.toolInvocation?.toolName || 'tool';
+                  const cost =
+                    part.costUSD ??
+                    part.cost ??
+                    part.toolInvocation?.costUSD ??
+                    part.toolInvocation?.cost ??
+                    toolCosts?.[toolName] ??
+                    0;
+                  const latency = part.latencyMs ?? part.toolInvocation?.latencyMs;
+                  recordToolUsage(toolName, cost, latency);
+                }
+              }
+            }
           }
         }
 
@@ -380,6 +469,24 @@ export function VibezCheck({
       } else {
         // Pure Offline Dev Mode: Zero server telemetry found in entire conversation
         for (const msg of messages) {
+          // Extract tool calls from parts
+          if (Array.isArray(msg.parts)) {
+            for (const part of msg.parts) {
+              if (part?.type === 'tool-call' || part?.type === 'tool-invocation') {
+                const toolName = part.toolName || part.toolInvocation?.toolName || 'tool';
+                const cost =
+                  part.costUSD ??
+                  part.cost ??
+                  part.toolInvocation?.costUSD ??
+                  part.toolInvocation?.cost ??
+                  toolCosts?.[toolName] ??
+                  0;
+                const latency = part.latencyMs ?? part.toolInvocation?.latencyMs;
+                recordToolUsage(toolName, cost, latency);
+              }
+            }
+          }
+
           let text = '';
           if (typeof msg.content === 'string') {
             text = msg.content;
@@ -420,6 +527,11 @@ export function VibezCheck({
 
           recordModelUsage(activeModel, totalTokens, promptTokens, completionTokens, billedUSD, wholesaleUSD);
         }
+
+        if (toolCostUSD > 0) {
+          billedUSD = Number((billedUSD + toolCostUSD).toFixed(6));
+          wholesaleUSD = Number((wholesaleUSD + toolCostUSD).toFixed(6));
+        }
       }
     }
 
@@ -437,6 +549,7 @@ export function VibezCheck({
         : Math.round((margin - 1) * 100);
 
     const modelsList = Object.values(byModel).sort((a, b) => b.billedUSD - a.billedUSD);
+    const toolsList = Object.values(byTool).sort((a, b) => b.costUSD - a.costUSD || b.calls - a.calls);
 
     return {
       wholesaleUSD,
@@ -459,8 +572,12 @@ export function VibezCheck({
       effectiveMarginPercent,
       byModel,
       modelsList,
+      byTool,
+      toolsList,
+      toolCostUSD: Number(toolCostUSD.toFixed(6)),
+      toolCallCount,
     };
-  }, [events, messages, manualCost, manualTokens, model, margin, devMode]);
+  }, [events, messages, manualCost, manualTokens, model, margin, toolCosts, devMode]);
 
   useEffect(() => {
     if (onCostUpdate) {
@@ -471,9 +588,11 @@ export function VibezCheck({
         totalTokens: stats.totalTokens,
         isDevMode: stats.isDevMode,
         byModel: stats.byModel,
+        byTool: stats.byTool,
+        toolCostUSD: stats.toolCostUSD,
       });
     }
-  }, [stats.billedUSD, stats.totalTokens, stats.isDevMode, stats.byModel, onCostUpdate]);
+  }, [stats.billedUSD, stats.totalTokens, stats.isDevMode, stats.byModel, stats.byTool, stats.toolCostUSD, onCostUpdate]);
 
   const positionStyles: React.CSSProperties = useMemo(() => {
     const base: React.CSSProperties = { position: 'fixed', zIndex: 9999 };
@@ -950,8 +1069,8 @@ export function VibezCheck({
               </div>
             )}
 
-            {/* MULTI-MODEL BREAKDOWN (Automatically shows when >1 model is used) */}
-            {isMultiModel && (
+            {/* BREAKDOWN: MODEL DISTRIBUTION & TOOL BREAKDOWN */}
+            {(isMultiModel || (stats.toolsList && stats.toolsList.length > 0)) && (
               <div
                 style={{
                   marginTop: '10px',
@@ -959,48 +1078,123 @@ export function VibezCheck({
                   borderTop: `1px solid ${colors.border}`,
                 }}
               >
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginBottom: '6px',
-                  }}
-                >
-                  <span style={{ fontSize: '10.5px', fontWeight: 600, color: colors.textSecondary }}>
-                    Model Distribution ({stats.modelsList.length})
-                  </span>
-                  {selectedModelFilter && (
-                    <button
-                      onClick={() => setSelectedModelFilter(null)}
+                {/* Segmented Tab Header when tools exist */}
+                {stats.toolsList && stats.toolsList.length > 0 ? (
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      marginBottom: '8px',
+                    }}
+                  >
+                    <div
                       style={{
-                        background: 'none',
-                        border: 'none',
-                        color: colors.accentPink,
-                        fontSize: '10px',
-                        cursor: 'pointer',
-                        padding: 0,
+                        backgroundColor: colors.pillTrack,
+                        padding: '2px',
+                        borderRadius: '9999px',
+                        display: 'inline-flex',
+                        alignItems: 'center',
                       }}
                     >
-                      Clear Filter
-                    </button>
-                  )}
-                </div>
+                      <button
+                        onClick={() => setBreakdownTab('models')}
+                        style={{
+                          border: 'none',
+                          borderRadius: '9999px',
+                          padding: '3px 8px',
+                          fontSize: '10px',
+                          fontWeight: breakdownTab === 'models' ? 600 : 500,
+                          cursor: 'pointer',
+                          backgroundColor: breakdownTab === 'models' ? colors.activePill : 'transparent',
+                          color: breakdownTab === 'models' ? colors.activePillText : colors.textMuted,
+                          transition: 'all 0.15s ease',
+                        }}
+                      >
+                        {`Models (${stats.modelsList.length})`}
+                      </button>
+                      <button
+                        onClick={() => setBreakdownTab('tools')}
+                        style={{
+                          border: 'none',
+                          borderRadius: '9999px',
+                          padding: '3px 8px',
+                          fontSize: '10px',
+                          fontWeight: breakdownTab === 'tools' ? 600 : 500,
+                          cursor: 'pointer',
+                          backgroundColor: breakdownTab === 'tools' ? colors.activePill : 'transparent',
+                          color: breakdownTab === 'tools' ? colors.activePillText : colors.textMuted,
+                          transition: 'all 0.15s ease',
+                        }}
+                      >
+                        {`Tools (${stats.toolsList.length})`}
+                      </button>
+                    </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                  {stats.modelsList.map((m) => {
-                    const isSelected = selectedModelFilter === m.model;
-                    const pct = stats.totalTokens > 0 ? Math.round((m.tokens / stats.totalTokens) * 100) : 0;
-                    return (
+
+                    {breakdownTab === 'models' && selectedModelFilter && (
+                      <button
+                        onClick={() => setSelectedModelFilter(null)}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: colors.accentPink,
+                          fontSize: '10px',
+                          cursor: 'pointer',
+                          padding: 0,
+                        }}
+                      >
+                        Clear Filter
+                      </button>
+                    )}
+
+                    {breakdownTab === 'tools' && (
+                      <span style={{ fontSize: '10px', fontWeight: 600, color: colors.accentPink }}>
+                        ${stats.toolCostUSD.toFixed(4)}
+                      </span>
+                    )}
+                  </div>
+                ) : (
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: '6px',
+                    }}
+                  >
+                    <span style={{ fontSize: '10.5px', fontWeight: 600, color: colors.textSecondary }}>
+                      Model Distribution ({stats.modelsList.length})
+                    </span>
+                    {selectedModelFilter && (
+                      <button
+                        onClick={() => setSelectedModelFilter(null)}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: colors.accentPink,
+                          fontSize: '10px',
+                          cursor: 'pointer',
+                          padding: 0,
+                        }}
+                      >
+                        Clear Filter
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {/* Tab content: Tools */}
+                {breakdownTab === 'tools' && stats.toolsList && stats.toolsList.length > 0 ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                    {stats.toolsList.map((t) => (
                       <div
-                        key={m.model}
-                        onClick={() => setSelectedModelFilter(isSelected ? null : m.model)}
+                        key={t.name}
                         style={{
                           padding: '6px 8px',
                           borderRadius: '12px',
-                          backgroundColor: isSelected ? colors.chipBg : colors.cardBg,
-                          border: `1px solid ${isSelected ? colors.accentPink : colors.border}`,
-                          cursor: 'pointer',
+                          backgroundColor: colors.cardBg,
+                          border: `1px solid ${colors.border}`,
                           transition: 'all 0.15s ease',
                         }}
                       >
@@ -1014,10 +1208,10 @@ export function VibezCheck({
                         >
                           <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                             <span style={{ fontWeight: 600, color: colors.textPrimary }}>
-                              {m.displayName}
+                              {t.name}
                             </span>
                             <span style={{ fontSize: '9.5px', color: colors.textMuted }}>
-                              ({m.turns} turn{m.turns > 1 ? 's' : ''})
+                              ({t.calls} call{t.calls > 1 ? 's' : ''})
                             </span>
                           </div>
                           <span
@@ -1027,7 +1221,7 @@ export function VibezCheck({
                               color: colors.textPrimary,
                             }}
                           >
-                            ${m.billedUSD.toFixed(4)}
+                            ${t.costUSD.toFixed(4)}
                           </span>
                         </div>
 
@@ -1041,15 +1235,83 @@ export function VibezCheck({
                             marginTop: '2px',
                           }}
                         >
-                          <span>{`${formatTokens(m.tokens)} tok (${pct}%)`}</span>
-                          <span>{`Prompt: ${formatTokens(m.promptTokens)} · Comp: ${formatTokens(m.completionTokens)}`}</span>
+                          <span>
+                            {t.name}: {t.calls} call{t.calls > 1 ? 's' : ''} (${t.costUSD.toFixed(2)})
+                          </span>
+                          {t.latencyMs !== undefined && t.latencyMs > 0 && (
+                            <span>{t.latencyMs}ms</span>
+                          )}
                         </div>
                       </div>
-                    );
-                  })}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  /* Tab content: Models */
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                    {stats.modelsList.map((m) => {
+                      const isSelected = selectedModelFilter === m.model;
+                      const pct = stats.totalTokens > 0 ? Math.round((m.tokens / stats.totalTokens) * 100) : 0;
+                      return (
+                        <div
+                          key={m.model}
+                          onClick={() => setSelectedModelFilter(isSelected ? null : m.model)}
+                          style={{
+                            padding: '6px 8px',
+                            borderRadius: '12px',
+                            backgroundColor: isSelected ? colors.chipBg : colors.cardBg,
+                            border: `1px solid ${isSelected ? colors.accentPink : colors.border}`,
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease',
+                          }}
+                        >
+                          <div
+                            style={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              fontSize: '11px',
+                            }}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                              <span style={{ fontWeight: 600, color: colors.textPrimary }}>
+                                {m.displayName}
+                              </span>
+                              <span style={{ fontSize: '9.5px', color: colors.textMuted }}>
+                                ({m.turns} turn{m.turns > 1 ? 's' : ''})
+                              </span>
+                            </div>
+                            <span
+                              style={{
+                                fontWeight: 600,
+                                fontVariantNumeric: 'tabular-nums',
+                                color: colors.textPrimary,
+                              }}
+                            >
+                              ${m.billedUSD.toFixed(4)}
+                            </span>
+                          </div>
+
+                          <div
+                            style={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              fontSize: '10px',
+                              color: colors.textSecondary,
+                              marginTop: '2px',
+                            }}
+                          >
+                            <span>{`${formatTokens(m.tokens)} tok (${pct}%)`}</span>
+                            <span>{`Prompt: ${formatTokens(m.promptTokens)} · Comp: ${formatTokens(m.completionTokens)}`}</span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             )}
+
           </div>
 
           {/* OPTIONAL DEVELOPER WHOLESALE & MARGIN SECTION (Hidden by default!) */}

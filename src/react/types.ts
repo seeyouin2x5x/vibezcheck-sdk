@@ -1,9 +1,9 @@
 import type React from 'react';
 import type { UsageEvent } from '../types';
-import type { ModelUsageDetail, VibezCheckProps } from './vibezcheck-ui';
+import type { ModelUsageDetail, ToolUsageDetail, VibezCheckProps } from './vibezcheck-ui';
 import type { VibezReceiptProps } from './receipt';
 
-export type { ModelUsageDetail, VibezCheckProps, VibezReceiptProps };
+export type { ModelUsageDetail, ToolUsageDetail, VibezCheckProps, VibezReceiptProps };
 
 /**
  * Options for the reactive useVibez() hook
@@ -15,6 +15,8 @@ export interface UseVibezOptions {
   margin?: number;
   /** Array of raw UsageEvents (if using event-driven telemetry) */
   events?: UsageEvent[];
+  /** Optional tool rate card in USD (e.g. { web_search: 0.01 }) */
+  toolCosts?: Record<string, number>;
   /** Manual total cost override in USD */
   totalCostUSD?: number;
   /** Manual total tokens override */
@@ -45,6 +47,12 @@ export interface UseVibezResult {
   reasoningTokens: number;
   /** Multi-model breakdown mapping model names to their usage details */
   byModel: Record<string, ModelUsageDetail>;
+  /** Multi-tool breakdown mapping tool names to their usage details */
+  byTool: Record<string, ToolUsageDetail>;
+  /** Total billed cost for tool calls in USD */
+  toolCostUSD: number;
+  /** Total number of tool calls executed */
+  toolCallCount: number;
   /** Total number of assistant response turns */
   turnCount: number;
   /** Active or primary model detected from the conversation */
@@ -61,3 +69,4 @@ export interface UseVibezResult {
     completionTokens: number;
   };
 }
+

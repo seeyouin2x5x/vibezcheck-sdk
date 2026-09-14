@@ -13,6 +13,7 @@ import { AgentSession, createAgentSession } from './billing/session';
 import { wrapTool, instrumentToolKit, createTools } from './billing/tools';
 import { isBudgetExceeded, stopWhenBudgetExceeded } from './billing/stop-condition';
 import { createAgent } from './billing/agent';
+import { createSupabaseAdapter, createPrismaAdapter, createSqlAdapter } from './database';
 
 export * from './types';
 export * from './meter';
@@ -21,6 +22,7 @@ export * from './ai-sdk';
 export * from './customers';
 export * from './auth';
 export * from './billing';
+export * from './database';
 export { vibezcheckMiddleware } from './ai-sdk/middleware';
 
 
@@ -179,6 +181,9 @@ vibezcheck.Billing = BillingHelper;
 vibezcheck.Auth = ApiKeyAuth;
 vibezcheck.Customers = CustomerManager;
 vibezcheck.toResponse = toResponse;
+vibezcheck.supabase = createSupabaseAdapter;
+vibezcheck.prisma = createPrismaAdapter;
+vibezcheck.sql = createSqlAdapter;
 
 /**
  * Singleton client instance

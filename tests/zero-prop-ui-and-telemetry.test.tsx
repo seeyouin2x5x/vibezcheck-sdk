@@ -1,6 +1,6 @@
 import React from 'react';
 import { renderToString } from 'react-dom/server';
-import { VibezReceipt, VibezCheck } from '../src/react';
+import { VibezReceipt, VibezCheck, extractSessionStats } from '../src/react';
 import { vibezcheck, toResponse } from '../src';
 import { withBilling } from '../src/ai-sdk/with-billing';
 
@@ -229,6 +229,63 @@ describe('Zero-Prop UI & Native Stream Telemetry Suite (v0.5.7)', () => {
       const html = renderToString(<VibezCheck messages={messages} defaultOpen={true} />);
       expect(html).toContain('vibezcheck-ui-root');
       expect(html).not.toContain('Top Up ▶');
+    });
+
+    it('should aggregate tool usage and itemize individual tool costs in <VibezCheck />', () => {
+      const messages = [
+        { role: 'user', content: 'What is the weather in Paris?' },
+        {
+          role: 'assistant',
+          content: 'Checking weather...',
+          parts: [
+            { type: 'tool-call', toolName: 'web_search', costUSD: 0.01 },
+            { type: 'tool-call', toolName: 'web_search', costUSD: 0.01 },
+            { type: 'tool-call', toolName: 'calculator', costUSD: 0.005 },
+            {
+              type: 'data-vibezcheck',
+              data: {
+                model: 'gpt-4o',
+                cost: { billedUSD: 0.002, wholesaleUSD: 0.0016 },
+                usage: { totalTokens: 150, inputTokens: 50, outputTokens: 100 },
+              },
+            },
+          ],
+        },
+      ];
+
+      const html = renderToString(<VibezCheck messages={messages} defaultOpen={true} />);
+
+      // Should render Tools segmented tab button
+      expect(html).toContain('Tools (2)');
+      expect(html).toContain('Models (1)');
+    });
+
+
+
+    it('should extract byTool, toolCostUSD, and toolCallCount in extractSessionStats / useVibez', () => {
+      const messages = [
+        { role: 'user', content: 'Search and calculate' },
+        {
+          role: 'assistant',
+          content: 'Here are results',
+          parts: [
+            { type: 'tool-call', toolName: 'web_search' },
+            { type: 'tool-call', toolName: 'web_search' },
+            { type: 'tool-call', toolName: 'code_sandbox', costUSD: 0.03 },
+          ],
+        },
+      ];
+
+      const stats = extractSessionStats(messages, {
+        toolCosts: { web_search: 0.01 },
+      });
+
+      expect(stats.toolCallCount).toBe(3);
+      expect(stats.toolCostUSD).toBe(0.05); // 2 * 0.01 + 0.03
+      expect(stats.byTool['web_search'].calls).toBe(2);
+      expect(stats.byTool['web_search'].costUSD).toBe(0.02);
+      expect(stats.byTool['code_sandbox'].calls).toBe(1);
+      expect(stats.byTool['code_sandbox'].costUSD).toBe(0.03);
     });
   });
 

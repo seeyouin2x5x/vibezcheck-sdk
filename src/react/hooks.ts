@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import type { UseVibezOptions, UseVibezResult, ModelUsageDetail } from './types';
+import type { UseVibezOptions, UseVibezResult, ModelUsageDetail, ToolUsageDetail } from './types';
 
 // Built-in fallback rate cards per 1M tokens for local Zero-DB Dev Mode
 const DEV_RATES: Record<string, { input: number; output: number }> = {
@@ -33,6 +33,7 @@ export function extractSessionStats(
     model = 'gpt-4o',
     margin = 1.25,
     events,
+    toolCosts,
     totalCostUSD: manualCost,
     totalTokens: manualTokens,
   } = options;
@@ -49,6 +50,9 @@ export function extractSessionStats(
   let turnCount = 0;
 
   const byModel: Record<string, ModelUsageDetail> = {};
+  const byTool: Record<string, ToolUsageDetail> = {};
+  let toolCostUSD = 0;
+  let toolCallCount = 0;
 
   let latestBilledUSD = 0;
   let latestWholesaleUSD = 0;
@@ -56,6 +60,29 @@ export function extractSessionStats(
   let latestPromptTokens = 0;
   let latestCompletionTokens = 0;
   let latestModel: string | undefined = undefined;
+
+  const recordToolUsage = (
+    toolName: string,
+    cost: number = 0,
+    latency?: number
+  ) => {
+    if (!toolName) return;
+    if (!byTool[toolName]) {
+      byTool[toolName] = {
+        name: toolName,
+        calls: 0,
+        costUSD: 0,
+        latencyMs: latency,
+      };
+    }
+    byTool[toolName].calls += 1;
+    byTool[toolName].costUSD = Number((byTool[toolName].costUSD + cost).toFixed(6));
+    if (latency !== undefined) {
+      byTool[toolName].latencyMs = (byTool[toolName].latencyMs ?? 0) + latency;
+    }
+    toolCallCount += 1;
+    toolCostUSD = Number((toolCostUSD + cost).toFixed(6));
+  };
 
   const recordModelUsage = (
     rawModel: string | undefined,
@@ -115,6 +142,21 @@ export function extractSessionStats(
       cachedTokens += evCached;
       reasoningTokens += evReasoning;
       turnCount += 1;
+
+      // Extract tool calls from event
+      if (Array.isArray((ev as any).toolCalls)) {
+        for (const tc of (ev as any).toolCalls) {
+          const tName = tc.name || tc.toolName || 'tool';
+          const tCost = tc.costUSD ?? tc.cost ?? toolCosts?.[tName] ?? 0;
+          recordToolUsage(tName, tCost, tc.latencyMs);
+        }
+      } else if ((ev as any).metadata?.toolCalls && Array.isArray((ev as any).metadata.toolCalls)) {
+        for (const tc of (ev as any).metadata.toolCalls) {
+          const tName = tc.name || tc.toolName || 'tool';
+          const tCost = tc.costUSD ?? tc.cost ?? toolCosts?.[tName] ?? 0;
+          recordToolUsage(tName, tCost, tc.latencyMs);
+        }
+      }
 
       const currentModel = ev.model || model;
       if (currentModel && !detectedModel) {
@@ -197,7 +239,10 @@ export function extractSessionStats(
     }
 
     if (telemetryEvents.length > 0) {
+
       hasServerTelemetry = true;
+      let hasTelemetryToolCalls = false;
+
       for (const { event: eventFound } of telemetryEvents) {
         const costVal = eventFound.cost;
         let msgBilled = 0;
@@ -238,6 +283,16 @@ export function extractSessionStats(
         reasoningTokens += msgReasoning;
         turnCount += 1;
 
+        // Check for server-tracked toolCalls in telemetry
+        if (Array.isArray(eventFound.toolCalls) && eventFound.toolCalls.length > 0) {
+          hasTelemetryToolCalls = true;
+          for (const tc of eventFound.toolCalls) {
+            const tName = tc.name || tc.toolName || 'tool';
+            const tCost = tc.costUSD ?? tc.cost ?? toolCosts?.[tName] ?? 0;
+            recordToolUsage(tName, tCost, tc.latencyMs);
+          }
+        }
+
         recordModelUsage(
           currentModel,
           msgTok,
@@ -256,6 +311,28 @@ export function extractSessionStats(
         latestCompletionTokens = msgComp;
         latestModel = currentModel;
       }
+
+      // If server telemetry did not include explicit toolCalls, extract from message parts
+      if (!hasTelemetryToolCalls) {
+        for (const msg of messages) {
+          if (Array.isArray(msg.parts)) {
+            for (const part of msg.parts) {
+              if (part?.type === 'tool-call' || part?.type === 'tool-invocation') {
+                const toolName = part.toolName || part.toolInvocation?.toolName || 'tool';
+                const cost =
+                  part.costUSD ??
+                  part.cost ??
+                  part.toolInvocation?.costUSD ??
+                  part.toolInvocation?.cost ??
+                  toolCosts?.[toolName] ??
+                  0;
+                const latency = part.latencyMs ?? part.toolInvocation?.latencyMs;
+                recordToolUsage(toolName, cost, latency);
+              }
+            }
+          }
+        }
+      }
     } else {
       // Local Zero-DB Dev Mode heuristic
       const activeRate = DEV_RATES[model] || DEV_RATES.default;
@@ -263,6 +340,25 @@ export function extractSessionStats(
 
       for (let i = 0; i < messages.length; i++) {
         const msg = messages[i];
+
+        // Extract tool calls from parts
+        if (Array.isArray(msg.parts)) {
+          for (const part of msg.parts) {
+            if (part?.type === 'tool-call' || part?.type === 'tool-invocation') {
+              const toolName = part.toolName || part.toolInvocation?.toolName || 'tool';
+              const cost =
+                part.costUSD ??
+                part.cost ??
+                part.toolInvocation?.costUSD ??
+                part.toolInvocation?.cost ??
+                toolCosts?.[toolName] ??
+                0;
+              const latency = part.latencyMs ?? part.toolInvocation?.latencyMs;
+              recordToolUsage(toolName, cost, latency);
+            }
+          }
+        }
+
         const text =
           typeof msg.content === 'string'
             ? msg.content
@@ -302,6 +398,11 @@ export function extractSessionStats(
           billedUSD += turnBilled;
         }
       }
+
+      if (toolCostUSD > 0) {
+        billedUSD = Number((billedUSD + toolCostUSD).toFixed(6));
+        wholesaleUSD = Number((wholesaleUSD + toolCostUSD).toFixed(6));
+      }
     }
   }
 
@@ -320,6 +421,9 @@ export function extractSessionStats(
     cachedTokens,
     reasoningTokens,
     byModel,
+    byTool,
+    toolCostUSD: Number(toolCostUSD.toFixed(6)),
+    toolCallCount,
     turnCount,
     activeModel: detectedModel || model,
     hasServerTelemetry,
@@ -357,6 +461,7 @@ export function useVibez(
       options.events,
       options.model,
       options.margin,
+      options.toolCosts,
       options.totalCostUSD,
       options.totalTokens,
     ]

@@ -11,6 +11,7 @@ export default defineConfig({
     'auth/index': 'src/auth/index.ts',
     'billing/index': 'src/billing/index.ts',
     'react/index': 'src/react/index.ts',
+    'database/index': 'src/database/index.ts',
     'cli/index': 'src/cli/index.ts',
   },
   format: ['cjs', 'esm'],
