@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useChat } from 'ai/react';
-import { VibezReceipt, VibezSessionWidget } from 'vibezcheck/react';
+import { VibezReceipt, VibezCheck } from 'vibezcheck/react';
 import { Sparkles, CreditCard, ArrowUp, Zap, ShieldCheck, Building2, User, Cpu, Percent } from 'lucide-react';
 
 interface TenantProfile {
@@ -319,8 +319,8 @@ export default function Home() {
         </div>
       </footer>
 
-      {/* Floating Speedometer Token Counter */}
-      <VibezSessionWidget position="bottom-right" theme="light" />
+      {/* Floating Aztec Web3 Financial HUD */}
+      <VibezCheck messages={messages} position="bottom-right" theme="light" />
     </div>
   );
 }

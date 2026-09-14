@@ -1,273 +1,368 @@
-import { useContext, useState, useCallback, useRef } from 'react';
-import { VibezSessionContext } from './context';
-import type { VibezSessionContextValue } from './types';
+import { useMemo } from 'react';
+import type { UseVibezOptions, UseVibezResult, ModelUsageDetail } from './types';
+
+// Built-in fallback rate cards per 1M tokens for local Zero-DB Dev Mode
+const DEV_RATES: Record<string, { input: number; output: number }> = {
+  'gpt-4o': { input: 2.5, output: 10.0 },
+  'gpt-4o-mini': { input: 0.15, output: 0.6 },
+  'claude-3-5-sonnet': { input: 3.0, output: 15.0 },
+  'claude-3-7-sonnet': { input: 3.0, output: 15.0 },
+  'claude-opus': { input: 15.0, output: 75.0 },
+  'gemini-1.5-pro': { input: 1.25, output: 5.0 },
+  'gemini-1.5-flash': { input: 0.075, output: 0.3 },
+  'deepseek-chat': { input: 0.14, output: 0.28 },
+  default: { input: 2.0, output: 8.0 },
+};
+
+export function cleanModelName(raw?: string): string | undefined {
+  if (!raw || raw === 'ai-model' || raw === 'default') return undefined;
+  const match = raw.match(/\(['"]?([^'"]+)['"]?\)/);
+  let name = match ? match[1] : raw;
+  name = name.replace(/^(openai|anthropic|google|xai|elevenlabs|deepseek|luma|mistral|groq)\//, '');
+  return name;
+}
 
 /**
- * Hook to access live session usage, cost totals, and turn recorder
+ * Pure function to extract live session financial and token metrics from messages or events
  */
-export function useVibezSession(): VibezSessionContextValue {
-  const context = useContext(VibezSessionContext);
+export function extractSessionStats(
+  messages?: any[],
+  options: UseVibezOptions = {}
+): UseVibezResult {
+  const {
+    model = 'gpt-4o',
+    margin = 1.25,
+    events,
+    totalCostUSD: manualCost,
+    totalTokens: manualTokens,
+  } = options;
 
-  if (!context) {
-    throw new Error(
-      '[vibezcheck/react] useVibezSession must be used within a <VibezSessionProvider>.'
-    );
+  let hasServerTelemetry = false;
+  let wholesaleUSD = 0;
+  let billedUSD = manualCost ?? 0;
+  let totalTokens = manualTokens ?? 0;
+  let promptTokens = 0;
+  let completionTokens = 0;
+  let cachedTokens = 0;
+  let reasoningTokens = 0;
+  let detectedModel: string | undefined = undefined;
+  let turnCount = 0;
+
+  const byModel: Record<string, ModelUsageDetail> = {};
+
+  let latestBilledUSD = 0;
+  let latestWholesaleUSD = 0;
+  let latestTokens = 0;
+  let latestPromptTokens = 0;
+  let latestCompletionTokens = 0;
+  let latestModel: string | undefined = undefined;
+
+  const recordModelUsage = (
+    rawModel: string | undefined,
+    tok: number,
+    pTok: number,
+    cTok: number,
+    billed: number,
+    wholesale: number,
+    rTok: number = 0,
+    cachedTok: number = 0
+  ) => {
+    const clean = cleanModelName(rawModel) || rawModel || 'ai-model';
+    if (!byModel[clean]) {
+      byModel[clean] = {
+        model: clean,
+        displayName: clean,
+        tokens: 0,
+        promptTokens: 0,
+        completionTokens: 0,
+        reasoningTokens: 0,
+        cachedTokens: 0,
+        billedUSD: 0,
+        wholesaleUSD: 0,
+        profitUSD: 0,
+        turns: 0,
+      };
+    }
+    byModel[clean].tokens += tok;
+    byModel[clean].promptTokens += pTok;
+    byModel[clean].completionTokens += cTok;
+    byModel[clean].reasoningTokens += rTok;
+    byModel[clean].cachedTokens += cachedTok;
+    byModel[clean].billedUSD += billed;
+    byModel[clean].wholesaleUSD += wholesale;
+    byModel[clean].profitUSD = Math.max(0, byModel[clean].billedUSD - byModel[clean].wholesaleUSD);
+    byModel[clean].turns += 1;
+  };
+
+  if (events && events.length > 0) {
+    hasServerTelemetry = true;
+    for (let i = 0; i < events.length; i++) {
+      const ev = events[i];
+      const evBilled = ev.cost?.billedUSD ?? ev.cost?.totalUSD ?? 0;
+      const evWholesale =
+        ev.cost?.wholesaleTotalUSD ?? ev.cost?.wholesaleUSD ?? ev.cost?.billedUSD ?? 0;
+      const evTokens = ev.usage?.totalTokens ?? 0;
+      const evPrompt = ev.usage?.inputTokens ?? 0;
+      const evComp = ev.usage?.outputTokens ?? 0;
+      const evCached = ev.usage?.cachedTokens ?? 0;
+      const evReasoning = ev.usage?.reasoningTokens ?? 0;
+
+      billedUSD += evBilled;
+      wholesaleUSD += evWholesale;
+      totalTokens += evTokens;
+      promptTokens += evPrompt;
+      completionTokens += evComp;
+      cachedTokens += evCached;
+      reasoningTokens += evReasoning;
+      turnCount += 1;
+
+      const currentModel = ev.model || model;
+      if (currentModel && !detectedModel) {
+        detectedModel = currentModel;
+      }
+
+      recordModelUsage(
+        currentModel,
+        evTokens,
+        evPrompt,
+        evComp,
+        evBilled,
+        evWholesale,
+        evReasoning,
+        evCached
+      );
+
+      if (i === events.length - 1) {
+        latestBilledUSD = evBilled;
+        latestWholesaleUSD = evWholesale;
+        latestTokens = evTokens;
+        latestPromptTokens = evPrompt;
+        latestCompletionTokens = evComp;
+        latestModel = currentModel;
+      }
+    }
   }
 
-  return context;
-}
+  if (messages && messages.length > 0) {
+    const telemetryEvents: Array<{ mIdx: number; event: any }> = [];
 
-export const useVibez = useVibezSession;
+    for (let mIdx = 0; mIdx < messages.length; mIdx++) {
+      const msg = messages[mIdx];
+      let eventFound: any = null;
 
-export interface VibezChatMessage {
-  id: string;
-  role: 'user' | 'assistant' | 'system';
-  content: string;
-  annotations?: Array<{ type: string; reasoning?: string; [key: string]: any }>;
-  createdAt?: Date;
-}
+      // 1. AI SDK v4 Message Annotations
+      if (Array.isArray(msg.annotations)) {
+        for (const ann of msg.annotations) {
+          if (ann && (ann.cost || ann.usage || ann.vibez || ann.type === 'vibezcheck')) {
+            eventFound = ann.vibez || ann;
+            break;
+          }
+        }
+      }
 
-export interface UseVibezChatOptions {
-  api?: string;
-  model?: string;
-  customer?: string;
-  body?: Record<string, any>;
-  initialMessages?: VibezChatMessage[];
-  onFinish?: (message: VibezChatMessage, usage: any) => void;
-  onError?: (error: Error) => void;
+      // 2. AI SDK v5/v6/v7 Message Parts
+      if (!eventFound && Array.isArray(msg.parts)) {
+        for (const part of msg.parts) {
+          if (part?.type === 'data-vibezcheck' && part.data) {
+            eventFound = part.data;
+            break;
+          } else if (
+            (part?.type === 'data' || part?.type === 'custom') &&
+            (part.data?.vibez || part.data?.cost || part.data?.usage)
+          ) {
+            eventFound = part.data.vibez || part.data;
+            break;
+          } else if (part?.providerMetadata?.vibezcheck) {
+            eventFound = part.providerMetadata.vibezcheck;
+            break;
+          }
+        }
+      }
+
+      // 3. AI SDK v5/v6/v7 Message Metadata
+      if (!eventFound && msg.metadata?.vibezcheck) {
+        eventFound = msg.metadata.vibezcheck;
+      } else if (!eventFound && msg.metadata && (msg.metadata.cost || msg.metadata.usage)) {
+        eventFound = msg.metadata;
+      }
+
+      // 4. Direct Provider Metadata
+      if (!eventFound && msg.providerMetadata?.vibezcheck) {
+        eventFound = msg.providerMetadata.vibezcheck;
+      }
+
+      if (eventFound) {
+        telemetryEvents.push({ mIdx, event: eventFound });
+      }
+    }
+
+    if (telemetryEvents.length > 0) {
+      hasServerTelemetry = true;
+      for (const { event: eventFound } of telemetryEvents) {
+        const costVal = eventFound.cost;
+        let msgBilled = 0;
+        let msgWholesale = 0;
+        if (typeof costVal === 'number') {
+          msgBilled = costVal;
+          msgWholesale = costVal;
+        } else if (costVal && typeof costVal === 'object') {
+          msgBilled = costVal.billedUSD ?? costVal.totalUSD ?? costVal.costUSD ?? 0;
+          msgWholesale =
+            costVal.wholesaleUSD ??
+            costVal.wholesaleTotalUSD ??
+            costVal.billedUSD ??
+            costVal.totalUSD ??
+            0;
+        } else if (typeof eventFound.costUSD === 'number') {
+          msgBilled = eventFound.costUSD;
+          msgWholesale = eventFound.costUSD;
+        }
+
+        const msgTok = eventFound.usage?.totalTokens ?? eventFound.tokens ?? 0;
+        const msgPrompt = eventFound.usage?.inputTokens ?? eventFound.promptTokens ?? 0;
+        const msgComp = eventFound.usage?.outputTokens ?? eventFound.completionTokens ?? 0;
+        const msgCached = eventFound.usage?.cachedTokens ?? 0;
+        const msgReasoning = eventFound.usage?.reasoningTokens ?? 0;
+        const currentModel = eventFound.model || model;
+
+        if (currentModel && !detectedModel) {
+          detectedModel = currentModel;
+        }
+
+        billedUSD += msgBilled;
+        wholesaleUSD += msgWholesale;
+        totalTokens += msgTok;
+        promptTokens += msgPrompt;
+        completionTokens += msgComp;
+        cachedTokens += msgCached;
+        reasoningTokens += msgReasoning;
+        turnCount += 1;
+
+        recordModelUsage(
+          currentModel,
+          msgTok,
+          msgPrompt,
+          msgComp,
+          msgBilled,
+          msgWholesale,
+          msgReasoning,
+          msgCached
+        );
+
+        latestBilledUSD = msgBilled;
+        latestWholesaleUSD = msgWholesale;
+        latestTokens = msgTok;
+        latestPromptTokens = msgPrompt;
+        latestCompletionTokens = msgComp;
+        latestModel = currentModel;
+      }
+    } else {
+      // Local Zero-DB Dev Mode heuristic
+      const activeRate = DEV_RATES[model] || DEV_RATES.default;
+      const effectiveMargin = margin ?? 1.25;
+
+      for (let i = 0; i < messages.length; i++) {
+        const msg = messages[i];
+        const text =
+          typeof msg.content === 'string'
+            ? msg.content
+            : Array.isArray(msg.parts)
+            ? msg.parts
+                .filter((p: any) => p.type === 'text')
+                .map((p: any) => p.text)
+                .join('')
+            : '';
+
+        const charCount = text.length;
+        const estimatedTokens = Math.max(1, Math.ceil(charCount / 3.8));
+
+        totalTokens += estimatedTokens;
+
+        if (msg.role === 'assistant') {
+          completionTokens += estimatedTokens;
+          turnCount += 1;
+          const turnWholesale = (estimatedTokens / 1_000_000) * activeRate.output;
+          const turnBilled = turnWholesale * effectiveMargin;
+          wholesaleUSD += turnWholesale;
+          billedUSD += turnBilled;
+
+          recordModelUsage(model, estimatedTokens, 0, estimatedTokens, turnBilled, turnWholesale);
+
+          latestBilledUSD = turnBilled;
+          latestWholesaleUSD = turnWholesale;
+          latestTokens = estimatedTokens;
+          latestPromptTokens = 0;
+          latestCompletionTokens = estimatedTokens;
+          latestModel = model;
+        } else {
+          promptTokens += estimatedTokens;
+          const turnWholesale = (estimatedTokens / 1_000_000) * activeRate.input;
+          const turnBilled = turnWholesale * effectiveMargin;
+          wholesaleUSD += turnWholesale;
+          billedUSD += turnBilled;
+        }
+      }
+    }
+  }
+
+  const profitUSD = Math.max(0, billedUSD - wholesaleUSD);
+  const marginPercent =
+    wholesaleUSD > 0 ? Math.round(((billedUSD - wholesaleUSD) / wholesaleUSD) * 100) : 0;
+
+  return {
+    totalCostUSD: Number(billedUSD.toFixed(6)),
+    wholesaleUSD: Number(wholesaleUSD.toFixed(6)),
+    profitUSD: Number(profitUSD.toFixed(6)),
+    marginPercent,
+    totalTokens,
+    promptTokens,
+    completionTokens,
+    cachedTokens,
+    reasoningTokens,
+    byModel,
+    turnCount,
+    activeModel: detectedModel || model,
+    hasServerTelemetry,
+    latestTurn: {
+      model: latestModel || detectedModel || model,
+      billedUSD: Number(latestBilledUSD.toFixed(6)),
+      wholesaleUSD: Number(latestWholesaleUSD.toFixed(6)),
+      tokens: latestTokens,
+      promptTokens: latestPromptTokens,
+      completionTokens: latestCompletionTokens,
+    },
+  };
 }
 
 /**
- * Declarative, 1-line Chat Streaming Hook with automatic VibezCheck session tracking.
+ * ✦ Modern Reactive Hook for Vercel AI SDK
+ *
+ * Pass `messages` from `useChat()` and get real-time aggregated costs,
+ * token counts, profit margins, and multi-model breakdowns with zero props or providers.
  *
  * @example
  * ```tsx
- * const { messages, input, handleInputChange, handleSubmit, isLoading } = useVibezChat({
- *   model: 'gpt-4o-mini',
- *   customer: 'alex@example.com',
- * });
+ * const { messages } = useChat();
+ * const { totalCostUSD, totalTokens, byModel } = useVibez(messages);
  * ```
  */
-export function useVibezChat(options: UseVibezChatOptions = {}) {
-  const {
-    api = '/api/chat',
-    model = 'gpt-4o-mini',
-    customer = 'anonymous',
-    body = {},
-    initialMessages = [],
-    onFinish,
-    onError,
-  } = options;
-
-  const session = useContext(VibezSessionContext);
-
-  const [messages, setMessages] = useState<VibezChatMessage[]>(initialMessages);
-  const [input, setInput] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const abortControllerRef = useRef<AbortController | null>(null);
-
-  const handleInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      setInput(e.target.value);
-    },
-    []
+export function useVibez(
+  messages?: any[],
+  options: UseVibezOptions = {}
+): UseVibezResult {
+  return useMemo(
+    () => extractSessionStats(messages, options),
+    [
+      messages,
+      options.events,
+      options.model,
+      options.margin,
+      options.totalCostUSD,
+      options.totalTokens,
+    ]
   );
-
-  const append = useCallback(
-    async (userMessage: VibezChatMessage) => {
-      const updatedMessages = [...messages, userMessage];
-      setMessages(updatedMessages);
-      setIsLoading(true);
-
-      const assistantId = 'msg_' + Math.random().toString(36).substring(2, 9);
-      let assistantContent = '';
-      let detectedReasoning = '';
-      let detectedUsage = {
-        promptTokens: 0,
-        completionTokens: 0,
-        totalTokens: 0,
-        reasoningTokens: 0,
-      };
-
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: assistantId,
-          role: 'assistant',
-          content: '',
-          createdAt: new Date(),
-        },
-      ]);
-
-      try {
-        abortControllerRef.current = new AbortController();
-
-        const res = await fetch(api, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            messages: updatedMessages.map((m) => ({
-              role: m.role,
-              content: m.content,
-            })),
-            model,
-            customer,
-            ...body,
-          }),
-          signal: abortControllerRef.current.signal,
-        });
-
-        if (!res.ok) {
-          const errData = await res.json().catch(() => ({}));
-          throw new Error(errData.error || `HTTP error! status: ${res.status}`);
-        }
-
-        const reader = res.body?.getReader();
-        if (!reader) throw new Error('No stream body available');
-
-        const decoder = new TextDecoder();
-        let buffer = '';
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
-          buffer = lines.pop() || '';
-
-          for (const line of lines) {
-            if (!line.trim()) continue;
-
-            if (line.startsWith('0:')) {
-              try {
-                assistantContent += JSON.parse(line.substring(2));
-              } catch {
-                assistantContent += line.substring(2).replace(/^"|"$/g, '');
-              }
-            } else if (line.startsWith('d:')) {
-              try {
-                const data = JSON.parse(line.substring(2));
-                if (data.usage) {
-                  detectedUsage = {
-                    promptTokens: data.usage.promptTokens ?? 0,
-                    completionTokens: data.usage.completionTokens ?? 0,
-                    totalTokens:
-                      (data.usage.promptTokens ?? 0) + (data.usage.completionTokens ?? 0),
-                    reasoningTokens: data.usage.reasoningTokens ?? 0,
-                  };
-                }
-              } catch {
-                // ignore
-              }
-            } else if (line.startsWith('e:') || line.startsWith('g:')) {
-              try {
-                detectedReasoning += JSON.parse(line.substring(2));
-              } catch {
-                detectedReasoning += line.substring(2);
-              }
-            } else if (!line.startsWith('f:') && !line.startsWith('2:')) {
-              assistantContent += line;
-            }
-
-            setMessages((prev) =>
-              prev.map((msg) =>
-                msg.id === assistantId
-                  ? {
-                      ...msg,
-                      content: assistantContent,
-                      annotations: detectedReasoning
-                        ? [{ type: 'reasoning', reasoning: detectedReasoning }]
-                        : undefined,
-                    }
-                  : msg
-              )
-            );
-          }
-        }
-
-        if (detectedUsage.promptTokens === 0 && detectedUsage.completionTokens === 0) {
-          const promptWords = updatedMessages.reduce(
-            (acc, m) => acc + m.content.split(/\s+/).length,
-            0
-          );
-          const outputWords = assistantContent.split(/\s+/).length;
-          detectedUsage = {
-            promptTokens: Math.ceil(promptWords * 1.3),
-            completionTokens: Math.ceil(outputWords * 1.3),
-            totalTokens: Math.ceil((promptWords + outputWords) * 1.3),
-            reasoningTokens: detectedReasoning
-              ? Math.ceil(detectedReasoning.split(/\s+/).length * 1.3)
-              : 0,
-          };
-        }
-
-        // Automatically record turn into VibezSessionContext
-        if (session) {
-          session.recordTurn({
-            model,
-            usage: detectedUsage,
-          });
-        }
-
-        const finalMsg: VibezChatMessage = {
-          id: assistantId,
-          role: 'assistant',
-          content: assistantContent,
-          annotations: detectedReasoning
-            ? [{ type: 'reasoning', reasoning: detectedReasoning }]
-            : undefined,
-          createdAt: new Date(),
-        };
-
-        if (onFinish) {
-          onFinish(finalMsg, detectedUsage);
-        }
-      } catch (err: any) {
-        if (err.name === 'AbortError') return;
-        console.error('[useVibezChat Error]', err);
-        if (onError) onError(err);
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [api, model, customer, body, messages, session, onFinish, onError]
-  );
-
-  const handleSubmit = useCallback(
-    (e?: React.FormEvent) => {
-      if (e) e.preventDefault();
-      if (!input.trim() || isLoading) return;
-
-      const userMsg: VibezChatMessage = {
-        id: 'msg_' + Math.random().toString(36).substring(2, 9),
-        role: 'user',
-        content: input.trim(),
-        createdAt: new Date(),
-      };
-
-      setInput('');
-      append(userMsg);
-    },
-    [input, isLoading, append]
-  );
-
-  const stop = useCallback(() => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-      setIsLoading(false);
-    }
-  }, []);
-
-  return {
-    messages,
-    setMessages,
-    input,
-    setInput,
-    handleInputChange,
-    handleSubmit,
-    isLoading,
-    stop,
-    append,
-  };
 }
+
+// Aliases for developer convenience
+export const useVibezSession = useVibez;
+export const useVibezStats = useVibez;

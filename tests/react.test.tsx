@@ -1,124 +1,127 @@
 import React from 'react';
 import { renderToString } from 'react-dom/server';
-import { VibezSessionProvider, useVibezSession, VibezSessionBadge } from '../src/react';
+import { useVibez, extractSessionStats } from '../src/react';
 
-describe('VibezSession React Context & Hooks', () => {
-  it('should initialize with empty in-memory session state', () => {
-    let capturedCtx: any = null;
+describe('useVibez React Hook & Session Extraction Engine (v0.6.0)', () => {
+  it('should initialize with zero totals when empty messages array is passed', () => {
+    let stats: any = null;
 
     const TestComponent = () => {
-      capturedCtx = useVibezSession();
+      stats = useVibez([]);
       return <div>Test</div>;
     };
 
-    renderToString(
-      <VibezSessionProvider sessionId="test_sess_1">
-        <TestComponent />
-      </VibezSessionProvider>
-    );
+    renderToString(<TestComponent />);
 
-    expect(capturedCtx).not.toBeNull();
-    expect(capturedCtx.sessionId).toBe('test_sess_1');
-    expect(capturedCtx.turnCount).toBe(0);
-    expect(capturedCtx.sessionUsage.totalTokens).toBe(0);
-    expect(capturedCtx.sessionCost.totalUSD).toBe(0);
+    expect(stats).not.toBeNull();
+    expect(stats.totalTokens).toBe(0);
+    expect(stats.totalCostUSD).toBe(0);
+    expect(stats.wholesaleUSD).toBe(0);
+    expect(stats.profitUSD).toBe(0);
+    expect(stats.hasServerTelemetry).toBe(false);
   });
 
-  it('should record turns and calculate multi-turn usage and costs', () => {
-    let capturedCtx: any = null;
+  it('should reactively parse AI SDK messages with verified server telemetry', () => {
+    const messages = [
+      { role: 'user', content: 'What is photosynthesis?' },
+      {
+        role: 'assistant',
+        content: 'Photosynthesis is the biological process...',
+        parts: [
+          { type: 'text', text: 'Photosynthesis is the biological process...' },
+          {
+            type: 'data-vibezcheck',
+            data: {
+              type: 'vibezcheck',
+              model: 'gpt-4o',
+              cost: { billedUSD: 0.0015, wholesaleUSD: 0.0010 },
+              usage: { totalTokens: 150, inputTokens: 50, outputTokens: 100 },
+            },
+          },
+        ],
+      },
+    ];
 
+    let stats: any = null;
     const TestComponent = () => {
-      capturedCtx = useVibezSession();
+      stats = useVibez(messages);
       return null;
     };
 
-    renderToString(
-      <VibezSessionProvider>
-        <TestComponent />
-      </VibezSessionProvider>
-    );
+    renderToString(<TestComponent />);
 
-    // Turn 1: GPT-5.6 Sol (1000 input, 500 output, 300 reasoning)
-    const turn1 = capturedCtx.recordTurn({
-      model: 'gpt-5.6-sol',
-      usage: {
-        promptTokens: 1000,
-        completionTokens: 500,
-        reasoningTokens: 300,
-      },
-    });
-
-    expect(turn1.usage.inputTokens).toBe(1000);
-    expect(turn1.usage.outputTokens).toBe(500);
-    expect(turn1.usage.reasoningTokens).toBe(300);
-    expect(turn1.cost.totalUSD).toBeGreaterThan(0);
-
-    // Turn 2: Claude 3.7 Sonnet (2000 input, 800 output, 400 thinking)
-    const turn2 = capturedCtx.recordTurn({
-      model: 'claude-3-7-sonnet',
-      usage: {
-        inputTokens: 2000,
-        outputTokens: 800,
-        reasoningTokens: 400,
-      },
-    });
-
-    expect(turn2.usage.inputTokens).toBe(2000);
-    expect(turn2.usage.outputTokens).toBe(800);
-    expect(turn2.usage.reasoningTokens).toBe(400);
-    expect(turn2.cost.totalUSD).toBeGreaterThan(0);
+    expect(stats.totalTokens).toBe(150);
+    expect(stats.promptTokens).toBe(50);
+    expect(stats.completionTokens).toBe(100);
+    expect(stats.totalCostUSD).toBe(0.0015);
+    expect(stats.wholesaleUSD).toBe(0.001);
+    expect(stats.profitUSD).toBe(0.0005);
+    expect(stats.marginPercent).toBe(50);
+    expect(stats.hasServerTelemetry).toBe(true);
+    expect(stats.turnCount).toBe(1);
+    expect(stats.byModel['gpt-4o']).toBeDefined();
+    expect(stats.byModel['gpt-4o'].tokens).toBe(150);
   });
 
-  it('should support custom storage adapters for persistence', () => {
-    const mockStorageMap = new Map<string, string>();
-    const mockStorage = {
-      getItem: (key: string) => mockStorageMap.get(key) || null,
-      setItem: (key: string, val: string) => {
-        mockStorageMap.set(key, val);
+  it('should aggregate multi-model sessions across turns accurately', () => {
+    const messages = [
+      { role: 'user', content: 'Say hi' },
+      {
+        role: 'assistant',
+        content: 'Hello!',
+        annotations: [
+          {
+            type: 'vibezcheck',
+            model: 'gpt-4o-mini',
+            cost: { billedUSD: 0.0001, wholesaleUSD: 0.00008 },
+            usage: { totalTokens: 30, inputTokens: 10, outputTokens: 20 },
+          },
+        ],
       },
-      removeItem: (key: string) => {
-        mockStorageMap.delete(key);
+      { role: 'user', content: 'Write a quick sort algorithm in Rust' },
+      {
+        role: 'assistant',
+        content: 'fn quicksort(...)',
+        parts: [
+          { type: 'text', text: 'fn quicksort(...)' },
+          {
+            type: 'data-vibezcheck',
+            data: {
+              type: 'vibezcheck',
+              model: 'claude-3-5-sonnet',
+              cost: { billedUSD: 0.0050, wholesaleUSD: 0.0035 },
+              usage: { totalTokens: 400, inputTokens: 100, outputTokens: 300 },
+            },
+          },
+        ],
       },
-    };
+    ];
 
-    let capturedCtx: any = null;
-    const TestComponent = () => {
-      capturedCtx = useVibezSession();
-      return null;
-    };
+    const stats = extractSessionStats(messages);
 
-    renderToString(
-      <VibezSessionProvider
-        sessionId="persisted_session_1"
-        persist="custom"
-        storage={mockStorage}
-      >
-        <TestComponent />
-      </VibezSessionProvider>
-    );
-
-    capturedCtx.recordTurn({
-      model: 'gpt-4o',
-      usage: { promptTokens: 100, completionTokens: 200 },
-    });
-
-    // Check custom storage received updated JSON
-    const stored = mockStorageMap.get('vibez_session_persisted_session_1');
-    expect(stored).toBeDefined();
-    const parsed = JSON.parse(stored!);
-    expect(parsed.turnCount).toBe(1);
-    expect(parsed.sessionUsage.totalTokens).toBe(300);
+    expect(stats.totalTokens).toBe(430);
+    expect(stats.totalCostUSD).toBe(0.0051);
+    expect(stats.wholesaleUSD).toBe(0.00358);
+    expect(stats.byModel['gpt-4o-mini'].tokens).toBe(30);
+    expect(stats.byModel['claude-3-5-sonnet'].tokens).toBe(400);
+    expect(stats.turnCount).toBe(2);
+    expect(stats.latestTurn.model).toBe('claude-3-5-sonnet');
+    expect(stats.latestTurn.tokens).toBe(400);
   });
 
-  it('should render VibezSessionBadge markup cleanly', () => {
-    const html = renderToString(
-      <VibezSessionProvider>
-        <VibezSessionBadge showTokens showCost />
-      </VibezSessionProvider>
-    );
+  it('should provide offline fallback estimates in local zero-db dev mode', () => {
+    const messages = [
+      { role: 'user', content: 'Explain string theory.' },
+      { role: 'assistant', content: 'String theory proposes that fundamental particles...' },
+    ];
 
-    expect(html).toContain('⚡');
-    expect(html).toContain('tok');
-    expect(html).toContain('0.0000');
+    const stats = extractSessionStats(messages, { model: 'gpt-4o', margin: 1.30 });
+
+    expect(stats.hasServerTelemetry).toBe(false);
+    expect(stats.totalTokens).toBeGreaterThan(0);
+    expect(stats.totalCostUSD).toBeGreaterThan(0);
+    expect(stats.wholesaleUSD).toBeGreaterThan(0);
+    expect(stats.profitUSD).toBeGreaterThan(0);
   });
 });
+

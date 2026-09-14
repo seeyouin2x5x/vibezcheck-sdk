@@ -1,19 +1,30 @@
+import type { AgentSession } from './session';
+
 export interface ToolOptions {
-  name: string;
+  name?: string;
   costUSD: number;
   tool?: any;
   execute?: (...args: any[]) => any;
+  session?: AgentSession;
+  onExecute?: (info: {
+    name: string;
+    costUSD: number;
+    latencyMs: number;
+    args: any;
+    result?: any;
+    error?: any;
+  }) => void | Promise<void>;
 }
 
 /**
- * Wraps a Vercel AI SDK tool with usage and cost tracking
+ * Wraps a Vercel AI SDK tool or custom function with cost and latency tracking
  */
-export function wrapTool(options: ToolOptions): any {
-  const { name, costUSD, tool, execute } = options;
+export function wrapTool<T = any>(options: ToolOptions): T {
+  const { name = 'tool', costUSD, tool, execute, session, onExecute } = options;
   const targetFn = execute || tool?.execute;
 
   if (!targetFn && !tool) {
-    return options;
+    return options as any;
   }
 
   const base = tool || {};
@@ -25,50 +36,56 @@ export function wrapTool(options: ToolOptions): any {
     execute: async (...args: any[]) => {
       const startTime = performance.now();
       try {
-        const result = await targetFn(...args);
+        let result: any;
+        if (session && typeof session.trackTool === 'function') {
+          result = await session.trackTool(name, { costUSD }, () => targetFn(...args));
+        } else {
+          result = await targetFn(...args);
+        }
         const latencyMs = Math.round(performance.now() - startTime);
 
-        if (typeof (globalThis as any).__vibezCurrentSession?.trackTool === 'function') {
-          await (globalThis as any).__vibezCurrentSession.trackTool(name, {
-            costUSD,
-            latencyMs,
-            metadata: { args: args[0] },
-          });
+        if (onExecute) {
+          await onExecute({ name, costUSD, latencyMs, args: args[0], result });
         }
 
         return result;
       } catch (error) {
         const latencyMs = Math.round(performance.now() - startTime);
-        if (typeof (globalThis as any).__vibezCurrentSession?.trackTool === 'function') {
-          await (globalThis as any).__vibezCurrentSession.trackTool(name, {
-            costUSD,
-            latencyMs,
-            metadata: { error: String(error) },
-          });
+        if (onExecute) {
+          await onExecute({ name, costUSD, latencyMs, args: args[0], error });
         }
         throw error;
       }
     },
-  };
+  } as any;
 }
 
 /**
  * Instruments an entire toolkit (e.g. StripeAgentToolkit) with cost and latency tracking
  */
-export function instrumentToolKit(
-  tools: Record<string, any>,
-  options: { customer?: string; costPerActionUSD?: number } = {}
-): Record<string, any> {
+export function instrumentToolKit<T extends Record<string, any>>(
+  tools: T,
+  options: {
+    customer?: string;
+    costPerActionUSD?: number;
+    session?: AgentSession;
+    costs?: Record<string, number>;
+  } = {}
+): { [K in keyof T]: T[K] & { costUSD: number } } {
   const instrumented: Record<string, any> = {};
   const cost = options.costPerActionUSD ?? 0.005;
 
   for (const [toolName, toolDef] of Object.entries(tools)) {
+    const actionCost = options.costs?.[toolName] ?? cost;
     instrumented[toolName] = wrapTool({
       name: toolName,
-      costUSD: cost,
+      costUSD: actionCost,
       tool: toolDef,
+      session: options.session,
     });
   }
 
-  return instrumented;
+  return instrumented as { [K in keyof T]: T[K] & { costUSD: number } };
 }
+
+

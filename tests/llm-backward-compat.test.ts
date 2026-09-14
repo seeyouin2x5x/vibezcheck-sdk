@@ -3,12 +3,10 @@ import {
   normalizeModelKey,
   calculateCost,
   withBilling,
-  createTokenMeter,
-  createStripe,
-  stripe,
+  meteredModel,
   vibezcheckMiddleware,
 } from '../src';
-import { meteredModel } from '../src/compat/stripe-meter';
+
 
 describe('Universal LLM Support & Backward Compatibility Suite', () => {
   describe('Model Pricing & Bedrock Normalization', () => {
@@ -187,55 +185,7 @@ describe('Universal LLM Support & Backward Compatibility Suite', () => {
     });
   });
 
-  describe('Compat: @stripe/token-meter Backward Compatibility', () => {
-    test('supports createTokenMeter without arguments (reads env)', () => {
-      process.env.STRIPE_SECRET_KEY = 'sk_test_mock_key';
-      const meter = createTokenMeter();
-      expect(meter).toBeDefined();
-      expect(typeof meter.trackUsage).toBe('function');
-      expect(typeof meter.track).toBe('function');
-    });
-
-    test('supports track alias and object customer argument', () => {
-      const meter = createTokenMeter('sk_test_mock');
-      const response = {
-        model: 'deepseek-chat',
-        usage: { prompt_tokens: 300, completion_tokens: 150 },
-      };
-
-      expect(() => {
-        meter.track(response, { customerId: 'cus_flexible_1' });
-      }).not.toThrow();
-
-      expect(() => {
-        meter.trackUsage(response, { customer: 'cus_flexible_2' });
-      }).not.toThrow();
-    });
-
-    test('supports trackUsageStreamDeepSeek, trackUsageStreamGroq, trackUsageStreamMistral', async () => {
-      const meter = createTokenMeter('sk_test_mock');
-
-      // Mock DeepSeek stream
-      const mockChunks = [
-        { model: 'deepseek-r1', usage: { prompt_tokens: 50, completion_tokens: 100 } },
-      ];
-      const asyncIterable = {
-        async *[Symbol.asyncIterator]() {
-          for (const c of mockChunks) yield c;
-        },
-      };
-
-      const wrapped = meter.trackUsageStreamDeepSeek(asyncIterable, 'cus_deepseek_user');
-      const chunks: any[] = [];
-      for await (const chunk of wrapped) {
-        chunks.push(chunk);
-      }
-      expect(chunks.length).toBe(1);
-      expect(chunks[0].model).toBe('deepseek-r1');
-    });
-  });
-
-  describe('Compat: @stripe/ai-sdk/meter Overloads', () => {
+  describe('withBilling / meteredModel Overloads', () => {
     test('supports 2-argument call: meteredModel(model, customerId)', async () => {
       const mockModel = {
         modelId: 'gpt-4o',
@@ -279,17 +229,6 @@ describe('Universal LLM Support & Backward Compatibility Suite', () => {
       const metered = meteredModel(mockModel, 'cus_three_arg', { maxCostPerCallUSD: 1.0 });
       const res = await (metered as any).doGenerate({ prompt: 'test' });
       expect(res.text).toBe('Mini');
-    });
-  });
-
-  describe('Compat: @stripe/ai-sdk/provider Dynamic Resolution', () => {
-    test('createStripe returns model with runnable interface rather than throwing', () => {
-      const stripeProvider = createStripe({ apiKey: 'sk_test_provider' });
-      const model = stripeProvider('gpt-4o', { customerId: 'cus_provider_user' });
-
-      expect(model).toBeDefined();
-      expect(typeof (model as any).doGenerate).toBe('function');
-      expect(typeof (model as any).doStream).toBe('function');
     });
   });
 

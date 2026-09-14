@@ -120,6 +120,58 @@ export class AgentSession {
   }
 
   /**
+   * Wraps an individual Vercel AI SDK tool or custom function with session budget enforcement
+   */
+  wrapTool<T extends object>(
+    toolDef: T,
+    costOrOptions: number | (ToolTrackingOptions & { name?: string })
+  ): T {
+    const session = this;
+    const costUSD = typeof costOrOptions === 'number' ? costOrOptions : costOrOptions.costUSD;
+    const toolName =
+      (typeof costOrOptions === 'object' && costOrOptions.name) ||
+      (toolDef as any).name ||
+      'anonymous_tool';
+
+    const base = toolDef || {};
+    const originalExecute = (toolDef as any).execute;
+
+    if (typeof originalExecute !== 'function') {
+      return toolDef;
+    }
+
+    return {
+      ...base,
+      costUSD,
+      execute: async (...args: any[]) => {
+        return session.trackTool(
+          toolName,
+          typeof costOrOptions === 'object' ? costOrOptions : { costUSD },
+          () => originalExecute(...args)
+        );
+      },
+    };
+  }
+
+  /**
+   * Instruments an entire tools dictionary (e.g. for streamText / generateText) with session tracking
+   */
+  tools<T extends Record<string, any>>(
+    toolsRecord: T,
+    options: { costPerActionUSD?: number; costs?: Record<string, number> } = {}
+  ): T {
+    const defaultCost = options.costPerActionUSD ?? 0.005;
+    const instrumented: Record<string, any> = {};
+
+    for (const [name, toolDef] of Object.entries(toolsRecord)) {
+      const costUSD = options.costs?.[name] ?? defaultCost;
+      instrumented[name] = this.wrapTool(toolDef, { name, costUSD });
+    }
+
+    return instrumented as T;
+  }
+
+  /**
    * Concludes session and returns final financial summary
    */
   async conclude() {

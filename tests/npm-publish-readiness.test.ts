@@ -112,7 +112,7 @@ describe('NPM Package Pre-Publish Readiness & Export Integrity', () => {
 
     const react = require('../dist/react/index.js');
     expect(typeof react.VibezReceipt).toBe('function');
-    expect(typeof react.VibezSessionWidget).toBe('function');
-    expect(typeof react.useVibezChat).toBe('function');
+    expect(typeof react.VibezCheck).toBe('function');
+    expect(typeof react.useVibez).toBe('function');
   });
 });

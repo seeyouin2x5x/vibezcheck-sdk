@@ -1,62 +1,56 @@
 import React from 'react';
 import { renderToString } from 'react-dom/server';
-import { meteredModel } from '../src/compat/stripe-meter';
-import { createStripe, stripe } from '../src/compat/stripe-provider';
-import { createTokenMeter } from '../src/compat/token-meter';
 import { AgentSession, createAgentSession } from '../src/billing/session';
 import { wrapTool, instrumentToolKit } from '../src/billing/tools';
 import { VibezCheck } from '../src/react/vibezcheck-ui';
 import { vibezcheck } from '../src/index';
 
-describe('Commercial Suite & Compat Drop-Ins', () => {
-  describe('Compat: @stripe/ai-sdk/meter', () => {
-    it('should wrap LanguageModel and pass options', async () => {
-      const mockModel = {
-        modelId: 'gpt-4o',
-        provider: 'openai',
-        specificationVersion: 'v2',
-        doGenerate: jest.fn().mockResolvedValue({
-          text: 'Hello',
-          usage: { promptTokens: 10, completionTokens: 20 },
-        }),
-        doStream: jest.fn(),
-      };
+describe('Commercial Suite & Tool Metering Engine (v0.6.0)', () => {
+  describe('session.tools() & session.wrapTool() Budget Integration', () => {
+    it('should track tool execution against AgentSession budget', async () => {
+      const session = createAgentSession({
+        customer: 'cus_agent_user',
+        sessionBudgetUSD: 1.0,
+      });
 
-      const metered = meteredModel(mockModel, 'sk_test_123', 'cus_test_abc');
-      const res = await (metered as any).doGenerate({ prompt: 'Hi' });
-
-      expect(res.text).toBe('Hello');
-      expect(mockModel.doGenerate).toHaveBeenCalled();
-    });
-  });
-
-  describe('Compat: @stripe/ai-sdk/provider', () => {
-    it('should create proxy model from createStripe provider factory', () => {
-      const provider = createStripe({ apiKey: 'sk_test_123' });
-      const model = provider('gpt-4o', { customerId: 'cus_client_1' });
-
-      expect(model).toBeDefined();
-      expect(typeof (model as any).doGenerate).toBe('function');
-      expect(typeof (model as any).doStream).toBe('function');
-    });
-  });
-
-  describe('Compat: @stripe/token-meter', () => {
-    it('should record usage for OpenAI non-streaming response', () => {
-      const meter = createTokenMeter('sk_test_123');
-      const mockResponse = {
-        model: 'gpt-4o',
-        usage: {
-          prompt_tokens: 150,
-          completion_tokens: 50,
+      const rawTools = {
+        web_search: {
+          description: 'search the web',
+          execute: jest.fn().mockResolvedValue(['res1', 'res2']),
         },
       };
 
-      expect(() => {
-        meter.trackUsage(mockResponse, 'cus_token_meter_user');
-      }).not.toThrow();
+      const tools = session.tools(rawTools, { costPerActionUSD: 0.05 });
+      expect(tools.web_search).toBeDefined();
+
+      const result = await tools.web_search.execute({ query: 'quantum computing' });
+      expect(result).toEqual(['res1', 'res2']);
+      expect(session.getCurrentCostUSD()).toBe(0.05);
+
+      const summary = session.getSummary();
+      expect(summary.toolCallCount).toBe(1);
+      expect(summary.toolCalls[0].name).toBe('web_search');
+      expect(summary.toolCalls[0].costUSD).toBe(0.05);
+    });
+
+    it('should trip circuit breaker if tool execution crosses session budget', async () => {
+      const session = createAgentSession({
+        customer: 'cus_agent_user',
+        sessionBudgetUSD: 0.08,
+      });
+
+      const tools = session.tools({
+        expensive_tool: {
+          execute: jest.fn().mockResolvedValue('done'),
+        },
+      }, { costPerActionUSD: 0.10 });
+
+      await expect(
+        tools.expensive_tool.execute({})
+      ).rejects.toThrow(/Agent Session Budget exceeded/);
     });
   });
+
 
   describe('AgentSession & Tool Tracking', () => {
     it('should accumulate tokens and costs across multiple tool and model invocations', async () => {
