@@ -17,10 +17,39 @@ export interface ToolOptions {
 }
 
 /**
- * Wraps a Vercel AI SDK tool or custom function with cost and latency tracking
+ * Wraps a Vercel AI SDK tool or custom function with cost and latency tracking.
+ * Supports both options object: wrapTool({ tool, costUSD })
+ * and direct tool + cost: wrapTool(myTool, 0.01)
  */
-export function wrapTool<T = any>(options: ToolOptions): T {
-  const { name = 'tool', costUSD, tool, execute, session, onExecute } = options;
+export function wrapTool<T = any>(
+  toolOrOptions: any,
+  costOrOptions?: number | Partial<ToolOptions>
+): T {
+  let options: ToolOptions;
+
+  if (typeof costOrOptions === 'number') {
+    options = {
+      tool: toolOrOptions,
+      costUSD: costOrOptions,
+      name: toolOrOptions?.name,
+    };
+  } else if (costOrOptions && typeof costOrOptions === 'object') {
+    options = {
+      tool: toolOrOptions,
+      costUSD: costOrOptions.costUSD ?? 0.005,
+      ...costOrOptions,
+    };
+  } else if (toolOrOptions && typeof toolOrOptions === 'object' && 'costUSD' in toolOrOptions) {
+    options = toolOrOptions as ToolOptions;
+  } else {
+    options = {
+      tool: toolOrOptions,
+      costUSD: 0.005,
+      name: toolOrOptions?.name,
+    };
+  }
+
+  const { name = options.tool?.name || 'tool', costUSD, tool, execute, session, onExecute } = options;
   const targetFn = execute || tool?.execute;
 
   if (!targetFn && !tool) {
@@ -61,7 +90,7 @@ export function wrapTool<T = any>(options: ToolOptions): T {
 }
 
 /**
- * Instruments an entire toolkit (e.g. StripeAgentToolkit) with cost and latency tracking
+ * Instruments an entire toolkit (e.g. StripeAgentToolkit or tools record) with cost and latency tracking
  */
 export function instrumentToolKit<T extends Record<string, any>>(
   tools: T,
@@ -88,4 +117,7 @@ export function instrumentToolKit<T extends Record<string, any>>(
   return instrumented as { [K in keyof T]: T[K] & { costUSD: number } };
 }
 
-
+/**
+ * Declarative alias for instrumentToolKit
+ */
+export const createTools = instrumentToolKit;

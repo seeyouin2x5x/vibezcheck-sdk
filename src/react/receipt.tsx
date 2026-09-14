@@ -101,6 +101,9 @@ export const VibezReceipt: React.FC<VibezReceiptProps> = ({
     }
   };
 
+  let toolCallCount = 0;
+  const toolCallNames: string[] = [];
+
   // 1. AI SDK v4 Message Annotations
   if (message?.annotations && Array.isArray(message.annotations)) {
     for (const ann of message.annotations) {
@@ -108,10 +111,16 @@ export const VibezReceipt: React.FC<VibezReceiptProps> = ({
     }
   }
 
-  // 2. AI SDK v5/v6/v7 Message Parts (data-vibezcheck, data, custom, providerMetadata)
+  // 2. AI SDK v5/v6/v7 Message Parts (data-vibezcheck, data, custom, providerMetadata, tool-call)
   if (message?.parts && Array.isArray(message.parts)) {
     for (const part of message.parts) {
-      if (part?.type === 'data-vibezcheck' && part.data) {
+      if (part?.type === 'tool-call' || part?.type === 'tool-invocation') {
+        toolCallCount++;
+        const toolName = part.toolName || part.toolInvocation?.toolName;
+        if (toolName && !toolCallNames.includes(toolName)) {
+          toolCallNames.push(toolName);
+        }
+      } else if (part?.type === 'data-vibezcheck' && part.data) {
         inspectItem(part.data);
       } else if ((part?.type === 'data' || part?.type === 'custom') && part.data) {
         inspectItem(part.data);
@@ -214,6 +223,17 @@ export const VibezReceipt: React.FC<VibezReceiptProps> = ({
           <span className="text-zinc-300 dark:text-zinc-600 shrink-0 opacity-60">·</span>
           <span className="text-zinc-400 dark:text-zinc-500 text-[10px] truncate max-w-[95px]">
             {shortModel}
+          </span>
+        </>
+      )}
+      {toolCallCount > 0 && !compact && (
+        <>
+          <span className="text-zinc-300 dark:text-zinc-600 shrink-0 opacity-60">·</span>
+          <span
+            className="text-amber-600 dark:text-amber-400 text-[10px] shrink-0"
+            title={toolCallNames.length > 0 ? `Tools: ${toolCallNames.join(', ')}` : undefined}
+          >
+            {`${toolCallCount} ${toolCallCount === 1 ? 'tool' : 'tools'}`}
           </span>
         </>
       )}
