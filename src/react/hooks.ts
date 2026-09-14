@@ -64,7 +64,8 @@ export function extractSessionStats(
   const recordToolUsage = (
     toolName: string,
     cost: number = 0,
-    latency?: number
+    latency?: number,
+    callCount: number = 1
   ) => {
     if (!toolName) return;
     if (!byTool[toolName]) {
@@ -75,12 +76,12 @@ export function extractSessionStats(
         latencyMs: latency,
       };
     }
-    byTool[toolName].calls += 1;
+    byTool[toolName].calls += callCount;
     byTool[toolName].costUSD = Number((byTool[toolName].costUSD + cost).toFixed(6));
     if (latency !== undefined) {
       byTool[toolName].latencyMs = (byTool[toolName].latencyMs ?? 0) + latency;
     }
-    toolCallCount += 1;
+    toolCallCount += callCount;
     toolCostUSD = Number((toolCostUSD + cost).toFixed(6));
   };
 
@@ -148,13 +149,15 @@ export function extractSessionStats(
         for (const tc of (ev as any).toolCalls) {
           const tName = tc.name || tc.toolName || 'tool';
           const tCost = tc.costUSD ?? tc.cost ?? toolCosts?.[tName] ?? 0;
-          recordToolUsage(tName, tCost, tc.latencyMs);
+          const calls = tc.calls ?? tc.count ?? 1;
+          recordToolUsage(tName, tCost, tc.latencyMs, calls);
         }
       } else if ((ev as any).metadata?.toolCalls && Array.isArray((ev as any).metadata.toolCalls)) {
         for (const tc of (ev as any).metadata.toolCalls) {
           const tName = tc.name || tc.toolName || 'tool';
           const tCost = tc.costUSD ?? tc.cost ?? toolCosts?.[tName] ?? 0;
-          recordToolUsage(tName, tCost, tc.latencyMs);
+          const calls = tc.calls ?? tc.count ?? 1;
+          recordToolUsage(tName, tCost, tc.latencyMs, calls);
         }
       }
 
@@ -260,14 +263,14 @@ export function extractSessionStats(
             0;
         } else if (typeof eventFound.costUSD === 'number') {
           msgBilled = eventFound.costUSD;
-          msgWholesale = eventFound.costUSD;
+          msgWholesale = typeof eventFound.wholesaleUSD === 'number' ? eventFound.wholesaleUSD : eventFound.costUSD;
         }
 
         const msgTok = eventFound.usage?.totalTokens ?? eventFound.tokens ?? 0;
         const msgPrompt = eventFound.usage?.inputTokens ?? eventFound.promptTokens ?? 0;
         const msgComp = eventFound.usage?.outputTokens ?? eventFound.completionTokens ?? 0;
-        const msgCached = eventFound.usage?.cachedTokens ?? 0;
-        const msgReasoning = eventFound.usage?.reasoningTokens ?? 0;
+        const msgCached = eventFound.usage?.cachedTokens ?? eventFound.cachedTokens ?? 0;
+        const msgReasoning = eventFound.usage?.reasoningTokens ?? eventFound.reasoningTokens ?? 0;
         const currentModel = eventFound.model || model;
 
         if (currentModel && !detectedModel) {
@@ -289,7 +292,8 @@ export function extractSessionStats(
           for (const tc of eventFound.toolCalls) {
             const tName = tc.name || tc.toolName || 'tool';
             const tCost = tc.costUSD ?? tc.cost ?? toolCosts?.[tName] ?? 0;
-            recordToolUsage(tName, tCost, tc.latencyMs);
+            const calls = tc.calls ?? tc.count ?? 1;
+            recordToolUsage(tName, tCost, tc.latencyMs, calls);
           }
         }
 
