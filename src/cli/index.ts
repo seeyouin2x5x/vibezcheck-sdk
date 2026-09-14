@@ -10,9 +10,26 @@ import { handleExamplesCommand } from './examples';
 const args = process.argv.slice(2);
 const command = args[0] || 'init';
 
+function getCliVersion(): string {
+  try {
+    const candidates = [
+      path.resolve(__dirname, '../../package.json'),
+      path.resolve(__dirname, '../package.json'),
+      path.resolve(__dirname, './package.json'),
+    ];
+    for (const p of candidates) {
+      if (fs.existsSync(p)) {
+        const pkg = JSON.parse(fs.readFileSync(p, 'utf-8'));
+        if (pkg.version) return pkg.version;
+      }
+    }
+  } catch {}
+  return '0.5.9';
+}
+
 function printBanner() {
   console.log(`
-\x1b[38;2;212;255;50m✦\x1b[0m \x1b[1mvibezcheck CLI\x1b[0m \x1b[90mv0.5.5\x1b[0m
+\x1b[38;2;212;255;50m✦\x1b[0m \x1b[1mvibezcheck CLI\x1b[0m \x1b[90mv${getCliVersion()}\x1b[0m
 \x1b[90mThe 1-line Stripe Billing & Token Metering Engine for LLMs\x1b[0m
 `);
 }

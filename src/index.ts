@@ -189,9 +189,3 @@ vibezcheck.sql = createSqlAdapter;
  * Singleton client instance
  */
 export const vibez = new VibezCheckClient();
-
-/**
- * Aliases for developer typing convenience
- */
-export const vibescheck = vibezcheck;
-export const vibes = vibez;

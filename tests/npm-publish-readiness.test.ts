@@ -114,5 +114,10 @@ describe('NPM Package Pre-Publish Readiness & Export Integrity', () => {
     expect(typeof react.VibezReceipt).toBe('function');
     expect(typeof react.VibezCheck).toBe('function');
     expect(typeof react.useVibez).toBe('function');
+
+    const database = require('../dist/database/index.js');
+    expect(typeof database.createSupabaseAdapter).toBe('function');
+    expect(typeof database.createPrismaAdapter).toBe('function');
+    expect(typeof database.createSqlAdapter).toBe('function');
   });
 });
