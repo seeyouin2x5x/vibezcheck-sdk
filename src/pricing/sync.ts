@@ -64,6 +64,27 @@ export interface StripePricingItem {
 export const DEFAULT_MANIFEST_URL =
   'https://raw.githubusercontent.com/seeyouin2x5x/vibezcheck-sdk/main/manifest/pricing-v1.json';
 
+export const VERCEL_GATEWAY_MODELS_URL = 'https://ai-gateway.vercel.sh/v1/models';
+
+export interface VercelGatewayModelItem {
+  id: string;
+  name?: string;
+  owned_by?: string;
+  type?: string;
+  pricing?: {
+    input?: string | number | null;
+    output?: string | number | null;
+    input_cache_read?: string | number | null;
+    input_cache_write?: string | number | null;
+  };
+  prices_per_1m?: {
+    input_token?: number | null;
+    output_token?: number | null;
+    cached_input?: number | null;
+    cached_write?: number | null;
+  };
+}
+
 const DEFAULT_TIMEOUT_MS = 3000;
 const DEFAULT_CACHE_TTL_MS = 3600_000; // 1 hour
 
@@ -134,10 +155,10 @@ export function seedPricingCache(manifest: unknown): number {
 
   let count = 0;
 
-  // Case 1: Array of Stripe pricing items
+  // Case 1: Array of pricing items (Stripe or Vercel)
   if (Array.isArray(manifest)) {
     for (const item of manifest) {
-      if (registerStripeItem(item)) {
+      if (registerStripeItem(item) || registerVercelGatewayItem(item)) {
         count++;
       }
     }
@@ -146,19 +167,45 @@ export function seedPricingCache(manifest: unknown): number {
 
   const obj = manifest as Record<string, any>;
 
-  // Case 2: Object with models array (e.g. { models: [...] })
+  // Case 2: Vercel Gateway direct endpoint response: { object: "list", data: [...] }
+  if (obj.object === 'list' && Array.isArray(obj.data)) {
+    for (const item of obj.data) {
+      if (registerVercelGatewayItem(item) || registerStripeItem(item)) {
+        count++;
+      }
+    }
+    return count;
+  }
+
+  // Case 3: Object with models array (e.g. { models: [...] })
   if (Array.isArray(obj.models)) {
     for (const item of obj.models) {
-      if (registerStripeItem(item)) {
+      if (registerStripeItem(item) || registerVercelGatewayItem(item)) {
         count++;
       }
     }
   }
 
-  // Case 3: Object with rates dictionary (e.g. { rates: { "gpt-4o": { inputPer1M: 2.5, ... } } })
+  // Case 4: Object with vercel_gateway_models array
+  if (Array.isArray(obj.vercel_gateway_models)) {
+    for (const item of obj.vercel_gateway_models) {
+      if (registerVercelGatewayItem(item) || registerStripeItem(item)) {
+        count++;
+      }
+    }
+  }
+
+  // Case 5: Object with rates dictionary (e.g. { rates: { "gpt-4o": { inputPer1M: 2.5, ... } } })
   const ratesDict = obj.rates && typeof obj.rates === 'object' ? obj.rates : obj;
   for (const [key, val] of Object.entries(ratesDict)) {
-    if (key === 'models' || key === 'rates' || key === 'version' || key === '$schema') {
+    if (
+      key === 'models' ||
+      key === 'rates' ||
+      key === 'version' ||
+      key === '$schema' ||
+      key === 'sources' ||
+      key === 'vercel_gateway_models'
+    ) {
       continue;
     }
     const v = val as any;
@@ -185,8 +232,65 @@ function registerRate(key: string, rate: ModelPricingRates): void {
   dynamicPricingCache[normalized] = rate;
 }
 
+function registerVercelGatewayItem(entry: any): boolean {
+  if (!entry || typeof entry !== 'object') return false;
+  const modelId = typeof entry.id === 'string' ? entry.id : typeof entry.model === 'string' ? entry.model : null;
+  if (!modelId) return false;
+
+  // If entry has prices_per_1m already precomputed
+  if (entry.prices_per_1m && typeof entry.prices_per_1m.input_token === 'number' && typeof entry.prices_per_1m.output_token === 'number') {
+    return registerStripeItem({ ...entry, model: modelId });
+  }
+
+  const p = entry.pricing;
+  if (!p || typeof p !== 'object') return false;
+
+  const inSingle = p.input !== undefined && p.input !== null ? parseFloat(String(p.input)) : null;
+  const outSingle = p.output !== undefined && p.output !== null ? parseFloat(String(p.output)) : null;
+  if (inSingle === null || isNaN(inSingle) || outSingle === null || isNaN(outSingle)) {
+    return false;
+  }
+
+  const roundRate = (v: number) => Math.round(v * 1e6) / 1e6;
+
+  const rateObj: ModelPricingRates = {
+    inputPer1M: Math.max(0, roundRate(inSingle * 1_000_000)),
+    outputPer1M: Math.max(0, roundRate(outSingle * 1_000_000)),
+    currency: 'USD',
+  };
+
+  if (p.input_cache_read !== undefined && p.input_cache_read !== null) {
+    const cr = parseFloat(String(p.input_cache_read));
+    if (!isNaN(cr)) {
+      rateObj.cachedInputPer1M = Math.max(0, roundRate(cr * 1_000_000));
+    }
+  }
+  if (p.input_cache_write !== undefined && p.input_cache_write !== null) {
+    const cw = parseFloat(String(p.input_cache_write));
+    if (!isNaN(cw)) {
+      rateObj.cacheWritePer1M = Math.max(0, roundRate(cw * 1_000_000));
+    }
+  }
+
+  const fullId = modelId.toLowerCase().trim();
+  registerRate(fullId, rateObj);
+
+  if (fullId.includes('/')) {
+    const stripped = fullId.split('/').slice(1).join('/');
+    registerRate(stripped, rateObj);
+  }
+
+  if (entry.owned_by && typeof entry.owned_by === 'string') {
+    const owner = entry.owned_by.toLowerCase().replace(/\s+/g, '-');
+    dynamicPricingCache[`${owner}/${fullId}`] = rateObj;
+  }
+
+  return true;
+}
+
 function registerStripeItem(entry: any): boolean {
-  if (!entry || typeof entry !== 'object' || typeof entry.model !== 'string') {
+  const modelKey = typeof entry.model === 'string' ? entry.model : typeof entry.id === 'string' ? entry.id : null;
+  if (!entry || typeof entry !== 'object' || !modelKey) {
     return false;
   }
   const p = entry.prices_per_1m;
@@ -209,7 +313,7 @@ function registerStripeItem(entry: any): boolean {
     rateObj.cacheWritePer1M = Math.max(0, p.cached_write);
   }
 
-  const baseKey = entry.model.toLowerCase().trim();
+  const baseKey = modelKey.toLowerCase().trim();
   registerRate(baseKey, rateObj);
 
   if (entry.publisher && typeof entry.publisher === 'string') {
@@ -337,3 +441,24 @@ export function triggerBackgroundSync(options: PricingSyncOptions = {}): void {
     // Silently caught - offline fallback preserved
   });
 }
+
+/**
+ * Synchronizes LLM token pricing directly from Vercel AI Gateway (https://ai-gateway.vercel.sh/v1/models).
+ * Converts single-token rates into per-1M-token rates and populates dynamic cache.
+ */
+export async function syncVercelGateway(options: PricingSyncOptions = {}): Promise<boolean> {
+  return syncPricingManifest({
+    manifestUrl: VERCEL_GATEWAY_MODELS_URL,
+    ...options,
+  });
+}
+
+/**
+ * Non-blocking, fire-and-forget background synchronization from Vercel AI Gateway.
+ */
+export function triggerVercelGatewaySync(options: PricingSyncOptions = {}): void {
+  syncVercelGateway(options).catch(() => {
+    // Silently caught - offline fallback preserved
+  });
+}
+

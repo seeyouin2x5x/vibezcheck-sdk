@@ -1,6 +1,6 @@
 import type { MeterOptions, StreamWrapOptions, CustomerParam } from './types';
 import { VibezMeter, createMeter } from './meter/client';
-import { calculateCost, calculateUsageCost, getModelPricing, registerModelPricing, syncPricingManifest, triggerBackgroundSync } from './pricing';
+import { calculateCost, calculateUsageCost, getModelPricing, registerModelPricing, syncPricingManifest, triggerBackgroundSync, syncVercelGateway, triggerVercelGatewaySync, VERCEL_GATEWAY_MODELS_URL } from './pricing';
 import { withBilling, meteredModel } from './ai-sdk/with-billing';
 import { toResponse } from './ai-sdk/to-response';
 import { toVibezDataStream, toVibezDataStreamResponse } from './ai-sdk/data-stream';
@@ -162,6 +162,10 @@ vibezcheck.sql = createSqlAdapter;
 vibezcheck.syncPricing = syncPricingManifest;
 vibezcheck.syncPricingManifest = syncPricingManifest;
 vibezcheck.triggerBackgroundSync = triggerBackgroundSync;
+vibezcheck.syncVercelGateway = syncVercelGateway;
+vibezcheck.syncVercel = syncVercelGateway;
+vibezcheck.triggerVercelGatewaySync = triggerVercelGatewaySync;
+vibezcheck.VERCEL_GATEWAY_MODELS_URL = VERCEL_GATEWAY_MODELS_URL;
 
 /**
  * Singleton client instance
