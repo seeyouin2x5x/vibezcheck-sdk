@@ -90,7 +90,7 @@ export function wrapTool<T = any>(
 }
 
 /**
- * Instruments an entire toolkit (e.g. StripeAgentToolkit or tools record) with cost and latency tracking
+ * Instruments an entire toolkit (e.g. agent toolkit or tools record) with cost and latency tracking
  */
 export function instrumentToolKit<T extends Record<string, any>>(
   tools: T,

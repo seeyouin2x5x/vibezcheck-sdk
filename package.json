@@ -1,7 +1,7 @@
 {
   "name": "vibezcheck",
   "version": "0.5.9",
-  "description": "The 1-line Stripe Billing and Token Metering engine for LLMs. Track tokens, compute real-time dollar costs, and bill customers with 0ms added latency.",
+  "description": "The 1-line Token Metering & Cost Intelligence engine for LLMs. Track tokens, compute real-time dollar costs, protect agent loops, and stream financial telemetry with 0ms added latency.",
   "author": "VibezCheck <dev@vibezcheck.xyz> (https://vibezcheck.xyz)",
   "license": "MIT",
   "repository": {
@@ -9,7 +9,6 @@
     "url": "git+https://github.com/seeyouin2x5x/vibezcheck-sdk.git"
   },
   "keywords": [
-    "stripe",
     "ai",
     "billing",
     "tokens",
@@ -105,9 +104,7 @@
     "test:coverage": "jest --coverage",
     "prepublishOnly": "tsup"
   },
-  "dependencies": {
-    "stripe": "^17.5.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@ai-sdk/anthropic": "^2.0.35",
     "@ai-sdk/google": "^2.0.23",
@@ -135,8 +132,7 @@
     "ai": ">=3.0.0",
     "openai": ">=4.0.0",
     "react": ">=18.0.0",
-    "react-dom": ">=18.0.0",
-    "stripe": ">=14.0.0"
+    "react-dom": ">=18.0.0"
   },
   "peerDependenciesMeta": {
     "@ai-sdk/provider": {
@@ -155,9 +151,6 @@
       "optional": true
     },
     "react-dom": {
-      "optional": true
-    },
-    "stripe": {
       "optional": true
     }
   },

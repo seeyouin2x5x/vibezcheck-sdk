@@ -1,4 +1,3 @@
-import Stripe from 'stripe';
 import type {
   MeterOptions,
   StreamWrapOptions,
@@ -15,30 +14,11 @@ import { normalizeCustomer } from '../customers/helpers';
 
 export class VibezMeter {
   private batcher: MeterBatcher;
-  private stripeClient?: Stripe;
   private markupMultiplier?: number;
 
   constructor(options: MeterOptions = {}) {
     this.markupMultiplier = options.pricing?.margin ?? options.markupMultiplier;
-
-    // Initialize Stripe client if apiKey or stripe instance is provided
-    if (options.stripe) {
-      this.stripeClient = options.stripe;
-    } else if (options.apiKey || process.env.STRIPE_SECRET_KEY) {
-      const key = options.apiKey || process.env.STRIPE_SECRET_KEY!;
-      this.stripeClient = new Stripe(key, {
-        appInfo: {
-          name: 'vibezcheck',
-          version: '0.5.5',
-          url: 'https://vibezcheck.xyz',
-        },
-      });
-    }
-
-    this.batcher = new MeterBatcher({
-      ...options,
-      stripe: this.stripeClient,
-    });
+    this.batcher = new MeterBatcher(options);
   }
 
   /**
@@ -137,7 +117,7 @@ export class VibezMeter {
   }
 
   /**
-   * Flush pending events to Stripe (vital for Serverless & Edge environments)
+   * Flush pending events (vital for Serverless & Edge environments)
    */
   public async flush(): Promise<void> {
     await this.batcher.flush();

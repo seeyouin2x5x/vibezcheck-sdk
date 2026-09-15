@@ -15,7 +15,7 @@ import { normalizeCustomer } from '../customers/helpers';
 export interface WithBillingOptions extends CircuitBreakerOptions {
   /** Customer email, user ID, or rich customer object with metadata */
   customer?: CustomerParam;
-  /** Direct Stripe customer ID */
+  /** Direct customer ID */
   customerId?: string;
   /** Billing mode configuration (Universal Auto-Debit, postpaid vs prepaid, pluggable providers) */
   billing?: BillingConfig;
@@ -29,8 +29,8 @@ export interface WithBillingOptions extends CircuitBreakerOptions {
   captureOnAbort?: boolean;
   /** Execution runtime environment (default: 'auto') */
   runtime?: 'auto' | 'serverless' | 'edge' | 'node';
-  /** Stripe API Key override (uses STRIPE_SECRET_KEY env by default) */
-  stripeApiKey?: string;
+  /** API Key override */
+  apiKey?: string;
   /** Existing VibezMeter instance (optional) */
   meter?: VibezMeter;
   /** Custom meter event name */
@@ -44,7 +44,7 @@ export interface WithBillingOptions extends CircuitBreakerOptions {
 }
 
 /**
- * Wraps any Vercel AI SDK LanguageModel (v2 or v3) with automated Stripe billing, token metering, and agent circuit breakers.
+ * Wraps any Vercel AI SDK LanguageModel (v2 or v3) with automated token metering, cost intelligence, and agent circuit breakers.
  *
  * Sane Defaults Built-In:
  * - $0.50 safety ceiling per call (overridable)
@@ -75,8 +75,7 @@ export function withBilling<T extends object>(
   const meter =
     options.meter ||
     createMeter({
-      apiKey: options.stripeApiKey,
-      eventName: options.eventName,
+      apiKey: options.apiKey,
     });
 
   const normalized = normalizeCustomer(options.customer, options.customerId);

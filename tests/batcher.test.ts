@@ -2,7 +2,7 @@ import { MeterBatcher } from '../src/meter/batcher';
 import type { UsageEvent } from '../src/types';
 
 describe('MeterBatcher & Local Ledger', () => {
-  it('should maintain accurate in-memory ledger stats without Stripe', () => {
+  it('should maintain accurate in-memory ledger stats', () => {
     let firedEvent: UsageEvent | null = null;
     const batcher = new MeterBatcher({
       onUsage: (event) => {
@@ -42,20 +42,12 @@ describe('MeterBatcher & Local Ledger', () => {
     expect(summary.byModel['claude-3-7-sonnet'].requests).toBe(1);
   });
 
-  it('should flush batches to Stripe client when present', async () => {
-    const mockCreate = jest.fn().mockResolvedValue({ id: 'me_123' });
-    const mockStripe: any = {
-      v2: {
-        billing: {
-          meterEvents: {
-            create: mockCreate,
-          },
-        },
-      },
-    };
-
+  it('should flush batches to onBatch callback when configured', async () => {
+    const batchedEvents: UsageEvent[][] = [];
     const batcher = new MeterBatcher({
-      stripe: mockStripe,
+      onBatch: async (events) => {
+        batchedEvents.push(events);
+      },
       batching: { maxBatchSize: 10, flushIntervalMs: 1000 },
     });
 
@@ -71,16 +63,9 @@ describe('MeterBatcher & Local Ledger', () => {
     batcher.enqueue(event);
     await batcher.flush();
 
-    expect(mockCreate).toHaveBeenCalledTimes(2); // 1 input event, 1 output event
-    expect(mockCreate).toHaveBeenCalledWith(
-      expect.objectContaining({
-        event_name: 'token-billing-tokens',
-        payload: expect.objectContaining({
-          stripe_customer_id: 'cus_client_1',
-          value: '500',
-          token_type: 'input',
-        }),
-      })
-    );
+    expect(batchedEvents).toHaveLength(1);
+    expect(batchedEvents[0]).toHaveLength(1);
+    expect(batchedEvents[0][0].customerId).toBe('cus_client_1');
+    expect(batchedEvents[0][0].usage.totalTokens).toBe(1300);
   });
 });

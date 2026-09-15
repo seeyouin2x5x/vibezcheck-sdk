@@ -13,24 +13,8 @@ describe('Customer Cache & Manager', () => {
     expect(cache.get('user_123')).toBeNull();
   });
 
-  it('should auto-create customer when not found in Stripe', async () => {
-    const mockSearch = jest.fn().mockResolvedValue({ data: [] });
-    const mockList = jest.fn().mockResolvedValue({ data: [] });
-    const mockCreate = jest.fn().mockResolvedValue({
-      id: 'cus_new_123',
-      email: 'alex@example.com',
-      metadata: { vibez_user_id: 'user_alex' },
-    });
-
-    const mockStripe: any = {
-      customers: {
-        search: mockSearch,
-        list: mockList,
-        create: mockCreate,
-      },
-    };
-
-    const manager = new CustomerManager({ stripe: mockStripe });
+  it('should auto-create customer and retrieve from cache/store', async () => {
+    const manager = new CustomerManager();
 
     const result = await manager.getOrCreate({
       userId: 'user_alex',
@@ -38,24 +22,18 @@ describe('Customer Cache & Manager', () => {
       name: 'Alex Doe',
     });
 
-    expect(result.id).toBe('cus_new_123');
+    expect(result.id).toBe('user_alex');
     expect(result.isNew).toBe(true);
-    expect(mockCreate).toHaveBeenCalledWith(
-      expect.objectContaining({
-        email: 'alex@example.com',
-        name: 'Alex Doe',
-        metadata: expect.objectContaining({ vibez_user_id: 'user_alex' }),
-      })
-    );
+    expect(result.customer.name).toBe('Alex Doe');
+    expect(result.customer.metadata?.vibez_user_id).toBe('user_alex');
 
-    // Second call should hit the in-memory cache and not call Stripe API
+    // Second call should hit the in-memory cache
     const cachedResult = await manager.getOrCreate({
       userId: 'user_alex',
       email: 'alex@example.com',
     });
 
-    expect(cachedResult.id).toBe('cus_new_123');
+    expect(cachedResult.id).toBe('user_alex');
     expect(cachedResult.isNew).toBe(false);
-    expect(mockCreate).toHaveBeenCalledTimes(1);
   });
 });

@@ -1397,7 +1397,7 @@ export function VibezCheck({
                 </span>
               </div>
               <div style={{ fontSize: '9.5px' }}>
-                {stats.isDevMode ? 'Dev Mode · Local Zero-DB' : 'Stripe Meter Active'}
+                {stats.isDevMode ? 'Dev Mode · Local Zero-DB' : 'Telemetry Active'}
               </div>
             </div>
 

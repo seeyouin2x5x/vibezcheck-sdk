@@ -30,7 +30,7 @@ function getCliVersion(): string {
 function printBanner() {
   console.log(`
 \x1b[38;2;212;255;50m✦\x1b[0m \x1b[1mvibezcheck CLI\x1b[0m \x1b[90mv${getCliVersion()}\x1b[0m
-\x1b[90mThe 1-line Stripe Billing & Token Metering Engine for LLMs\x1b[0m
+\x1b[90mThe 1-line Token Metering & Cost Intelligence Engine for LLMs\x1b[0m
 `);
 }
 
@@ -74,14 +74,12 @@ async function handleInit() {
   // 1. Prompt for API Keys
   const defaultGateway = 'vck_demo_key';
   const gatewayKey = await prompt('Enter your OpenAI or AI Gateway API Key', defaultGateway);
-  const stripeKey = await prompt('Enter your Stripe Secret Key (press enter for free test mode)', '');
 
   // 2. Create / Update .env.local
   const envPath = path.join(cwd, '.env.local');
-  const envContent = `# VibezCheck AI & Stripe Configuration
+  const envContent = `# VibezCheck AI Configuration
 OPENAI_API_KEY=${gatewayKey}
 AI_GATEWAY_API_KEY=${gatewayKey}
-STRIPE_SECRET_KEY=${stripeKey}
 `;
 
   fs.writeFileSync(envPath, envContent, { flag: 'w' });
@@ -177,9 +175,7 @@ function handleDoctor() {
   console.log(`Node.js Version: \x1b[32m${process.version}\x1b[0m`);
   console.log(`Working Directory: \x1b[90m${cwd}\x1b[0m`);
   console.log(`Environment File: ${hasEnv ? '\x1b[32m✓ Found (.env.local)\x1b[0m' : '\x1b[33m⚠ Missing (.env.local)\x1b[0m'}`);
-
-  const hasStripe = Boolean(process.env.STRIPE_SECRET_KEY);
-  console.log(`Stripe Key: ${hasStripe ? '\x1b[32m✓ Active\x1b[0m' : '\x1b[90m○ Free Local Mode (No Stripe key)\x1b[0m'}`);
+  console.log(`Telemetry Mode: \x1b[32m✓ Zero-Dependency In-Memory Active\x1b[0m`);
 
   const hasGateway = Boolean(process.env.AI_GATEWAY_API_KEY || process.env.OPENAI_API_KEY);
   console.log(`AI Provider Key: ${hasGateway ? '\x1b[32m✓ Configured\x1b[0m' : '\x1b[33m⚠ Missing (Set AI_GATEWAY_API_KEY)\x1b[0m'}`);

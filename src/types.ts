@@ -1,5 +1,3 @@
-import type Stripe from 'stripe';
-
 /**
  * Known supported model identifiers with full IDE autocomplete
  */
@@ -205,7 +203,7 @@ export interface InferenceCost {
  * Structured Customer Information with rich metadata, multi-tenancy & billing attributes
  */
 export interface CustomerInfo {
-  /** Internal user ID or Stripe customer ID ('cus_xxx', 'usr_123') */
+  /** Internal user ID or customer identifier ('usr_123', 'cus_xxx') */
   id?: string;
   /** Explicit user ID */
   userId?: string;
@@ -262,7 +260,7 @@ export interface UsageEvent {
   usage: TokenUsage;
   /** Computed cost */
   cost: InferenceCost;
-  /** Customer ID (Stripe customer ID, internal userId, or anonymous) */
+  /** Customer ID (internal userId, customer identifier, or anonymous) */
   customerId?: string;
   /** Optional customer email */
   customerEmail?: string;
@@ -343,8 +341,8 @@ export interface BillingConfig {
   balanceUSD?: number;
   /** Action when balance is low: 'warn' logs/sends event, 'throw' throws CreditExhaustedError */
   onLowBalance?: 'warn' | 'throw';
-  /** Payment Provider Gateway (default: 'stripe') */
-  provider?: 'stripe' | 'polar' | 'lemonsqueezy' | 'paystack' | PaymentProvider;
+  /** Payment Provider Gateway */
+  provider?: 'polar' | 'lemonsqueezy' | 'paystack' | PaymentProvider;
   /** Custom charge handler for internal credit wallets / bespoke payment logic */
   charge?: (costUSD: number, event: UsageEvent) => Promise<void> | void;
 }
@@ -390,21 +388,19 @@ export interface ToolMeterOptions {
  * Configuration options for the VibezCheck Meter
  */
 export interface MeterOptions extends CircuitBreakerOptions {
-  /** Stripe API Key (sk_* or rk_*). If omitted, runs in local telemetry/free mode */
+  /** API Key (optional identifier or auth token). If omitted, runs in local telemetry mode */
   apiKey?: string;
-  /** Existing Stripe SDK instance (optional) */
-  stripe?: Stripe;
-  /** Default Stripe Meter Event Name (default: 'token-billing-tokens') */
-  eventName?: string;
-  /** Batching options to optimize Stripe API calls */
+  /** Batching options to optimize event dispatch */
   batching?: {
     /** Max events per batch (default: 50) */
     maxBatchSize?: number;
     /** Flush interval in milliseconds (default: 50ms) */
     flushIntervalMs?: number;
   };
-  /** Callback fired whenever usage is extracted (works with or without Stripe) */
+  /** Callback fired whenever usage is extracted */
   onUsage?: (event: UsageEvent) => void | Promise<void>;
+  /** Callback fired when a batch of usage events is flushed (e.g. for database persistence or external syncing) */
+  onBatch?: (events: UsageEvent[]) => void | Promise<void>;
   /** Error handler callback */
   onError?: (error: Error, events: UsageEvent[]) => void;
   /** Markup multiplier for retail price calculations (e.g. 1.3 for 30% profit) */

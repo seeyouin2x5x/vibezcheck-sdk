@@ -29,9 +29,9 @@ describe('NPM Package Pre-Publish Readiness & Export Integrity', () => {
     expect(pkg.files).toContain('LICENSE');
   });
 
-  test('runtime dependencies are strictly minimal (only stripe)', () => {
+  test('runtime dependencies are zero (pure 0-dependency engine)', () => {
     const deps = Object.keys(pkg.dependencies || {});
-    expect(deps).toEqual(['stripe']);
+    expect(deps).toEqual([]);
   });
 
   test('all exported subpaths in package.json exist on disk in dist/', () => {
@@ -84,7 +84,6 @@ describe('NPM Package Pre-Publish Readiness & Export Integrity', () => {
     expect(typeof distCjs.registerModelPricing).toBe('function');
     expect(typeof distCjs.CustomerManager).toBe('function');
     expect(typeof distCjs.ApiKeyAuth).toBe('function');
-    expect(typeof distCjs.BillingHelper).toBe('function');
   });
 
   test('Subpath CommonJS bundles can be required independently', () => {
@@ -108,7 +107,8 @@ describe('NPM Package Pre-Publish Readiness & Export Integrity', () => {
     expect(typeof auth.ApiKeyAuth).toBe('function');
 
     const billing = require('../dist/billing/index.js');
-    expect(typeof billing.BillingHelper).toBe('function');
+    expect(typeof billing.createAgentSession).toBe('function');
+    expect(typeof billing.wrapTool).toBe('function');
 
     const react = require('../dist/react/index.js');
     expect(typeof react.VibezReceipt).toBe('function');

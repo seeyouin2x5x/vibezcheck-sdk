@@ -1,5 +1,4 @@
 import * as crypto from 'crypto';
-import Stripe from 'stripe';
 
 export interface ApiKeyRecord {
   keyId: string;
@@ -19,11 +18,7 @@ export interface CreateApiKeyParams {
 }
 
 export class ApiKeyAuth {
-  private stripe?: Stripe;
-
-  constructor(stripe?: Stripe) {
-    this.stripe = stripe;
-  }
+  constructor() {}
 
   /**
    * Hashes a raw API key using SHA-256
@@ -55,24 +50,6 @@ export class ApiKeyAuth {
       createdAt: new Date().toISOString(),
     };
 
-    // If Stripe client is available, save key metadata to Stripe customer
-    if (this.stripe && params.customerId) {
-      try {
-        await this.stripe.customers.update(params.customerId, {
-          metadata: {
-            [`vibez_key_${keyId}`]: JSON.stringify({
-              hash: keyHash,
-              name: params.name,
-              scopes: params.scopes,
-              created: record.createdAt,
-            }),
-          },
-        });
-      } catch {
-        // If customer update fails, record is still returned for database storage
-      }
-    }
-
     return { apiKey, keyId, record };
   }
 
@@ -88,10 +65,6 @@ export class ApiKeyAuth {
 /**
  * Factory to create ApiKeyAuth
  */
-export function createApiKeyAuth(options: { apiKey?: string; stripe?: Stripe } = {}): ApiKeyAuth {
-  let stripeClient = options.stripe;
-  if (!stripeClient && (options.apiKey || process.env.STRIPE_SECRET_KEY)) {
-    stripeClient = new Stripe(options.apiKey || process.env.STRIPE_SECRET_KEY!);
-  }
-  return new ApiKeyAuth(stripeClient);
+export function createApiKeyAuth(_options: { apiKey?: string } = {}): ApiKeyAuth {
+  return new ApiKeyAuth();
 }

@@ -1,4 +1,3 @@
-import type Stripe from 'stripe';
 import type { UsageEvent, UsageSummary, MeterOptions } from '../types';
 
 export class MeterBatcher {
@@ -7,9 +6,8 @@ export class MeterBatcher {
   private isFlushing: boolean = false;
   private readonly maxBatchSize: number;
   private readonly flushIntervalMs: number;
-  private readonly stripeClient?: Stripe;
-  private readonly eventName: string;
   private readonly onUsageCallback?: (event: UsageEvent) => void | Promise<void>;
+  private readonly onBatchCallback?: (events: UsageEvent[]) => void | Promise<void>;
   private readonly onErrorCallback?: (error: Error, events: UsageEvent[]) => void;
   private readonly debug: boolean;
 
@@ -23,11 +21,10 @@ export class MeterBatcher {
   private byModel: Record<string, { requests: number; tokens: number; costUSD: number }> = {};
 
   constructor(options: MeterOptions = {}) {
-    this.stripeClient = options.stripe;
-    this.eventName = options.eventName || 'token-billing-tokens';
     this.maxBatchSize = options.batching?.maxBatchSize ?? 50;
     this.flushIntervalMs = options.batching?.flushIntervalMs ?? 50;
     this.onUsageCallback = options.onUsage;
+    this.onBatchCallback = options.onBatch;
     this.onErrorCallback = options.onError;
     this.debug = options.debug ?? false;
   }
@@ -53,8 +50,8 @@ export class MeterBatcher {
       }
     }
 
-    // 3. If no Stripe client is configured, we're done (local mode)
-    if (!this.stripeClient) {
+    // 3. If no onBatch handler is configured, we run in immediate local mode
+    if (!this.onBatchCallback) {
       if (this.debug) {
         console.log(
           `[vibezcheck:local] 📊 ${event.model} | Tokens: ${event.usage.totalTokens} | Cost: $${event.cost.totalUSD.toFixed(6)}`
@@ -63,7 +60,7 @@ export class MeterBatcher {
       return;
     }
 
-    // 4. Queue for Stripe dispatch
+    // 4. Queue for batch dispatch
     this.queue.push(event);
 
     if (this.queue.length >= this.maxBatchSize) {
@@ -81,7 +78,7 @@ export class MeterBatcher {
   }
 
   /**
-   * Immediately flush all queued events to Stripe
+   * Immediately flush all queued events
    */
   public async flush(): Promise<void> {
     if (this.timer) {
@@ -89,7 +86,7 @@ export class MeterBatcher {
       this.timer = null;
     }
 
-    if (this.queue.length === 0 || !this.stripeClient || this.isFlushing) {
+    if (this.queue.length === 0 || !this.onBatchCallback || this.isFlushing) {
       return;
     }
 
@@ -98,11 +95,11 @@ export class MeterBatcher {
     this.queue = [];
 
     try {
-      await this.sendEventsToStripe(eventsToSend);
+      await this.onBatchCallback(eventsToSend);
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
       if (this.debug) {
-        console.error('[vibezcheck] Failed to send meter events to Stripe:', err);
+        console.error('[vibezcheck] Failed to flush meter event batch:', err);
       }
       if (this.onErrorCallback) {
         this.onErrorCallback(err, eventsToSend);
@@ -112,65 +109,6 @@ export class MeterBatcher {
       // If new items were queued while flushing, trigger another flush
       if (this.queue.length > 0) {
         this.flush().catch(() => {});
-      }
-    }
-  }
-
-  /**
-   * Sends events to Stripe Billing Meter Events API
-   */
-  private async sendEventsToStripe(events: UsageEvent[]): Promise<void> {
-    if (!this.stripeClient) return;
-
-    for (const event of events) {
-      const customerId = event.customerId;
-      if (!customerId) {
-        // Skip events without customer attribution for Stripe billing
-        continue;
-      }
-
-      const timestamp = event.timestamp || new Date().toISOString();
-      const model = `${event.provider}/${event.model}`;
-
-      // 1. Send Input Tokens Meter Event
-      if (event.usage.inputTokens > 0) {
-        try {
-          await this.stripeClient.v2.billing.meterEvents.create({
-            event_name: this.eventName,
-            timestamp,
-            payload: {
-              stripe_customer_id: customerId,
-              value: event.usage.inputTokens.toString(),
-              model,
-              token_type: 'input',
-              cached_tokens: (event.usage.cachedTokens ?? 0).toString(),
-              ...(event.metadata ? (event.metadata as any) : {}),
-            },
-          });
-        } catch (e) {
-          if (this.debug) console.warn('[vibezcheck] Input meter event error:', e);
-        }
-      }
-
-      // 2. Send Output Tokens Meter Event
-      if (event.usage.outputTokens > 0) {
-        try {
-          await this.stripeClient.v2.billing.meterEvents.create({
-            event_name: this.eventName,
-            timestamp,
-            payload: {
-              stripe_customer_id: customerId,
-              value: event.usage.outputTokens.toString(),
-              model,
-              token_type: 'output',
-              reasoning_tokens: (event.usage.reasoningTokens ?? 0).toString(),
-              visible_tokens: (event.usage.visibleOutputTokens ?? event.usage.outputTokens).toString(),
-              ...(event.metadata ? (event.metadata as any) : {}),
-            },
-          });
-        } catch (e) {
-          if (this.debug) console.warn('[vibezcheck] Output meter event error:', e);
-        }
       }
     }
   }

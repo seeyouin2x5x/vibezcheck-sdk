@@ -1,5 +1,24 @@
-import Stripe from 'stripe';
 import { CustomerCache } from './cache';
+
+export interface CustomerRecord {
+  id: string;
+  userId?: string;
+  email?: string;
+  name?: string;
+  phone?: string;
+  orgId?: string;
+  organizationId?: string;
+  orgName?: string;
+  teamId?: string;
+  workspaceId?: string;
+  role?: string;
+  plan?: string;
+  tier?: string;
+  metadata?: Record<string, string>;
+  createdAt: string;
+  updatedAt: string;
+  [key: string]: any;
+}
 
 export interface GetOrCreateCustomerParams {
   userId?: string;
@@ -20,133 +39,123 @@ export interface GetOrCreateCustomerParams {
 
 export interface CustomerManagerOptions {
   apiKey?: string;
-  stripe?: Stripe;
   cacheTtlMs?: number;
 }
 
 export class CustomerManager {
-  private stripe: Stripe;
   private cache: CustomerCache;
+  private records = new Map<string, CustomerRecord>();
 
   constructor(options: CustomerManagerOptions = {}) {
-    if (options.stripe) {
-      this.stripe = options.stripe;
-    } else {
-      const apiKey = options.apiKey || process.env.STRIPE_SECRET_KEY;
-      if (!apiKey) {
-        throw new Error('[vibezcheck] Stripe API key required for customer management.');
-      }
-      this.stripe = new Stripe(apiKey);
-    }
-
     this.cache = new CustomerCache(options.cacheTtlMs);
   }
 
   /**
-   * Retrieves existing Stripe Customer or automatically provisions a new one with full metadata
+   * Retrieves existing Customer or automatically provisions a new one with full metadata
    */
   public async getOrCreate(
     params: GetOrCreateCustomerParams
-  ): Promise<{ id: string; isNew: boolean; customer: Stripe.Customer }> {
+  ): Promise<{ id: string; isNew: boolean; customer: CustomerRecord }> {
     const cacheKey = params.userId || params.email;
     if (cacheKey) {
       const cachedId = this.cache.get(cacheKey);
-      if (cachedId) {
+      if (cachedId && this.records.has(cachedId)) {
         return {
           id: cachedId,
           isNew: false,
-          customer: { id: cachedId } as Stripe.Customer,
+          customer: this.records.get(cachedId)!,
         };
       }
     }
 
-    // 1. Search by userId in Stripe metadata
+    // 1. Search by userId
     if (params.userId) {
-      try {
-        const searchResult = await this.stripe.customers.search({
-          query: `metadata['vibez_user_id']:'${params.userId}'`,
-          limit: 1,
-        });
-
-        if (searchResult.data.length > 0) {
-          const customer = searchResult.data[0];
-          if (cacheKey) this.cache.set(cacheKey, customer.id);
-          if (params.email) this.cache.set(params.email, customer.id);
-          return { id: customer.id, isNew: false, customer };
+      for (const record of this.records.values()) {
+        if (record.userId === params.userId) {
+          if (cacheKey) this.cache.set(cacheKey, record.id);
+          if (params.email) this.cache.set(params.email, record.id);
+          return { id: record.id, isNew: false, customer: record };
         }
-      } catch {
-        // Fallback to email search if search query is unsupported or errors
       }
     }
 
-    // 2. Search by email if provided
+    // 2. Search by email
     if (params.email) {
-      const listResult = await this.stripe.customers.list({
-        email: params.email,
-        limit: 1,
-      });
-
-      if (listResult.data.length > 0) {
-        const customer = listResult.data[0];
-        if (cacheKey) this.cache.set(cacheKey, customer.id);
-        if (params.userId) this.cache.set(params.userId, customer.id);
-        return { id: customer.id, isNew: false, customer };
+      for (const record of this.records.values()) {
+        if (record.email === params.email) {
+          if (cacheKey) this.cache.set(cacheKey, record.id);
+          if (params.userId) this.cache.set(params.userId, record.id);
+          return { id: record.id, isNew: false, customer: record };
+        }
       }
     }
 
-    // 3. Prepare rich metadata for Stripe Customer
-    const orgId = params.orgId || params.organizationId;
-    const teamId = params.teamId || params.workspaceId;
-
-    const stripeMetadata: Record<string, string> = {
+    // 3. Prepare metadata
+    const metadata: Record<string, string> = {
       vibez_user_id: params.userId || '',
       created_by: 'vibezcheck',
     };
-
-    if (orgId) stripeMetadata.org_id = String(orgId);
-    if (params.orgName) stripeMetadata.org_name = String(params.orgName);
-    if (teamId) stripeMetadata.team_id = String(teamId);
-    if (params.plan) stripeMetadata.plan = String(params.plan);
-    if (params.tier) stripeMetadata.tier = String(params.tier);
-    if (params.role) stripeMetadata.role = String(params.role);
+    const orgId = params.orgId || params.organizationId;
+    const teamId = params.teamId || params.workspaceId;
+    if (orgId) metadata.org_id = String(orgId);
+    if (params.orgName) metadata.org_name = String(params.orgName);
+    if (teamId) metadata.team_id = String(teamId);
+    if (params.plan) metadata.plan = String(params.plan);
+    if (params.tier) metadata.tier = String(params.tier);
+    if (params.role) metadata.role = String(params.role);
 
     if (params.metadata) {
       for (const [k, v] of Object.entries(params.metadata)) {
         if (v !== undefined && v !== null) {
-          stripeMetadata[k] = String(v);
+          metadata[k] = String(v);
         }
       }
     }
 
-    // 4. Create new Customer in Stripe
-    const newCustomer = await this.stripe.customers.create({
+    // 4. Provision new Customer record
+    const id = params.userId || `cus_${Math.random().toString(36).substring(2, 11)}`;
+    const now = new Date().toISOString();
+    const newCustomer: CustomerRecord = {
+      id,
+      userId: params.userId,
       email: params.email,
       name: params.name,
       phone: params.phone,
-      metadata: stripeMetadata,
-    });
+      orgId: orgId ? String(orgId) : undefined,
+      organizationId: orgId ? String(orgId) : undefined,
+      orgName: params.orgName,
+      teamId: teamId ? String(teamId) : undefined,
+      workspaceId: teamId ? String(teamId) : undefined,
+      role: params.role,
+      plan: params.plan,
+      tier: params.tier,
+      metadata,
+      createdAt: now,
+      updatedAt: now,
+    };
 
-    if (cacheKey) this.cache.set(cacheKey, newCustomer.id);
-    if (params.userId) this.cache.set(params.userId, newCustomer.id);
-    if (params.email) this.cache.set(params.email, newCustomer.id);
+    this.records.set(id, newCustomer);
+    if (cacheKey) this.cache.set(cacheKey, id);
+    if (params.userId) this.cache.set(params.userId, id);
+    if (params.email) this.cache.set(params.email, id);
 
-    return { id: newCustomer.id, isNew: true, customer: newCustomer };
+    return { id, isNew: true, customer: newCustomer };
   }
 
   /**
-   * Updates an existing Stripe Customer's information and metadata
+   * Updates an existing Customer's information and metadata
    */
   public async updateCustomer(
     customerId: string,
     params: Partial<GetOrCreateCustomerParams>
-  ): Promise<Stripe.Customer> {
-    const updatePayload: Stripe.CustomerUpdateParams = {};
+  ): Promise<CustomerRecord> {
+    const existing = this.records.get(customerId) || {
+      id: customerId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
 
-    if (params.email) updatePayload.email = params.email;
-    if (params.name) updatePayload.name = params.name;
-    if (params.phone) updatePayload.phone = params.phone;
-
-    const metadataToUpdate: Record<string, string> = {};
+    const metadataToUpdate: Record<string, string> = { ...(existing.metadata || {}) };
     if (params.userId) metadataToUpdate.vibez_user_id = params.userId;
     const orgId = params.orgId || params.organizationId;
     if (orgId) metadataToUpdate.org_id = String(orgId);
@@ -165,18 +174,27 @@ export class CustomerManager {
       }
     }
 
-    if (Object.keys(metadataToUpdate).length > 0) {
-      updatePayload.metadata = metadataToUpdate;
-    }
+    const updated: CustomerRecord = {
+      ...existing,
+      ...params,
+      id: customerId,
+      metadata: metadataToUpdate,
+      updatedAt: new Date().toISOString(),
+    };
 
-    return await this.stripe.customers.update(customerId, updatePayload);
+    this.records.set(customerId, updated);
+    if (updated.userId) this.cache.set(updated.userId, customerId);
+    if (updated.email) this.cache.set(updated.email, customerId);
+
+    return updated;
   }
 
   /**
-   * Clears in-memory resolution cache
+   * Clears in-memory resolution cache and records
    */
   public clearCache(): void {
     this.cache.clear();
+    this.records.clear();
   }
 }
 

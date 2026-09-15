@@ -1,4 +1,3 @@
-import Stripe from 'stripe';
 import type { MeterOptions, StreamWrapOptions, CustomerParam } from './types';
 import { VibezMeter, createMeter } from './meter/client';
 import { calculateCost, calculateUsageCost, getModelPricing, registerModelPricing } from './pricing';
@@ -9,7 +8,6 @@ import { createVibezModel, createVibezSession, type VibezCheckModelOptions } fro
 import { vibezcheckMiddleware } from './ai-sdk/middleware';
 import { CustomerManager, createCustomerManager } from './customers/manager';
 import { ApiKeyAuth, createApiKeyAuth, extractAuthToken } from './auth';
-import { BillingHelper, createBillingHelper } from './billing/portal';
 import { AgentSession, createAgentSession } from './billing/session';
 import { wrapTool, instrumentToolKit, createTools } from './billing/tools';
 import { isBudgetExceeded, stopWhenBudgetExceeded } from './billing/stop-condition';
@@ -31,7 +29,7 @@ export { vibezcheckMiddleware } from './ai-sdk/middleware';
  * VibezCheck Unified Client Configuration
  */
 export interface VibezCheckConfig extends MeterOptions {
-  /** Auto-initialize CustomerManager (default: true if Stripe key present) */
+  /** Auto-initialize CustomerManager (default: true) */
   autoCustomers?: boolean;
 }
 
@@ -40,27 +38,13 @@ export interface VibezCheckConfig extends MeterOptions {
  */
 export class VibezCheckClient {
   public meter: VibezMeter;
-  public customers?: CustomerManager;
-  public auth?: ApiKeyAuth;
-  public billing?: BillingHelper;
-  private stripeClient?: Stripe;
+  public customers: CustomerManager;
+  public auth: ApiKeyAuth;
 
   constructor(config: VibezCheckConfig = {}) {
-    const apiKey = config.apiKey || process.env.STRIPE_SECRET_KEY;
-    if (apiKey) {
-      this.stripeClient = config.stripe || new Stripe(apiKey);
-    }
-
-    this.meter = new VibezMeter({
-      ...config,
-      stripe: this.stripeClient,
-    });
-
-    if (this.stripeClient) {
-      this.customers = new CustomerManager({ stripe: this.stripeClient });
-      this.auth = new ApiKeyAuth(this.stripeClient);
-      this.billing = new BillingHelper({ stripe: this.stripeClient });
-    }
+    this.meter = new VibezMeter(config);
+    this.customers = new CustomerManager();
+    this.auth = new ApiKeyAuth();
   }
 
   /**
@@ -178,7 +162,6 @@ vibezcheck.tools = createTools;
 vibezcheck.agent = createAgent;
 vibezcheck.stopWhen = isBudgetExceeded;
 vibezcheck.middleware = vibezcheckMiddleware;
-vibezcheck.Billing = BillingHelper;
 vibezcheck.Auth = ApiKeyAuth;
 vibezcheck.Customers = CustomerManager;
 vibezcheck.toResponse = toResponse;

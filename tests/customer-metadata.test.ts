@@ -17,7 +17,7 @@ describe('Customer Information & Rich Metadata', () => {
 
     // 3. Rich structured object
     const customerInfo: CustomerInfo = {
-      id: 'cus_stripe_999',
+      id: 'cus_premium_999',
       userId: 'usr_internal_456',
       email: 'alex@acme.corp',
       name: 'Alex Developer',
@@ -36,7 +36,7 @@ describe('Customer Information & Rich Metadata', () => {
     };
 
     const norm = normalizeCustomer(customerInfo);
-    expect(norm.customerId).toBe('cus_stripe_999');
+    expect(norm.customerId).toBe('cus_premium_999');
     expect(norm.customerEmail).toBe('alex@acme.corp');
     expect(norm.customerObj?.name).toBe('Alex Developer');
     expect(norm.customerMetadata.org_id).toBe('org_enterprise_1');
@@ -118,26 +118,8 @@ describe('Customer Information & Rich Metadata', () => {
     expect(dbRecordedRow.metadata.department).toBe('R&D');
   });
 
-  test('CustomerManager provisions and updates Stripe Customer with rich metadata', async () => {
-    let createdPayload: any = null;
-    let updatedPayload: any = null;
-
-    const mockStripe: any = {
-      customers: {
-        search: async () => ({ data: [] }),
-        list: async () => ({ data: [] }),
-        create: async (payload: any) => {
-          createdPayload = payload;
-          return { id: 'cus_new_123', ...payload };
-        },
-        update: async (id: string, payload: any) => {
-          updatedPayload = { id, ...payload };
-          return { id, ...payload };
-        },
-      },
-    };
-
-    const manager = createCustomerManager({ stripe: mockStripe });
+  test('CustomerManager provisions and updates Customer with rich metadata', async () => {
+    const manager = createCustomerManager();
 
     const result = await manager.getOrCreate({
       userId: 'usr_777',
@@ -156,23 +138,23 @@ describe('Customer Information & Rich Metadata', () => {
       },
     });
 
-    expect(result.id).toBe('cus_new_123');
+    expect(result.id).toBe('usr_777');
     expect(result.isNew).toBe(true);
-    expect(createdPayload.email).toBe('cto@acme.ai');
-    expect(createdPayload.name).toBe('John Doe');
-    expect(createdPayload.phone).toBe('+15551234567');
-    expect(createdPayload.metadata.vibez_user_id).toBe('usr_777');
-    expect(createdPayload.metadata.org_id).toBe('org_acme');
-    expect(createdPayload.metadata.org_name).toBe('Acme AI Inc');
-    expect(createdPayload.metadata.team_id).toBe('team_platform');
-    expect(createdPayload.metadata.plan).toBe('growth');
-    expect(createdPayload.metadata.tier).toBe('tier_3');
-    expect(createdPayload.metadata.role).toBe('cto');
-    expect(createdPayload.metadata.invited_by).toBe('ceo@acme.ai');
-    expect(createdPayload.metadata.seats).toBe('25');
+    expect(result.customer.email).toBe('cto@acme.ai');
+    expect(result.customer.name).toBe('John Doe');
+    expect(result.customer.phone).toBe('+15551234567');
+    expect(result.customer.metadata?.vibez_user_id).toBe('usr_777');
+    expect(result.customer.metadata?.org_id).toBe('org_acme');
+    expect(result.customer.metadata?.org_name).toBe('Acme AI Inc');
+    expect(result.customer.metadata?.team_id).toBe('team_platform');
+    expect(result.customer.metadata?.plan).toBe('growth');
+    expect(result.customer.metadata?.tier).toBe('tier_3');
+    expect(result.customer.metadata?.role).toBe('cto');
+    expect(result.customer.metadata?.invited_by).toBe('ceo@acme.ai');
+    expect(result.customer.metadata?.seats).toBe('25');
 
     // Test updating customer metadata
-    await manager.updateCustomer('cus_new_123', {
+    const updated = await manager.updateCustomer('usr_777', {
       plan: 'enterprise',
       metadata: {
         seats: 100,
@@ -180,9 +162,9 @@ describe('Customer Information & Rich Metadata', () => {
       },
     });
 
-    expect(updatedPayload.id).toBe('cus_new_123');
-    expect(updatedPayload.metadata.plan).toBe('enterprise');
-    expect(updatedPayload.metadata.seats).toBe('100');
-    expect(updatedPayload.metadata.upgraded_at).toBe('2026-09-06');
+    expect(updated.id).toBe('usr_777');
+    expect(updated.metadata?.plan).toBe('enterprise');
+    expect(updated.metadata?.seats).toBe('100');
+    expect(updated.metadata?.upgraded_at).toBe('2026-09-06');
   });
 });

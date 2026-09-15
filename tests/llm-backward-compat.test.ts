@@ -216,7 +216,7 @@ describe('Universal LLM Support & Backward Compatibility Suite', () => {
       expect(res.text).toBe('Claude');
     });
 
-    test('supports 3-argument call: meteredModel(model, stripeCustomerId, options)', async () => {
+    test('supports 3-argument call: meteredModel(model, customerId, options)', async () => {
       const mockModel = {
         modelId: 'gpt-4o-mini',
         specificationVersion: 'v2',
