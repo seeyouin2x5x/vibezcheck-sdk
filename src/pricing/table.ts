@@ -1,4 +1,5 @@
 import type { ModelPricingRates } from '../types';
+import { getDynamicRate } from './sync';
 
 /**
  * Built-in Registry of Model Pricing (USD per 1 Million Tokens)
@@ -278,6 +279,12 @@ export function getModelPricing(modelName: string): ModelPricingRates {
     return customPricingRegistry[modelName];
   }
 
+  // Check dynamic synced manifest cache
+  const dynamicRate = getDynamicRate(modelName) || getDynamicRate(normalized);
+  if (dynamicRate) {
+    return dynamicRate;
+  }
+
   // Check built-in table with normalized key
   if (MODEL_PRICING_TABLE[normalized]) {
     return MODEL_PRICING_TABLE[normalized];
@@ -289,8 +296,12 @@ export function getModelPricing(modelName: string): ModelPricingRates {
 
   // Check alias table fallback
   const alias = MODEL_ALIASES[modelName.toLowerCase().trim()];
-  if (alias && MODEL_PRICING_TABLE[alias]) {
-    return MODEL_PRICING_TABLE[alias];
+  if (alias) {
+    const dynamicAlias = getDynamicRate(alias);
+    if (dynamicAlias) return dynamicAlias;
+    if (MODEL_PRICING_TABLE[alias]) {
+      return MODEL_PRICING_TABLE[alias];
+    }
   }
 
   // Fallback defaults for unknown models (conservative estimates: $1.00 in, $3.00 out)

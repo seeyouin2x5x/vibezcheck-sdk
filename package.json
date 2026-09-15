@@ -87,6 +87,7 @@
   "files": [
     "dist",
     "bin",
+    "manifest",
     "examples",
     "README.md",
     "LICENSE",

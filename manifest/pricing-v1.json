@@ -1,0 +1,3975 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "1.0.0",
+  "updatedAt": "2026-03-15T00:00:00.000Z",
+  "source": "https://docs.stripe.com/billing/token-billing/ai-prices#pricing-table-prices-per-1m-tokens",
+  "description": "Default LLM pricing manifest sourced from Stripe Metronome AI Token Billing Rates",
+  "models": [
+    {
+      "publisher": "Amazon",
+      "provider": "Bedrock",
+      "model": "nova-2-lite",
+      "prices_per_1m": {
+        "input_token": 0.3,
+        "output_token": 2.5,
+        "cached_input": 0.07,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Amazon",
+      "provider": "Bedrock",
+      "model": "nova-lite",
+      "prices_per_1m": {
+        "input_token": 0.06,
+        "output_token": 0.24,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Amazon",
+      "provider": "Bedrock",
+      "model": "nova-micro",
+      "prices_per_1m": {
+        "input_token": 0.04,
+        "output_token": 0.14,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Amazon",
+      "provider": "Bedrock",
+      "model": "nova-pro",
+      "prices_per_1m": {
+        "input_token": 0.8,
+        "output_token": 3.2,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Anthropic",
+      "model": "claude-3-haiku",
+      "prices_per_1m": {
+        "input_token": 0.25,
+        "output_token": 1.25,
+        "cached_input": 0.03,
+        "cached_output": 0.3,
+        "cached_read": null,
+        "cached_write": 0.3
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Google",
+      "model": "claude-3-haiku",
+      "prices_per_1m": {
+        "input_token": 0.25,
+        "output_token": 1.25,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Bedrock",
+      "model": "claude-3-haiku",
+      "prices_per_1m": {
+        "input_token": 0.25,
+        "output_token": 1.25,
+        "cached_input": 0.03,
+        "cached_output": 0.3,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Gemini Enterprise Agent Platform",
+      "model": "claude-3-haiku",
+      "prices_per_1m": {
+        "input_token": 0.25,
+        "output_token": 1.25,
+        "cached_input": 0.03,
+        "cached_output": 0.3,
+        "cached_read": null,
+        "cached_write": 0.3
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Anthropic",
+      "model": "claude-3-opus",
+      "prices_per_1m": {
+        "input_token": 15,
+        "output_token": 75,
+        "cached_input": 1.5,
+        "cached_output": 18.75,
+        "cached_read": null,
+        "cached_write": 18.75
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Anthropic",
+      "model": "claude-3.5-haiku",
+      "prices_per_1m": {
+        "input_token": 0.8,
+        "output_token": 4,
+        "cached_input": 0.08,
+        "cached_output": 1,
+        "cached_read": null,
+        "cached_write": 1
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Google",
+      "model": "claude-3.5-haiku",
+      "prices_per_1m": {
+        "input_token": 0.8,
+        "output_token": 4,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Bedrock",
+      "model": "claude-3.5-haiku",
+      "prices_per_1m": {
+        "input_token": 0.8,
+        "output_token": 4,
+        "cached_input": 0.08,
+        "cached_output": 1,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Gemini Enterprise Agent Platform",
+      "model": "claude-3.5-haiku",
+      "prices_per_1m": {
+        "input_token": 0.8,
+        "output_token": 4,
+        "cached_input": 0.08,
+        "cached_output": 1,
+        "cached_read": null,
+        "cached_write": 1
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Anthropic",
+      "model": "claude-3.5-sonnet",
+      "prices_per_1m": {
+        "input_token": 3,
+        "output_token": 15,
+        "cached_input": 0.3,
+        "cached_output": 3.75,
+        "cached_read": null,
+        "cached_write": 3.75
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Anthropic",
+      "model": "claude-3.7-sonnet",
+      "prices_per_1m": {
+        "input_token": 3,
+        "output_token": 15,
+        "cached_input": 0.3,
+        "cached_output": 3.75,
+        "cached_read": null,
+        "cached_write": 3.75
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Google",
+      "model": "claude-3.7-sonnet",
+      "prices_per_1m": {
+        "input_token": 3,
+        "output_token": 15,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Bedrock",
+      "model": "claude-3.7-sonnet",
+      "prices_per_1m": {
+        "input_token": 3,
+        "output_token": 15,
+        "cached_input": 0.3,
+        "cached_output": 3.75,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Gemini Enterprise Agent Platform",
+      "model": "claude-3.7-sonnet",
+      "prices_per_1m": {
+        "input_token": 3,
+        "output_token": 15,
+        "cached_input": 0.3,
+        "cached_output": 3.75,
+        "cached_read": null,
+        "cached_write": 3.75
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Anthropic",
+      "model": "claude-fable-5",
+      "prices_per_1m": {
+        "input_token": 10,
+        "output_token": 50,
+        "cached_input": 1,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": 12.5
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Bedrock",
+      "model": "claude-fable-5",
+      "prices_per_1m": {
+        "input_token": 10,
+        "output_token": 50,
+        "cached_input": 1,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": 12.5
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Gemini Enterprise Agent Platform",
+      "model": "claude-fable-5",
+      "prices_per_1m": {
+        "input_token": 10,
+        "output_token": 50,
+        "cached_input": 1,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": 12.5
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Anthropic",
+      "model": "claude-fable-5.1",
+      "prices_per_1m": {
+        "input_token": 10,
+        "output_token": 50,
+        "cached_input": 0.25,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": 12.5
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Anthropic",
+      "model": "claude-haiku-4.5",
+      "prices_per_1m": {
+        "input_token": 1,
+        "output_token": 5,
+        "cached_input": 0.1,
+        "cached_output": 1.25,
+        "cached_read": null,
+        "cached_write": 1.25
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Google",
+      "model": "claude-haiku-4.5",
+      "prices_per_1m": {
+        "input_token": 1,
+        "output_token": 5,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Bedrock",
+      "model": "claude-haiku-4.5",
+      "prices_per_1m": {
+        "input_token": 1,
+        "output_token": 5,
+        "cached_input": 0.1,
+        "cached_output": 1.25,
+        "cached_read": null,
+        "cached_write": 1.25
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Gemini Enterprise Agent Platform",
+      "model": "claude-haiku-4.5",
+      "prices_per_1m": {
+        "input_token": 1,
+        "output_token": 5,
+        "cached_input": 0.1,
+        "cached_output": 1.25,
+        "cached_read": null,
+        "cached_write": 1.25
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Anthropic",
+      "model": "claude-mythos-5",
+      "prices_per_1m": {
+        "input_token": 10,
+        "output_token": 50,
+        "cached_input": 1,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": 12.5
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Anthropic",
+      "model": "claude-mythos-5.1",
+      "prices_per_1m": {
+        "input_token": 10,
+        "output_token": 50,
+        "cached_input": 0.25,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": 12.5
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Anthropic",
+      "model": "claude-opus-4",
+      "prices_per_1m": {
+        "input_token": 15,
+        "output_token": 75,
+        "cached_input": 1.5,
+        "cached_output": 18.75,
+        "cached_read": null,
+        "cached_write": 18.75
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Google",
+      "model": "claude-opus-4",
+      "prices_per_1m": {
+        "input_token": 15,
+        "output_token": 75,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Bedrock",
+      "model": "claude-opus-4",
+      "prices_per_1m": {
+        "input_token": 15,
+        "output_token": 75,
+        "cached_input": 1.5,
+        "cached_output": 18.75,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Gemini Enterprise Agent Platform",
+      "model": "claude-opus-4",
+      "prices_per_1m": {
+        "input_token": 15,
+        "output_token": 75,
+        "cached_input": 1.5,
+        "cached_output": 18.75,
+        "cached_read": null,
+        "cached_write": 18.75
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Anthropic",
+      "model": "claude-opus-4.1",
+      "prices_per_1m": {
+        "input_token": 15,
+        "output_token": 75,
+        "cached_input": 1.5,
+        "cached_output": 18.75,
+        "cached_read": null,
+        "cached_write": 18.75
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Google",
+      "model": "claude-opus-4.1",
+      "prices_per_1m": {
+        "input_token": 15,
+        "output_token": 75,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Bedrock",
+      "model": "claude-opus-4.1",
+      "prices_per_1m": {
+        "input_token": 15,
+        "output_token": 75,
+        "cached_input": 1.5,
+        "cached_output": 18.75,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Gemini Enterprise Agent Platform",
+      "model": "claude-opus-4.1",
+      "prices_per_1m": {
+        "input_token": 15,
+        "output_token": 75,
+        "cached_input": 1.5,
+        "cached_output": 18.75,
+        "cached_read": null,
+        "cached_write": 18.75
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Anthropic",
+      "model": "claude-opus-4.5",
+      "prices_per_1m": {
+        "input_token": 5,
+        "output_token": 25,
+        "cached_input": 0.5,
+        "cached_output": 6.25,
+        "cached_read": null,
+        "cached_write": 6.25
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Google",
+      "model": "claude-opus-4.5",
+      "prices_per_1m": {
+        "input_token": 5,
+        "output_token": 25,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Bedrock",
+      "model": "claude-opus-4.5",
+      "prices_per_1m": {
+        "input_token": 5,
+        "output_token": 25,
+        "cached_input": 0.5,
+        "cached_output": 6.25,
+        "cached_read": null,
+        "cached_write": 6.25
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Gemini Enterprise Agent Platform",
+      "model": "claude-opus-4.5",
+      "prices_per_1m": {
+        "input_token": 5,
+        "output_token": 25,
+        "cached_input": 0.5,
+        "cached_output": 6.25,
+        "cached_read": null,
+        "cached_write": 6.25
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Anthropic",
+      "model": "claude-opus-4.6",
+      "prices_per_1m": {
+        "input_token": 5,
+        "output_token": 25,
+        "cached_input": 0.5,
+        "cached_output": 6.25,
+        "cached_read": null,
+        "cached_write": 6.25
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Google",
+      "model": "claude-opus-4.6",
+      "prices_per_1m": {
+        "input_token": 5,
+        "output_token": 25,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Bedrock",
+      "model": "claude-opus-4.6",
+      "prices_per_1m": {
+        "input_token": 5,
+        "output_token": 25,
+        "cached_input": 0.5,
+        "cached_output": 6.25,
+        "cached_read": null,
+        "cached_write": 6.25
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Gemini Enterprise Agent Platform",
+      "model": "claude-opus-4.6",
+      "prices_per_1m": {
+        "input_token": 5,
+        "output_token": 25,
+        "cached_input": 0.5,
+        "cached_output": 6.25,
+        "cached_read": null,
+        "cached_write": 6.25
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Anthropic",
+      "model": "claude-opus-4.7",
+      "prices_per_1m": {
+        "input_token": 5,
+        "output_token": 25,
+        "cached_input": 0.5,
+        "cached_output": 6.25,
+        "cached_read": null,
+        "cached_write": 6.25
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Gemini Enterprise Agent Platform",
+      "model": "claude-opus-4.7",
+      "prices_per_1m": {
+        "input_token": 5,
+        "output_token": 25,
+        "cached_input": 0.5,
+        "cached_output": 6.25,
+        "cached_read": null,
+        "cached_write": 6.25
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Bedrock",
+      "model": "claude-opus-4.7",
+      "prices_per_1m": {
+        "input_token": 5,
+        "output_token": 25,
+        "cached_input": 0.5,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": 6.25
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Anthropic",
+      "model": "claude-opus-4.8",
+      "prices_per_1m": {
+        "input_token": 5,
+        "output_token": 25,
+        "cached_input": 0.5,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": 6.25
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Gemini Enterprise Agent Platform",
+      "model": "claude-opus-4.8",
+      "prices_per_1m": {
+        "input_token": 5,
+        "output_token": 25,
+        "cached_input": 0.5,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": 6.25
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Bedrock",
+      "model": "claude-opus-4.8",
+      "prices_per_1m": {
+        "input_token": 5,
+        "output_token": 25,
+        "cached_input": 0.5,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": 6.25
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Gemini Enterprise Agent Platform",
+      "model": "claude-opus-5",
+      "prices_per_1m": {
+        "input_token": 5,
+        "output_token": 25,
+        "cached_input": 0.5,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": 6.25
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Anthropic",
+      "model": "claude-opus-5",
+      "prices_per_1m": {
+        "input_token": 5,
+        "output_token": 25,
+        "cached_input": 0.5,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": 6.25
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Bedrock",
+      "model": "claude-opus-5",
+      "prices_per_1m": {
+        "input_token": 5,
+        "output_token": 25,
+        "cached_input": 0.5,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": 6.25
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Anthropic",
+      "model": "claude-sonnet-4",
+      "prices_per_1m": {
+        "input_token": 3,
+        "output_token": 15,
+        "cached_input": 0.3,
+        "cached_output": 3.75,
+        "cached_read": null,
+        "cached_write": 3.75
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Gemini Enterprise Agent Platform",
+      "model": "claude-sonnet-4",
+      "prices_per_1m": {
+        "input_token": 3,
+        "output_token": 15,
+        "cached_input": 0.3,
+        "cached_output": 3.75,
+        "cached_read": null,
+        "cached_write": 3.75
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Bedrock",
+      "model": "claude-sonnet-4",
+      "prices_per_1m": {
+        "input_token": 3,
+        "output_token": 15,
+        "cached_input": 0.3,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": 3.75
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Anthropic",
+      "model": "claude-sonnet-4.5",
+      "prices_per_1m": {
+        "input_token": 3,
+        "output_token": 15,
+        "cached_input": 0.3,
+        "cached_output": 3.75,
+        "cached_read": null,
+        "cached_write": 3.75
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Gemini Enterprise Agent Platform",
+      "model": "claude-sonnet-4.5",
+      "prices_per_1m": {
+        "input_token": 3,
+        "output_token": 15,
+        "cached_input": 0.3,
+        "cached_output": 3.75,
+        "cached_read": null,
+        "cached_write": 3.75
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Bedrock",
+      "model": "claude-sonnet-4.5",
+      "prices_per_1m": {
+        "input_token": 3,
+        "output_token": 15,
+        "cached_input": 0.3,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": 3.75
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Anthropic",
+      "model": "claude-sonnet-4.6",
+      "prices_per_1m": {
+        "input_token": 3,
+        "output_token": 15,
+        "cached_input": 0.3,
+        "cached_output": 3.75,
+        "cached_read": null,
+        "cached_write": 3.75
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Google",
+      "model": "claude-sonnet-4.6",
+      "prices_per_1m": {
+        "input_token": 3,
+        "output_token": 15,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Bedrock",
+      "model": "claude-sonnet-4.6",
+      "prices_per_1m": {
+        "input_token": 3,
+        "output_token": 15,
+        "cached_input": 0.3,
+        "cached_output": 3.75,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Gemini Enterprise Agent Platform",
+      "model": "claude-sonnet-4.6",
+      "prices_per_1m": {
+        "input_token": 3,
+        "output_token": 15,
+        "cached_input": 0.3,
+        "cached_output": 3.75,
+        "cached_read": null,
+        "cached_write": 3.75
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Anthropic",
+      "model": "claude-sonnet-5",
+      "prices_per_1m": {
+        "input_token": 2,
+        "output_token": 10,
+        "cached_input": 0.2,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": 2.5
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Gemini Enterprise Agent Platform",
+      "model": "claude-sonnet-5",
+      "prices_per_1m": {
+        "input_token": 2,
+        "output_token": 10,
+        "cached_input": 0.2,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": 2.5
+      }
+    },
+    {
+      "publisher": "Anthropic",
+      "provider": "Bedrock",
+      "model": "claude-sonnet-5",
+      "prices_per_1m": {
+        "input_token": 2,
+        "output_token": 10,
+        "cached_input": 0.2,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": 2.5
+      }
+    },
+    {
+      "publisher": "ArceeAI",
+      "provider": "ArceeAI",
+      "model": "trinity-large-preview",
+      "prices_per_1m": {
+        "input_token": 0.25,
+        "output_token": 1,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "ArceeAI",
+      "provider": "ArceeAI",
+      "model": "trinity-large-thinking",
+      "prices_per_1m": {
+        "input_token": 0.25,
+        "output_token": 0.9,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "ArceeAI",
+      "provider": "ArceeAI",
+      "model": "trinity-mini",
+      "prices_per_1m": {
+        "input_token": 0.04,
+        "output_token": 0.15,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Cohere",
+      "provider": "Cohere",
+      "model": "command-a",
+      "prices_per_1m": {
+        "input_token": 2.5,
+        "output_token": 10,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "DeepSeek",
+      "provider": "DeepSeek",
+      "model": "deepseek-chat",
+      "prices_per_1m": {
+        "input_token": 0.57,
+        "output_token": 1.68,
+        "cached_input": 0.07,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "DeepSeek",
+      "provider": "DeepSeek",
+      "model": "deepseek-chat-v3.1",
+      "prices_per_1m": {
+        "input_token": 0.2,
+        "output_token": 0.8,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "DeepSeek",
+      "provider": "Bedrock",
+      "model": "deepseek-r1",
+      "prices_per_1m": {
+        "input_token": 1.35,
+        "output_token": 5.4,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "DeepSeek",
+      "provider": "DeepInfra",
+      "model": "deepseek-r1",
+      "prices_per_1m": {
+        "input_token": 0.5,
+        "output_token": 2.15,
+        "cached_input": 0.35,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "DeepSeek",
+      "provider": "Baseten",
+      "model": "deepseek-v3",
+      "prices_per_1m": {
+        "input_token": 0.77,
+        "output_token": 0.77,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "DeepSeek",
+      "provider": "Baseten",
+      "model": "deepseek-v3.1",
+      "prices_per_1m": {
+        "input_token": 0.5,
+        "output_token": 1.5,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "DeepSeek",
+      "provider": "Together AI",
+      "model": "deepseek-v3.1",
+      "prices_per_1m": {
+        "input_token": 0.6,
+        "output_token": 1.7,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "DeepSeek",
+      "provider": "Sambanova",
+      "model": "deepseek-v3.1",
+      "prices_per_1m": {
+        "input_token": 3,
+        "output_token": 4.5,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "DeepSeek",
+      "provider": "DeepInfra",
+      "model": "deepseek-v3.1",
+      "prices_per_1m": {
+        "input_token": 0.21,
+        "output_token": 0.79,
+        "cached_input": 0.13,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "DeepSeek",
+      "provider": "Novita",
+      "model": "deepseek-v3.1",
+      "prices_per_1m": {
+        "input_token": 0.27,
+        "output_token": 1,
+        "cached_input": 0.14,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "DeepSeek",
+      "provider": "DeepSeek",
+      "model": "deepseek-v3.1-terminus",
+      "prices_per_1m": {
+        "input_token": 0.27,
+        "output_token": 1,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "DeepSeek",
+      "provider": "Novita",
+      "model": "deepseek-v3.1-terminus",
+      "prices_per_1m": {
+        "input_token": 0.27,
+        "output_token": 1,
+        "cached_input": 0.14,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "DeepSeek",
+      "provider": "Bedrock",
+      "model": "deepseek-v3.2",
+      "prices_per_1m": {
+        "input_token": 0.62,
+        "output_token": 1.85,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "DeepSeek",
+      "provider": "DeepInfra",
+      "model": "deepseek-v3.2",
+      "prices_per_1m": {
+        "input_token": 0.26,
+        "output_token": 0.38,
+        "cached_input": 0.13,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "DeepSeek",
+      "provider": "Novita",
+      "model": "deepseek-v3.2",
+      "prices_per_1m": {
+        "input_token": 0.27,
+        "output_token": 0.4,
+        "cached_input": 0.13,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "DeepSeek",
+      "provider": "DeepSeek",
+      "model": "deepseek-v4-flash-0731",
+      "prices_per_1m": {
+        "input_token": 0.14,
+        "output_token": 0.28,
+        "cached_input": 0,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "DeepSeek",
+      "provider": "DeepSeek",
+      "model": "deepseek-v4-pro",
+      "prices_per_1m": {
+        "input_token": 0.43,
+        "output_token": 0.87,
+        "cached_input": 0,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Google",
+      "provider": "Google Vertex",
+      "model": "gemini-2.0-flash",
+      "prices_per_1m": {
+        "input_token": 0.15,
+        "output_token": 0.6,
+        "cached_input": 0.03,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Google",
+      "provider": "Gemini Enterprise Agent Platform",
+      "model": "gemini-2.0-flash",
+      "prices_per_1m": {
+        "input_token": 0.15,
+        "output_token": 0.6,
+        "cached_input": 0.03,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Google",
+      "provider": "Google Vertex",
+      "model": "gemini-2.0-flash-lite",
+      "prices_per_1m": {
+        "input_token": 0.07,
+        "output_token": 0.3,
+        "cached_input": 0.02,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Google",
+      "provider": "Gemini Enterprise Agent Platform",
+      "model": "gemini-2.0-flash-lite",
+      "prices_per_1m": {
+        "input_token": 0.07,
+        "output_token": 0.3,
+        "cached_input": 0.02,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Google",
+      "provider": "Google Vertex",
+      "model": "gemini-2.5-flash",
+      "prices_per_1m": {
+        "input_token": 0.3,
+        "output_token": 2.5,
+        "cached_input": 0.07,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Google",
+      "provider": "DeepInfra",
+      "model": "gemini-2.5-flash",
+      "prices_per_1m": {
+        "input_token": 0.3,
+        "output_token": 2.5,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Google",
+      "provider": "Gemini Enterprise Agent Platform",
+      "model": "gemini-2.5-flash",
+      "prices_per_1m": {
+        "input_token": 0.3,
+        "output_token": 2.5,
+        "cached_input": 0.07,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Google",
+      "provider": "Google Vertex",
+      "model": "gemini-2.5-flash-image",
+      "prices_per_1m": {
+        "input_token": 0.3,
+        "output_token": 30,
+        "cached_input": 0.07,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Google",
+      "provider": "Gemini Enterprise Agent Platform",
+      "model": "gemini-2.5-flash-image",
+      "prices_per_1m": {
+        "input_token": 0.3,
+        "output_token": 30,
+        "cached_input": 0.07,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Google",
+      "provider": "Google Vertex",
+      "model": "gemini-2.5-flash-image-preview",
+      "prices_per_1m": {
+        "input_token": 0.3,
+        "output_token": 30,
+        "cached_input": 0.07,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Google",
+      "provider": "Google Vertex",
+      "model": "gemini-2.5-flash-lite",
+      "prices_per_1m": {
+        "input_token": 0.1,
+        "output_token": 0.4,
+        "cached_input": 0.03,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Google",
+      "provider": "Gemini Enterprise Agent Platform",
+      "model": "gemini-2.5-flash-lite",
+      "prices_per_1m": {
+        "input_token": 0.1,
+        "output_token": 0.4,
+        "cached_input": 0.03,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Google",
+      "provider": "Google Vertex",
+      "model": "gemini-2.5-pro",
+      "prices_per_1m": {
+        "input_token": 1.25,
+        "output_token": 10,
+        "cached_input": 0.31,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Google",
+      "provider": "Gemini Enterprise Agent Platform",
+      "model": "gemini-2.5-pro",
+      "prices_per_1m": {
+        "input_token": 1.25,
+        "output_token": 10,
+        "cached_input": 0.31,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Google",
+      "provider": "Google Vertex",
+      "model": "gemini-3-flash",
+      "prices_per_1m": {
+        "input_token": 0.5,
+        "output_token": 3,
+        "cached_input": 0.05,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Google",
+      "provider": "Gemini Enterprise Agent Platform",
+      "model": "gemini-3-flash",
+      "prices_per_1m": {
+        "input_token": 0.5,
+        "output_token": 3,
+        "cached_input": 0.05,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Google",
+      "provider": "Google Vertex",
+      "model": "gemini-3-pro-image",
+      "prices_per_1m": {
+        "input_token": 2,
+        "output_token": 12,
+        "cached_input": 0.2,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Google",
+      "provider": "Google Vertex",
+      "model": "gemini-3-pro-preview",
+      "prices_per_1m": {
+        "input_token": 2,
+        "output_token": 12,
+        "cached_input": 0.2,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Google",
+      "provider": "Gemini Enterprise Agent Platform",
+      "model": "gemini-3-pro-preview",
+      "prices_per_1m": {
+        "input_token": 2,
+        "output_token": 12,
+        "cached_input": 0.2,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Google",
+      "provider": "Google Vertex",
+      "model": "gemini-3.1-flash-lite-preview",
+      "prices_per_1m": {
+        "input_token": 0.25,
+        "output_token": 1.5,
+        "cached_input": 0.03,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Google",
+      "provider": "Gemini Enterprise Agent Platform",
+      "model": "gemini-3.1-flash-lite-preview",
+      "prices_per_1m": {
+        "input_token": 0.25,
+        "output_token": 1.5,
+        "cached_input": 0.03,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Google",
+      "provider": "Google Vertex",
+      "model": "gemini-3.1-pro-preview",
+      "prices_per_1m": {
+        "input_token": 2,
+        "output_token": 12,
+        "cached_input": 0.2,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Google",
+      "provider": "Gemini Enterprise Agent Platform",
+      "model": "gemini-3.1-pro-preview",
+      "prices_per_1m": {
+        "input_token": 2,
+        "output_token": 12,
+        "cached_input": 0.2,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Google",
+      "provider": "Gemini Enterprise Agent Platform",
+      "model": "gemini-3.5-flash",
+      "prices_per_1m": {
+        "input_token": 1.5,
+        "output_token": 9,
+        "cached_input": 0.15,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Google",
+      "provider": "Google Vertex",
+      "model": "gemini-3.5-flash",
+      "prices_per_1m": {
+        "input_token": 1.5,
+        "output_token": 9,
+        "cached_input": 0.15,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Google",
+      "provider": "Gemini Enterprise Agent Platform",
+      "model": "gemini-3.5-flash-lite",
+      "prices_per_1m": {
+        "input_token": 0.3,
+        "output_token": 2.5,
+        "cached_input": 0.03,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Google",
+      "provider": "Google Vertex",
+      "model": "gemini-3.5-flash-lite",
+      "prices_per_1m": {
+        "input_token": 0.3,
+        "output_token": 2.5,
+        "cached_input": 0.03,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Google",
+      "provider": "Gemini Enterprise Agent Platform",
+      "model": "gemini-3.6-flash",
+      "prices_per_1m": {
+        "input_token": 1.5,
+        "output_token": 7.5,
+        "cached_input": 0.15,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Google",
+      "provider": "Google Vertex",
+      "model": "gemini-3.6-flash",
+      "prices_per_1m": {
+        "input_token": 1.5,
+        "output_token": 7.5,
+        "cached_input": 0.15,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Google",
+      "provider": "Gemini Enterprise Agent Platform",
+      "model": "gemini-3.7-flash",
+      "prices_per_1m": {
+        "input_token": 0.75,
+        "output_token": 3.75,
+        "cached_input": 0.07,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Google",
+      "provider": "Google Vertex",
+      "model": "gemini-3.7-flash",
+      "prices_per_1m": {
+        "input_token": 0.75,
+        "output_token": 3.75,
+        "cached_input": 0.07,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Google",
+      "provider": "Parasail",
+      "model": "gemma-4-26b-a4b-it",
+      "prices_per_1m": {
+        "input_token": 0.13,
+        "output_token": 0.4,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Google",
+      "provider": "Novita",
+      "model": "gemma-4-26b-a4b-it",
+      "prices_per_1m": {
+        "input_token": 0.13,
+        "output_token": 0.4,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Google",
+      "provider": "Novita",
+      "model": "gemma-4-31b-it",
+      "prices_per_1m": {
+        "input_token": 0.14,
+        "output_token": 0.4,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Google",
+      "provider": "Parasail",
+      "model": "gemma-4-31b-it",
+      "prices_per_1m": {
+        "input_token": 0.14,
+        "output_token": 0.4,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Inception Labs",
+      "provider": "Inception",
+      "model": "mercury",
+      "prices_per_1m": {
+        "input_token": 0.25,
+        "output_token": 1,
+        "cached_input": 0.25,
+        "cached_output": 1,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Inception Labs",
+      "provider": "Inception",
+      "model": "mercury-2",
+      "prices_per_1m": {
+        "input_token": 0.25,
+        "output_token": 0.75,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Inception Labs",
+      "provider": "Inception",
+      "model": "mercury-coder",
+      "prices_per_1m": {
+        "input_token": 0.25,
+        "output_token": 1,
+        "cached_input": 0.25,
+        "cached_output": 1,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Inception Labs",
+      "provider": "Inception",
+      "model": "mercury-coder-small",
+      "prices_per_1m": {
+        "input_token": 0.25,
+        "output_token": 0.75,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Kwaipilot",
+      "provider": "StreamLake",
+      "model": "kat-coder-pro-v1",
+      "prices_per_1m": {
+        "input_token": 0.3,
+        "output_token": 1.2,
+        "cached_input": 0.06,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Kwaipilot",
+      "provider": "Novita",
+      "model": "kat-coder-pro-v1",
+      "prices_per_1m": {
+        "input_token": 0.3,
+        "output_token": 1.2,
+        "cached_input": 0.06,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Kwaipilot",
+      "provider": "StreamLake",
+      "model": "kat-coder-pro-v2",
+      "prices_per_1m": {
+        "input_token": 0.3,
+        "output_token": 1.2,
+        "cached_input": 0.06,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Meta",
+      "provider": "Bedrock",
+      "model": "llama-3.1-70b",
+      "prices_per_1m": {
+        "input_token": 0.72,
+        "output_token": 0.72,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Meta",
+      "provider": "DeepInfra",
+      "model": "llama-3.1-70b",
+      "prices_per_1m": {
+        "input_token": 0.4,
+        "output_token": 0.4,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Meta",
+      "provider": "Bedrock",
+      "model": "llama-3.1-8b",
+      "prices_per_1m": {
+        "input_token": 0.22,
+        "output_token": 0.22,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Meta",
+      "provider": "Cerebras",
+      "model": "llama-3.1-8b",
+      "prices_per_1m": {
+        "input_token": 0.1,
+        "output_token": 0.1,
+        "cached_input": 0.1,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Meta",
+      "provider": "Groq",
+      "model": "llama-3.1-8b",
+      "prices_per_1m": {
+        "input_token": 0.05,
+        "output_token": 0.08,
+        "cached_input": 0.03,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Meta",
+      "provider": "DeepInfra",
+      "model": "llama-3.1-8b",
+      "prices_per_1m": {
+        "input_token": 0.02,
+        "output_token": 0.05,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Meta",
+      "provider": "Novita",
+      "model": "llama-3.1-8b",
+      "prices_per_1m": {
+        "input_token": 0.02,
+        "output_token": 0.05,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Meta",
+      "provider": "Bedrock",
+      "model": "llama-3.2-11b",
+      "prices_per_1m": {
+        "input_token": 0.16,
+        "output_token": 0.16,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Meta",
+      "provider": "Bedrock",
+      "model": "llama-3.2-1b",
+      "prices_per_1m": {
+        "input_token": 0.1,
+        "output_token": 0.1,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Meta",
+      "provider": "Bedrock",
+      "model": "llama-3.2-3b",
+      "prices_per_1m": {
+        "input_token": 0.15,
+        "output_token": 0.15,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Meta",
+      "provider": "Bedrock",
+      "model": "llama-3.2-90b",
+      "prices_per_1m": {
+        "input_token": 0.72,
+        "output_token": 0.72,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Meta",
+      "provider": "Bedrock",
+      "model": "llama-3.3-70b",
+      "prices_per_1m": {
+        "input_token": 0.72,
+        "output_token": 0.72,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Meta",
+      "provider": "Groq",
+      "model": "llama-3.3-70b",
+      "prices_per_1m": {
+        "input_token": 0.59,
+        "output_token": 0.79,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Meta",
+      "provider": "Bedrock",
+      "model": "llama-4-maverick",
+      "prices_per_1m": {
+        "input_token": 0.24,
+        "output_token": 0.97,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Meta",
+      "provider": "DeepInfra",
+      "model": "llama-4-maverick",
+      "prices_per_1m": {
+        "input_token": 0.15,
+        "output_token": 0.6,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Meta",
+      "provider": "Bedrock",
+      "model": "llama-4-scout",
+      "prices_per_1m": {
+        "input_token": 0.17,
+        "output_token": 0.66,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Meta",
+      "provider": "DeepInfra",
+      "model": "llama-4-scout",
+      "prices_per_1m": {
+        "input_token": 0.08,
+        "output_token": 0.3,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Meta",
+      "provider": "Groq",
+      "model": "llama-4-scout",
+      "prices_per_1m": {
+        "input_token": 0.11,
+        "output_token": 0.34,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Meta",
+      "provider": "meta",
+      "model": "muse-spark-1.1",
+      "prices_per_1m": {
+        "input_token": 1.25,
+        "output_token": 4.25,
+        "cached_input": 0.15,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Meta",
+      "provider": "meta",
+      "model": "muse-spark-1.2",
+      "prices_per_1m": {
+        "input_token": 1.25,
+        "output_token": 4.25,
+        "cached_input": 0.15,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Meta",
+      "provider": "meta",
+      "model": "muse-spark-1.2-contributor",
+      "prices_per_1m": {
+        "input_token": 0.1,
+        "output_token": 0.2,
+        "cached_input": 0,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "MiniMax",
+      "provider": "MiniMax",
+      "model": "minimax-m2",
+      "prices_per_1m": {
+        "input_token": 0.3,
+        "output_token": 1.2,
+        "cached_input": 0.03,
+        "cached_output": 0.38,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "MiniMax",
+      "provider": "Bedrock",
+      "model": "minimax-m2.1",
+      "prices_per_1m": {
+        "input_token": 0.3,
+        "output_token": 1.2,
+        "cached_input": 0.03,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "MiniMax",
+      "provider": "DeepInfra",
+      "model": "minimax-m2.1",
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": 0.03,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "MiniMax",
+      "provider": "Novita",
+      "model": "minimax-m2.1",
+      "prices_per_1m": {
+        "input_token": 0.3,
+        "output_token": 1.2,
+        "cached_input": 0.03,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Mistral AI",
+      "provider": "Mistral",
+      "model": "mistral-large-3",
+      "prices_per_1m": {
+        "input_token": 0.5,
+        "output_token": 1.5,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "Mistral AI",
+      "provider": "Mistral",
+      "model": "mistral-medium",
+      "prices_per_1m": {
+        "input_token": 0.4,
+        "output_token": 2,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "OpenAI",
+      "provider": "OpenAI",
+      "model": "gpt-4o-2024-05-13",
+      "prices_per_1m": {
+        "input_token": 5,
+        "output_token": 15,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "OpenAI",
+      "provider": "OpenAI",
+      "model": "gpt-4o-2024-08-06",
+      "prices_per_1m": {
+        "input_token": 2.5,
+        "output_token": 10,
+        "cached_input": 1.25,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "OpenAI",
+      "provider": "OpenAI",
+      "model": "gpt-4o-mini",
+      "prices_per_1m": {
+        "input_token": 0.15,
+        "output_token": 0.6,
+        "cached_input": 0.075,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "OpenAI",
+      "provider": "Azure",
+      "model": "gpt-4o-mini",
+      "prices_per_1m": {
+        "input_token": 0.15,
+        "output_token": 0.6,
+        "cached_input": 0.075,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "OpenAI",
+      "provider": "OpenAI",
+      "model": "gpt-4o-mini-search-preview",
+      "prices_per_1m": {
+        "input_token": 0.15,
+        "output_token": 0.6,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "OpenAI",
+      "provider": "Nebius",
+      "model": "gpt-oss-120b",
+      "prices_per_1m": {
+        "input_token": 0.15,
+        "output_token": 0.6,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "OpenAI",
+      "provider": "OpenAI",
+      "model": "gpt-oss-20b",
+      "prices_per_1m": {
+        "input_token": 0.05,
+        "output_token": 0.2,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "OpenAI",
+      "provider": "Bedrock",
+      "model": "gpt-oss-20b",
+      "prices_per_1m": {
+        "input_token": 0.07,
+        "output_token": 0.3,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "OpenAI",
+      "provider": "Groq",
+      "model": "gpt-oss-20b",
+      "prices_per_1m": {
+        "input_token": 0.07,
+        "output_token": 0.3,
+        "cached_input": 0.04,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "OpenAI",
+      "provider": "OpenAI",
+      "model": "o1-pro",
+      "prices_per_1m": {
+        "input_token": 150,
+        "output_token": 600,
+        "cached_input": null,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "OpenAI",
+      "provider": "OpenAI",
+      "model": "o3",
+      "prices_per_1m": {
+        "input_token": 2,
+        "output_token": 8,
+        "cached_input": 0.5,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "OpenAI",
+      "provider": "OpenAI",
+      "model": "o3-mini",
+      "prices_per_1m": {
+        "input_token": 1.1,
+        "output_token": 4.4,
+        "cached_input": 0.55,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    },
+    {
+      "publisher": "OpenAI",
+      "provider": "Azure",
+      "model": "o3-mini",
+      "prices_per_1m": {
+        "input_token": 1.1,
+        "output_token": 4.4,
+        "cached_input": 0.55,
+        "cached_output": null,
+        "cached_read": null,
+        "cached_write": null
+      }
+    }
+  ],
+  "rates": {
+    "nova-2-lite": {
+      "inputPer1M": 0.3,
+      "outputPer1M": 2.5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.07
+    },
+    "amazon/nova-2-lite": {
+      "inputPer1M": 0.3,
+      "outputPer1M": 2.5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.07
+    },
+    "bedrock/nova-2-lite": {
+      "inputPer1M": 0.3,
+      "outputPer1M": 2.5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.07
+    },
+    "nova-lite": {
+      "inputPer1M": 0.06,
+      "outputPer1M": 0.24,
+      "currency": "USD"
+    },
+    "amazon/nova-lite": {
+      "inputPer1M": 0.06,
+      "outputPer1M": 0.24,
+      "currency": "USD"
+    },
+    "bedrock/nova-lite": {
+      "inputPer1M": 0.06,
+      "outputPer1M": 0.24,
+      "currency": "USD"
+    },
+    "nova-micro": {
+      "inputPer1M": 0.04,
+      "outputPer1M": 0.14,
+      "currency": "USD"
+    },
+    "amazon/nova-micro": {
+      "inputPer1M": 0.04,
+      "outputPer1M": 0.14,
+      "currency": "USD"
+    },
+    "bedrock/nova-micro": {
+      "inputPer1M": 0.04,
+      "outputPer1M": 0.14,
+      "currency": "USD"
+    },
+    "nova-pro": {
+      "inputPer1M": 0.8,
+      "outputPer1M": 3.2,
+      "currency": "USD"
+    },
+    "amazon/nova-pro": {
+      "inputPer1M": 0.8,
+      "outputPer1M": 3.2,
+      "currency": "USD"
+    },
+    "bedrock/nova-pro": {
+      "inputPer1M": 0.8,
+      "outputPer1M": 3.2,
+      "currency": "USD"
+    },
+    "claude-3-haiku": {
+      "inputPer1M": 0.25,
+      "outputPer1M": 1.25,
+      "currency": "USD",
+      "cachedInputPer1M": 0.03,
+      "cacheWritePer1M": 0.3
+    },
+    "anthropic/claude-3-haiku": {
+      "inputPer1M": 0.25,
+      "outputPer1M": 1.25,
+      "currency": "USD",
+      "cachedInputPer1M": 0.03,
+      "cacheWritePer1M": 0.3
+    },
+    "google/claude-3-haiku": {
+      "inputPer1M": 0.25,
+      "outputPer1M": 1.25,
+      "currency": "USD"
+    },
+    "bedrock/claude-3-haiku": {
+      "inputPer1M": 0.25,
+      "outputPer1M": 1.25,
+      "currency": "USD",
+      "cachedInputPer1M": 0.03
+    },
+    "gemini-enterprise-agent-platform/claude-3-haiku": {
+      "inputPer1M": 0.25,
+      "outputPer1M": 1.25,
+      "currency": "USD",
+      "cachedInputPer1M": 0.03,
+      "cacheWritePer1M": 0.3
+    },
+    "claude-3-opus": {
+      "inputPer1M": 15,
+      "outputPer1M": 75,
+      "currency": "USD",
+      "cachedInputPer1M": 1.5,
+      "cacheWritePer1M": 18.75
+    },
+    "anthropic/claude-3-opus": {
+      "inputPer1M": 15,
+      "outputPer1M": 75,
+      "currency": "USD",
+      "cachedInputPer1M": 1.5,
+      "cacheWritePer1M": 18.75
+    },
+    "claude-3.5-haiku": {
+      "inputPer1M": 0.8,
+      "outputPer1M": 4,
+      "currency": "USD",
+      "cachedInputPer1M": 0.08,
+      "cacheWritePer1M": 1
+    },
+    "anthropic/claude-3.5-haiku": {
+      "inputPer1M": 0.8,
+      "outputPer1M": 4,
+      "currency": "USD",
+      "cachedInputPer1M": 0.08,
+      "cacheWritePer1M": 1
+    },
+    "google/claude-3.5-haiku": {
+      "inputPer1M": 0.8,
+      "outputPer1M": 4,
+      "currency": "USD"
+    },
+    "bedrock/claude-3.5-haiku": {
+      "inputPer1M": 0.8,
+      "outputPer1M": 4,
+      "currency": "USD",
+      "cachedInputPer1M": 0.08
+    },
+    "gemini-enterprise-agent-platform/claude-3.5-haiku": {
+      "inputPer1M": 0.8,
+      "outputPer1M": 4,
+      "currency": "USD",
+      "cachedInputPer1M": 0.08,
+      "cacheWritePer1M": 1
+    },
+    "claude-3.5-sonnet": {
+      "inputPer1M": 3,
+      "outputPer1M": 15,
+      "currency": "USD",
+      "cachedInputPer1M": 0.3,
+      "cacheWritePer1M": 3.75
+    },
+    "anthropic/claude-3.5-sonnet": {
+      "inputPer1M": 3,
+      "outputPer1M": 15,
+      "currency": "USD",
+      "cachedInputPer1M": 0.3,
+      "cacheWritePer1M": 3.75
+    },
+    "claude-3.7-sonnet": {
+      "inputPer1M": 3,
+      "outputPer1M": 15,
+      "currency": "USD",
+      "cachedInputPer1M": 0.3,
+      "cacheWritePer1M": 3.75
+    },
+    "anthropic/claude-3.7-sonnet": {
+      "inputPer1M": 3,
+      "outputPer1M": 15,
+      "currency": "USD",
+      "cachedInputPer1M": 0.3,
+      "cacheWritePer1M": 3.75
+    },
+    "google/claude-3.7-sonnet": {
+      "inputPer1M": 3,
+      "outputPer1M": 15,
+      "currency": "USD"
+    },
+    "bedrock/claude-3.7-sonnet": {
+      "inputPer1M": 3,
+      "outputPer1M": 15,
+      "currency": "USD",
+      "cachedInputPer1M": 0.3
+    },
+    "gemini-enterprise-agent-platform/claude-3.7-sonnet": {
+      "inputPer1M": 3,
+      "outputPer1M": 15,
+      "currency": "USD",
+      "cachedInputPer1M": 0.3,
+      "cacheWritePer1M": 3.75
+    },
+    "claude-fable-5": {
+      "inputPer1M": 10,
+      "outputPer1M": 50,
+      "currency": "USD",
+      "cachedInputPer1M": 1,
+      "cacheWritePer1M": 12.5
+    },
+    "anthropic/claude-fable-5": {
+      "inputPer1M": 10,
+      "outputPer1M": 50,
+      "currency": "USD",
+      "cachedInputPer1M": 1,
+      "cacheWritePer1M": 12.5
+    },
+    "bedrock/claude-fable-5": {
+      "inputPer1M": 10,
+      "outputPer1M": 50,
+      "currency": "USD",
+      "cachedInputPer1M": 1,
+      "cacheWritePer1M": 12.5
+    },
+    "gemini-enterprise-agent-platform/claude-fable-5": {
+      "inputPer1M": 10,
+      "outputPer1M": 50,
+      "currency": "USD",
+      "cachedInputPer1M": 1,
+      "cacheWritePer1M": 12.5
+    },
+    "claude-fable-5.1": {
+      "inputPer1M": 10,
+      "outputPer1M": 50,
+      "currency": "USD",
+      "cachedInputPer1M": 0.25,
+      "cacheWritePer1M": 12.5
+    },
+    "anthropic/claude-fable-5.1": {
+      "inputPer1M": 10,
+      "outputPer1M": 50,
+      "currency": "USD",
+      "cachedInputPer1M": 0.25,
+      "cacheWritePer1M": 12.5
+    },
+    "claude-haiku-4.5": {
+      "inputPer1M": 1,
+      "outputPer1M": 5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.1,
+      "cacheWritePer1M": 1.25
+    },
+    "anthropic/claude-haiku-4.5": {
+      "inputPer1M": 1,
+      "outputPer1M": 5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.1,
+      "cacheWritePer1M": 1.25
+    },
+    "google/claude-haiku-4.5": {
+      "inputPer1M": 1,
+      "outputPer1M": 5,
+      "currency": "USD"
+    },
+    "bedrock/claude-haiku-4.5": {
+      "inputPer1M": 1,
+      "outputPer1M": 5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.1,
+      "cacheWritePer1M": 1.25
+    },
+    "gemini-enterprise-agent-platform/claude-haiku-4.5": {
+      "inputPer1M": 1,
+      "outputPer1M": 5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.1,
+      "cacheWritePer1M": 1.25
+    },
+    "claude-mythos-5": {
+      "inputPer1M": 10,
+      "outputPer1M": 50,
+      "currency": "USD",
+      "cachedInputPer1M": 1,
+      "cacheWritePer1M": 12.5
+    },
+    "anthropic/claude-mythos-5": {
+      "inputPer1M": 10,
+      "outputPer1M": 50,
+      "currency": "USD",
+      "cachedInputPer1M": 1,
+      "cacheWritePer1M": 12.5
+    },
+    "claude-mythos-5.1": {
+      "inputPer1M": 10,
+      "outputPer1M": 50,
+      "currency": "USD",
+      "cachedInputPer1M": 0.25,
+      "cacheWritePer1M": 12.5
+    },
+    "anthropic/claude-mythos-5.1": {
+      "inputPer1M": 10,
+      "outputPer1M": 50,
+      "currency": "USD",
+      "cachedInputPer1M": 0.25,
+      "cacheWritePer1M": 12.5
+    },
+    "claude-opus-4": {
+      "inputPer1M": 15,
+      "outputPer1M": 75,
+      "currency": "USD",
+      "cachedInputPer1M": 1.5,
+      "cacheWritePer1M": 18.75
+    },
+    "anthropic/claude-opus-4": {
+      "inputPer1M": 15,
+      "outputPer1M": 75,
+      "currency": "USD",
+      "cachedInputPer1M": 1.5,
+      "cacheWritePer1M": 18.75
+    },
+    "google/claude-opus-4": {
+      "inputPer1M": 15,
+      "outputPer1M": 75,
+      "currency": "USD"
+    },
+    "bedrock/claude-opus-4": {
+      "inputPer1M": 15,
+      "outputPer1M": 75,
+      "currency": "USD",
+      "cachedInputPer1M": 1.5
+    },
+    "gemini-enterprise-agent-platform/claude-opus-4": {
+      "inputPer1M": 15,
+      "outputPer1M": 75,
+      "currency": "USD",
+      "cachedInputPer1M": 1.5,
+      "cacheWritePer1M": 18.75
+    },
+    "claude-opus-4.1": {
+      "inputPer1M": 15,
+      "outputPer1M": 75,
+      "currency": "USD",
+      "cachedInputPer1M": 1.5,
+      "cacheWritePer1M": 18.75
+    },
+    "anthropic/claude-opus-4.1": {
+      "inputPer1M": 15,
+      "outputPer1M": 75,
+      "currency": "USD",
+      "cachedInputPer1M": 1.5,
+      "cacheWritePer1M": 18.75
+    },
+    "google/claude-opus-4.1": {
+      "inputPer1M": 15,
+      "outputPer1M": 75,
+      "currency": "USD"
+    },
+    "bedrock/claude-opus-4.1": {
+      "inputPer1M": 15,
+      "outputPer1M": 75,
+      "currency": "USD",
+      "cachedInputPer1M": 1.5
+    },
+    "gemini-enterprise-agent-platform/claude-opus-4.1": {
+      "inputPer1M": 15,
+      "outputPer1M": 75,
+      "currency": "USD",
+      "cachedInputPer1M": 1.5,
+      "cacheWritePer1M": 18.75
+    },
+    "claude-opus-4.5": {
+      "inputPer1M": 5,
+      "outputPer1M": 25,
+      "currency": "USD",
+      "cachedInputPer1M": 0.5,
+      "cacheWritePer1M": 6.25
+    },
+    "anthropic/claude-opus-4.5": {
+      "inputPer1M": 5,
+      "outputPer1M": 25,
+      "currency": "USD",
+      "cachedInputPer1M": 0.5,
+      "cacheWritePer1M": 6.25
+    },
+    "google/claude-opus-4.5": {
+      "inputPer1M": 5,
+      "outputPer1M": 25,
+      "currency": "USD"
+    },
+    "bedrock/claude-opus-4.5": {
+      "inputPer1M": 5,
+      "outputPer1M": 25,
+      "currency": "USD",
+      "cachedInputPer1M": 0.5,
+      "cacheWritePer1M": 6.25
+    },
+    "gemini-enterprise-agent-platform/claude-opus-4.5": {
+      "inputPer1M": 5,
+      "outputPer1M": 25,
+      "currency": "USD",
+      "cachedInputPer1M": 0.5,
+      "cacheWritePer1M": 6.25
+    },
+    "claude-opus-4.6": {
+      "inputPer1M": 5,
+      "outputPer1M": 25,
+      "currency": "USD",
+      "cachedInputPer1M": 0.5,
+      "cacheWritePer1M": 6.25
+    },
+    "anthropic/claude-opus-4.6": {
+      "inputPer1M": 5,
+      "outputPer1M": 25,
+      "currency": "USD",
+      "cachedInputPer1M": 0.5,
+      "cacheWritePer1M": 6.25
+    },
+    "google/claude-opus-4.6": {
+      "inputPer1M": 5,
+      "outputPer1M": 25,
+      "currency": "USD"
+    },
+    "bedrock/claude-opus-4.6": {
+      "inputPer1M": 5,
+      "outputPer1M": 25,
+      "currency": "USD",
+      "cachedInputPer1M": 0.5,
+      "cacheWritePer1M": 6.25
+    },
+    "gemini-enterprise-agent-platform/claude-opus-4.6": {
+      "inputPer1M": 5,
+      "outputPer1M": 25,
+      "currency": "USD",
+      "cachedInputPer1M": 0.5,
+      "cacheWritePer1M": 6.25
+    },
+    "claude-opus-4.7": {
+      "inputPer1M": 5,
+      "outputPer1M": 25,
+      "currency": "USD",
+      "cachedInputPer1M": 0.5,
+      "cacheWritePer1M": 6.25
+    },
+    "anthropic/claude-opus-4.7": {
+      "inputPer1M": 5,
+      "outputPer1M": 25,
+      "currency": "USD",
+      "cachedInputPer1M": 0.5,
+      "cacheWritePer1M": 6.25
+    },
+    "gemini-enterprise-agent-platform/claude-opus-4.7": {
+      "inputPer1M": 5,
+      "outputPer1M": 25,
+      "currency": "USD",
+      "cachedInputPer1M": 0.5,
+      "cacheWritePer1M": 6.25
+    },
+    "bedrock/claude-opus-4.7": {
+      "inputPer1M": 5,
+      "outputPer1M": 25,
+      "currency": "USD",
+      "cachedInputPer1M": 0.5,
+      "cacheWritePer1M": 6.25
+    },
+    "claude-opus-4.8": {
+      "inputPer1M": 5,
+      "outputPer1M": 25,
+      "currency": "USD",
+      "cachedInputPer1M": 0.5,
+      "cacheWritePer1M": 6.25
+    },
+    "anthropic/claude-opus-4.8": {
+      "inputPer1M": 5,
+      "outputPer1M": 25,
+      "currency": "USD",
+      "cachedInputPer1M": 0.5,
+      "cacheWritePer1M": 6.25
+    },
+    "gemini-enterprise-agent-platform/claude-opus-4.8": {
+      "inputPer1M": 5,
+      "outputPer1M": 25,
+      "currency": "USD",
+      "cachedInputPer1M": 0.5,
+      "cacheWritePer1M": 6.25
+    },
+    "bedrock/claude-opus-4.8": {
+      "inputPer1M": 5,
+      "outputPer1M": 25,
+      "currency": "USD",
+      "cachedInputPer1M": 0.5,
+      "cacheWritePer1M": 6.25
+    },
+    "claude-opus-5": {
+      "inputPer1M": 5,
+      "outputPer1M": 25,
+      "currency": "USD",
+      "cachedInputPer1M": 0.5,
+      "cacheWritePer1M": 6.25
+    },
+    "anthropic/claude-opus-5": {
+      "inputPer1M": 5,
+      "outputPer1M": 25,
+      "currency": "USD",
+      "cachedInputPer1M": 0.5,
+      "cacheWritePer1M": 6.25
+    },
+    "gemini-enterprise-agent-platform/claude-opus-5": {
+      "inputPer1M": 5,
+      "outputPer1M": 25,
+      "currency": "USD",
+      "cachedInputPer1M": 0.5,
+      "cacheWritePer1M": 6.25
+    },
+    "bedrock/claude-opus-5": {
+      "inputPer1M": 5,
+      "outputPer1M": 25,
+      "currency": "USD",
+      "cachedInputPer1M": 0.5,
+      "cacheWritePer1M": 6.25
+    },
+    "claude-sonnet-4": {
+      "inputPer1M": 3,
+      "outputPer1M": 15,
+      "currency": "USD",
+      "cachedInputPer1M": 0.3,
+      "cacheWritePer1M": 3.75
+    },
+    "anthropic/claude-sonnet-4": {
+      "inputPer1M": 3,
+      "outputPer1M": 15,
+      "currency": "USD",
+      "cachedInputPer1M": 0.3,
+      "cacheWritePer1M": 3.75
+    },
+    "gemini-enterprise-agent-platform/claude-sonnet-4": {
+      "inputPer1M": 3,
+      "outputPer1M": 15,
+      "currency": "USD",
+      "cachedInputPer1M": 0.3,
+      "cacheWritePer1M": 3.75
+    },
+    "bedrock/claude-sonnet-4": {
+      "inputPer1M": 3,
+      "outputPer1M": 15,
+      "currency": "USD",
+      "cachedInputPer1M": 0.3,
+      "cacheWritePer1M": 3.75
+    },
+    "claude-sonnet-4.5": {
+      "inputPer1M": 3,
+      "outputPer1M": 15,
+      "currency": "USD",
+      "cachedInputPer1M": 0.3,
+      "cacheWritePer1M": 3.75
+    },
+    "anthropic/claude-sonnet-4.5": {
+      "inputPer1M": 3,
+      "outputPer1M": 15,
+      "currency": "USD",
+      "cachedInputPer1M": 0.3,
+      "cacheWritePer1M": 3.75
+    },
+    "gemini-enterprise-agent-platform/claude-sonnet-4.5": {
+      "inputPer1M": 3,
+      "outputPer1M": 15,
+      "currency": "USD",
+      "cachedInputPer1M": 0.3,
+      "cacheWritePer1M": 3.75
+    },
+    "bedrock/claude-sonnet-4.5": {
+      "inputPer1M": 3,
+      "outputPer1M": 15,
+      "currency": "USD",
+      "cachedInputPer1M": 0.3,
+      "cacheWritePer1M": 3.75
+    },
+    "claude-sonnet-4.6": {
+      "inputPer1M": 3,
+      "outputPer1M": 15,
+      "currency": "USD",
+      "cachedInputPer1M": 0.3,
+      "cacheWritePer1M": 3.75
+    },
+    "anthropic/claude-sonnet-4.6": {
+      "inputPer1M": 3,
+      "outputPer1M": 15,
+      "currency": "USD",
+      "cachedInputPer1M": 0.3,
+      "cacheWritePer1M": 3.75
+    },
+    "google/claude-sonnet-4.6": {
+      "inputPer1M": 3,
+      "outputPer1M": 15,
+      "currency": "USD"
+    },
+    "bedrock/claude-sonnet-4.6": {
+      "inputPer1M": 3,
+      "outputPer1M": 15,
+      "currency": "USD",
+      "cachedInputPer1M": 0.3
+    },
+    "gemini-enterprise-agent-platform/claude-sonnet-4.6": {
+      "inputPer1M": 3,
+      "outputPer1M": 15,
+      "currency": "USD",
+      "cachedInputPer1M": 0.3,
+      "cacheWritePer1M": 3.75
+    },
+    "claude-sonnet-5": {
+      "inputPer1M": 2,
+      "outputPer1M": 10,
+      "currency": "USD",
+      "cachedInputPer1M": 0.2,
+      "cacheWritePer1M": 2.5
+    },
+    "anthropic/claude-sonnet-5": {
+      "inputPer1M": 2,
+      "outputPer1M": 10,
+      "currency": "USD",
+      "cachedInputPer1M": 0.2,
+      "cacheWritePer1M": 2.5
+    },
+    "gemini-enterprise-agent-platform/claude-sonnet-5": {
+      "inputPer1M": 2,
+      "outputPer1M": 10,
+      "currency": "USD",
+      "cachedInputPer1M": 0.2,
+      "cacheWritePer1M": 2.5
+    },
+    "bedrock/claude-sonnet-5": {
+      "inputPer1M": 2,
+      "outputPer1M": 10,
+      "currency": "USD",
+      "cachedInputPer1M": 0.2,
+      "cacheWritePer1M": 2.5
+    },
+    "trinity-large-preview": {
+      "inputPer1M": 0.25,
+      "outputPer1M": 1,
+      "currency": "USD"
+    },
+    "arceeai/trinity-large-preview": {
+      "inputPer1M": 0.25,
+      "outputPer1M": 1,
+      "currency": "USD"
+    },
+    "trinity-large-thinking": {
+      "inputPer1M": 0.25,
+      "outputPer1M": 0.9,
+      "currency": "USD"
+    },
+    "arceeai/trinity-large-thinking": {
+      "inputPer1M": 0.25,
+      "outputPer1M": 0.9,
+      "currency": "USD"
+    },
+    "trinity-mini": {
+      "inputPer1M": 0.04,
+      "outputPer1M": 0.15,
+      "currency": "USD"
+    },
+    "arceeai/trinity-mini": {
+      "inputPer1M": 0.04,
+      "outputPer1M": 0.15,
+      "currency": "USD"
+    },
+    "command-a": {
+      "inputPer1M": 2.5,
+      "outputPer1M": 10,
+      "currency": "USD"
+    },
+    "cohere/command-a": {
+      "inputPer1M": 2.5,
+      "outputPer1M": 10,
+      "currency": "USD"
+    },
+    "deepseek-chat": {
+      "inputPer1M": 0.57,
+      "outputPer1M": 1.68,
+      "currency": "USD",
+      "cachedInputPer1M": 0.07
+    },
+    "deepseek/deepseek-chat": {
+      "inputPer1M": 0.57,
+      "outputPer1M": 1.68,
+      "currency": "USD",
+      "cachedInputPer1M": 0.07
+    },
+    "deepseek-chat-v3.1": {
+      "inputPer1M": 0.2,
+      "outputPer1M": 0.8,
+      "currency": "USD"
+    },
+    "deepseek/deepseek-chat-v3.1": {
+      "inputPer1M": 0.2,
+      "outputPer1M": 0.8,
+      "currency": "USD"
+    },
+    "deepseek-r1": {
+      "inputPer1M": 0.5,
+      "outputPer1M": 2.15,
+      "currency": "USD",
+      "cachedInputPer1M": 0.35
+    },
+    "deepseek/deepseek-r1": {
+      "inputPer1M": 0.5,
+      "outputPer1M": 2.15,
+      "currency": "USD",
+      "cachedInputPer1M": 0.35
+    },
+    "bedrock/deepseek-r1": {
+      "inputPer1M": 1.35,
+      "outputPer1M": 5.4,
+      "currency": "USD"
+    },
+    "deepinfra/deepseek-r1": {
+      "inputPer1M": 0.5,
+      "outputPer1M": 2.15,
+      "currency": "USD",
+      "cachedInputPer1M": 0.35
+    },
+    "deepseek-v3": {
+      "inputPer1M": 0.77,
+      "outputPer1M": 0.77,
+      "currency": "USD"
+    },
+    "deepseek/deepseek-v3": {
+      "inputPer1M": 0.77,
+      "outputPer1M": 0.77,
+      "currency": "USD"
+    },
+    "baseten/deepseek-v3": {
+      "inputPer1M": 0.77,
+      "outputPer1M": 0.77,
+      "currency": "USD"
+    },
+    "deepseek-v3.1": {
+      "inputPer1M": 0.27,
+      "outputPer1M": 1,
+      "currency": "USD",
+      "cachedInputPer1M": 0.14
+    },
+    "deepseek/deepseek-v3.1": {
+      "inputPer1M": 0.27,
+      "outputPer1M": 1,
+      "currency": "USD",
+      "cachedInputPer1M": 0.14
+    },
+    "baseten/deepseek-v3.1": {
+      "inputPer1M": 0.5,
+      "outputPer1M": 1.5,
+      "currency": "USD"
+    },
+    "together-ai/deepseek-v3.1": {
+      "inputPer1M": 0.6,
+      "outputPer1M": 1.7,
+      "currency": "USD"
+    },
+    "sambanova/deepseek-v3.1": {
+      "inputPer1M": 3,
+      "outputPer1M": 4.5,
+      "currency": "USD"
+    },
+    "deepinfra/deepseek-v3.1": {
+      "inputPer1M": 0.21,
+      "outputPer1M": 0.79,
+      "currency": "USD",
+      "cachedInputPer1M": 0.13
+    },
+    "novita/deepseek-v3.1": {
+      "inputPer1M": 0.27,
+      "outputPer1M": 1,
+      "currency": "USD",
+      "cachedInputPer1M": 0.14
+    },
+    "deepseek-v3.1-terminus": {
+      "inputPer1M": 0.27,
+      "outputPer1M": 1,
+      "currency": "USD",
+      "cachedInputPer1M": 0.14
+    },
+    "deepseek/deepseek-v3.1-terminus": {
+      "inputPer1M": 0.27,
+      "outputPer1M": 1,
+      "currency": "USD",
+      "cachedInputPer1M": 0.14
+    },
+    "novita/deepseek-v3.1-terminus": {
+      "inputPer1M": 0.27,
+      "outputPer1M": 1,
+      "currency": "USD",
+      "cachedInputPer1M": 0.14
+    },
+    "deepseek-v3.2": {
+      "inputPer1M": 0.27,
+      "outputPer1M": 0.4,
+      "currency": "USD",
+      "cachedInputPer1M": 0.13
+    },
+    "deepseek/deepseek-v3.2": {
+      "inputPer1M": 0.27,
+      "outputPer1M": 0.4,
+      "currency": "USD",
+      "cachedInputPer1M": 0.13
+    },
+    "bedrock/deepseek-v3.2": {
+      "inputPer1M": 0.62,
+      "outputPer1M": 1.85,
+      "currency": "USD"
+    },
+    "deepinfra/deepseek-v3.2": {
+      "inputPer1M": 0.26,
+      "outputPer1M": 0.38,
+      "currency": "USD",
+      "cachedInputPer1M": 0.13
+    },
+    "novita/deepseek-v3.2": {
+      "inputPer1M": 0.27,
+      "outputPer1M": 0.4,
+      "currency": "USD",
+      "cachedInputPer1M": 0.13
+    },
+    "deepseek-v4-flash-0731": {
+      "inputPer1M": 0.14,
+      "outputPer1M": 0.28,
+      "currency": "USD",
+      "cachedInputPer1M": 0
+    },
+    "deepseek/deepseek-v4-flash-0731": {
+      "inputPer1M": 0.14,
+      "outputPer1M": 0.28,
+      "currency": "USD",
+      "cachedInputPer1M": 0
+    },
+    "deepseek-v4-pro": {
+      "inputPer1M": 0.43,
+      "outputPer1M": 0.87,
+      "currency": "USD",
+      "cachedInputPer1M": 0
+    },
+    "deepseek/deepseek-v4-pro": {
+      "inputPer1M": 0.43,
+      "outputPer1M": 0.87,
+      "currency": "USD",
+      "cachedInputPer1M": 0
+    },
+    "gemini-2.0-flash": {
+      "inputPer1M": 0.15,
+      "outputPer1M": 0.6,
+      "currency": "USD",
+      "cachedInputPer1M": 0.03
+    },
+    "google/gemini-2.0-flash": {
+      "inputPer1M": 0.15,
+      "outputPer1M": 0.6,
+      "currency": "USD",
+      "cachedInputPer1M": 0.03
+    },
+    "google-vertex/gemini-2.0-flash": {
+      "inputPer1M": 0.15,
+      "outputPer1M": 0.6,
+      "currency": "USD",
+      "cachedInputPer1M": 0.03
+    },
+    "gemini-enterprise-agent-platform/gemini-2.0-flash": {
+      "inputPer1M": 0.15,
+      "outputPer1M": 0.6,
+      "currency": "USD",
+      "cachedInputPer1M": 0.03
+    },
+    "gemini-2.0-flash-lite": {
+      "inputPer1M": 0.07,
+      "outputPer1M": 0.3,
+      "currency": "USD",
+      "cachedInputPer1M": 0.02
+    },
+    "google/gemini-2.0-flash-lite": {
+      "inputPer1M": 0.07,
+      "outputPer1M": 0.3,
+      "currency": "USD",
+      "cachedInputPer1M": 0.02
+    },
+    "google-vertex/gemini-2.0-flash-lite": {
+      "inputPer1M": 0.07,
+      "outputPer1M": 0.3,
+      "currency": "USD",
+      "cachedInputPer1M": 0.02
+    },
+    "gemini-enterprise-agent-platform/gemini-2.0-flash-lite": {
+      "inputPer1M": 0.07,
+      "outputPer1M": 0.3,
+      "currency": "USD",
+      "cachedInputPer1M": 0.02
+    },
+    "gemini-2.5-flash": {
+      "inputPer1M": 0.3,
+      "outputPer1M": 2.5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.07
+    },
+    "google/gemini-2.5-flash": {
+      "inputPer1M": 0.3,
+      "outputPer1M": 2.5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.07
+    },
+    "google-vertex/gemini-2.5-flash": {
+      "inputPer1M": 0.3,
+      "outputPer1M": 2.5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.07
+    },
+    "deepinfra/gemini-2.5-flash": {
+      "inputPer1M": 0.3,
+      "outputPer1M": 2.5,
+      "currency": "USD"
+    },
+    "gemini-enterprise-agent-platform/gemini-2.5-flash": {
+      "inputPer1M": 0.3,
+      "outputPer1M": 2.5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.07
+    },
+    "gemini-2.5-flash-image": {
+      "inputPer1M": 0.3,
+      "outputPer1M": 30,
+      "currency": "USD",
+      "cachedInputPer1M": 0.07
+    },
+    "google/gemini-2.5-flash-image": {
+      "inputPer1M": 0.3,
+      "outputPer1M": 30,
+      "currency": "USD",
+      "cachedInputPer1M": 0.07
+    },
+    "google-vertex/gemini-2.5-flash-image": {
+      "inputPer1M": 0.3,
+      "outputPer1M": 30,
+      "currency": "USD",
+      "cachedInputPer1M": 0.07
+    },
+    "gemini-enterprise-agent-platform/gemini-2.5-flash-image": {
+      "inputPer1M": 0.3,
+      "outputPer1M": 30,
+      "currency": "USD",
+      "cachedInputPer1M": 0.07
+    },
+    "gemini-2.5-flash-image-preview": {
+      "inputPer1M": 0.3,
+      "outputPer1M": 30,
+      "currency": "USD",
+      "cachedInputPer1M": 0.07
+    },
+    "google/gemini-2.5-flash-image-preview": {
+      "inputPer1M": 0.3,
+      "outputPer1M": 30,
+      "currency": "USD",
+      "cachedInputPer1M": 0.07
+    },
+    "google-vertex/gemini-2.5-flash-image-preview": {
+      "inputPer1M": 0.3,
+      "outputPer1M": 30,
+      "currency": "USD",
+      "cachedInputPer1M": 0.07
+    },
+    "gemini-2.5-flash-lite": {
+      "inputPer1M": 0.1,
+      "outputPer1M": 0.4,
+      "currency": "USD",
+      "cachedInputPer1M": 0.03
+    },
+    "google/gemini-2.5-flash-lite": {
+      "inputPer1M": 0.1,
+      "outputPer1M": 0.4,
+      "currency": "USD",
+      "cachedInputPer1M": 0.03
+    },
+    "google-vertex/gemini-2.5-flash-lite": {
+      "inputPer1M": 0.1,
+      "outputPer1M": 0.4,
+      "currency": "USD",
+      "cachedInputPer1M": 0.03
+    },
+    "gemini-enterprise-agent-platform/gemini-2.5-flash-lite": {
+      "inputPer1M": 0.1,
+      "outputPer1M": 0.4,
+      "currency": "USD",
+      "cachedInputPer1M": 0.03
+    },
+    "gemini-2.5-pro": {
+      "inputPer1M": 1.25,
+      "outputPer1M": 10,
+      "currency": "USD",
+      "cachedInputPer1M": 0.31
+    },
+    "google/gemini-2.5-pro": {
+      "inputPer1M": 1.25,
+      "outputPer1M": 10,
+      "currency": "USD",
+      "cachedInputPer1M": 0.31
+    },
+    "google-vertex/gemini-2.5-pro": {
+      "inputPer1M": 1.25,
+      "outputPer1M": 10,
+      "currency": "USD",
+      "cachedInputPer1M": 0.31
+    },
+    "gemini-enterprise-agent-platform/gemini-2.5-pro": {
+      "inputPer1M": 1.25,
+      "outputPer1M": 10,
+      "currency": "USD",
+      "cachedInputPer1M": 0.31
+    },
+    "gemini-3-flash": {
+      "inputPer1M": 0.5,
+      "outputPer1M": 3,
+      "currency": "USD",
+      "cachedInputPer1M": 0.05
+    },
+    "google/gemini-3-flash": {
+      "inputPer1M": 0.5,
+      "outputPer1M": 3,
+      "currency": "USD",
+      "cachedInputPer1M": 0.05
+    },
+    "google-vertex/gemini-3-flash": {
+      "inputPer1M": 0.5,
+      "outputPer1M": 3,
+      "currency": "USD",
+      "cachedInputPer1M": 0.05
+    },
+    "gemini-enterprise-agent-platform/gemini-3-flash": {
+      "inputPer1M": 0.5,
+      "outputPer1M": 3,
+      "currency": "USD",
+      "cachedInputPer1M": 0.05
+    },
+    "gemini-3-pro-image": {
+      "inputPer1M": 2,
+      "outputPer1M": 12,
+      "currency": "USD",
+      "cachedInputPer1M": 0.2
+    },
+    "google/gemini-3-pro-image": {
+      "inputPer1M": 2,
+      "outputPer1M": 12,
+      "currency": "USD",
+      "cachedInputPer1M": 0.2
+    },
+    "google-vertex/gemini-3-pro-image": {
+      "inputPer1M": 2,
+      "outputPer1M": 12,
+      "currency": "USD",
+      "cachedInputPer1M": 0.2
+    },
+    "gemini-3-pro-preview": {
+      "inputPer1M": 2,
+      "outputPer1M": 12,
+      "currency": "USD",
+      "cachedInputPer1M": 0.2
+    },
+    "google/gemini-3-pro-preview": {
+      "inputPer1M": 2,
+      "outputPer1M": 12,
+      "currency": "USD",
+      "cachedInputPer1M": 0.2
+    },
+    "google-vertex/gemini-3-pro-preview": {
+      "inputPer1M": 2,
+      "outputPer1M": 12,
+      "currency": "USD",
+      "cachedInputPer1M": 0.2
+    },
+    "gemini-enterprise-agent-platform/gemini-3-pro-preview": {
+      "inputPer1M": 2,
+      "outputPer1M": 12,
+      "currency": "USD",
+      "cachedInputPer1M": 0.2
+    },
+    "gemini-3.1-flash-lite-preview": {
+      "inputPer1M": 0.25,
+      "outputPer1M": 1.5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.03
+    },
+    "google/gemini-3.1-flash-lite-preview": {
+      "inputPer1M": 0.25,
+      "outputPer1M": 1.5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.03
+    },
+    "google-vertex/gemini-3.1-flash-lite-preview": {
+      "inputPer1M": 0.25,
+      "outputPer1M": 1.5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.03
+    },
+    "gemini-enterprise-agent-platform/gemini-3.1-flash-lite-preview": {
+      "inputPer1M": 0.25,
+      "outputPer1M": 1.5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.03
+    },
+    "gemini-3.1-pro-preview": {
+      "inputPer1M": 2,
+      "outputPer1M": 12,
+      "currency": "USD",
+      "cachedInputPer1M": 0.2
+    },
+    "google/gemini-3.1-pro-preview": {
+      "inputPer1M": 2,
+      "outputPer1M": 12,
+      "currency": "USD",
+      "cachedInputPer1M": 0.2
+    },
+    "google-vertex/gemini-3.1-pro-preview": {
+      "inputPer1M": 2,
+      "outputPer1M": 12,
+      "currency": "USD",
+      "cachedInputPer1M": 0.2
+    },
+    "gemini-enterprise-agent-platform/gemini-3.1-pro-preview": {
+      "inputPer1M": 2,
+      "outputPer1M": 12,
+      "currency": "USD",
+      "cachedInputPer1M": 0.2
+    },
+    "gemini-3.5-flash": {
+      "inputPer1M": 1.5,
+      "outputPer1M": 9,
+      "currency": "USD",
+      "cachedInputPer1M": 0.15
+    },
+    "google/gemini-3.5-flash": {
+      "inputPer1M": 1.5,
+      "outputPer1M": 9,
+      "currency": "USD",
+      "cachedInputPer1M": 0.15
+    },
+    "gemini-enterprise-agent-platform/gemini-3.5-flash": {
+      "inputPer1M": 1.5,
+      "outputPer1M": 9,
+      "currency": "USD",
+      "cachedInputPer1M": 0.15
+    },
+    "google-vertex/gemini-3.5-flash": {
+      "inputPer1M": 1.5,
+      "outputPer1M": 9,
+      "currency": "USD",
+      "cachedInputPer1M": 0.15
+    },
+    "gemini-3.5-flash-lite": {
+      "inputPer1M": 0.3,
+      "outputPer1M": 2.5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.03
+    },
+    "google/gemini-3.5-flash-lite": {
+      "inputPer1M": 0.3,
+      "outputPer1M": 2.5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.03
+    },
+    "gemini-enterprise-agent-platform/gemini-3.5-flash-lite": {
+      "inputPer1M": 0.3,
+      "outputPer1M": 2.5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.03
+    },
+    "google-vertex/gemini-3.5-flash-lite": {
+      "inputPer1M": 0.3,
+      "outputPer1M": 2.5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.03
+    },
+    "gemini-3.6-flash": {
+      "inputPer1M": 1.5,
+      "outputPer1M": 7.5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.15
+    },
+    "google/gemini-3.6-flash": {
+      "inputPer1M": 1.5,
+      "outputPer1M": 7.5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.15
+    },
+    "gemini-enterprise-agent-platform/gemini-3.6-flash": {
+      "inputPer1M": 1.5,
+      "outputPer1M": 7.5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.15
+    },
+    "google-vertex/gemini-3.6-flash": {
+      "inputPer1M": 1.5,
+      "outputPer1M": 7.5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.15
+    },
+    "gemini-3.7-flash": {
+      "inputPer1M": 0.75,
+      "outputPer1M": 3.75,
+      "currency": "USD",
+      "cachedInputPer1M": 0.07
+    },
+    "google/gemini-3.7-flash": {
+      "inputPer1M": 0.75,
+      "outputPer1M": 3.75,
+      "currency": "USD",
+      "cachedInputPer1M": 0.07
+    },
+    "gemini-enterprise-agent-platform/gemini-3.7-flash": {
+      "inputPer1M": 0.75,
+      "outputPer1M": 3.75,
+      "currency": "USD",
+      "cachedInputPer1M": 0.07
+    },
+    "google-vertex/gemini-3.7-flash": {
+      "inputPer1M": 0.75,
+      "outputPer1M": 3.75,
+      "currency": "USD",
+      "cachedInputPer1M": 0.07
+    },
+    "gemma-4-26b-a4b-it": {
+      "inputPer1M": 0.13,
+      "outputPer1M": 0.4,
+      "currency": "USD"
+    },
+    "google/gemma-4-26b-a4b-it": {
+      "inputPer1M": 0.13,
+      "outputPer1M": 0.4,
+      "currency": "USD"
+    },
+    "parasail/gemma-4-26b-a4b-it": {
+      "inputPer1M": 0.13,
+      "outputPer1M": 0.4,
+      "currency": "USD"
+    },
+    "novita/gemma-4-26b-a4b-it": {
+      "inputPer1M": 0.13,
+      "outputPer1M": 0.4,
+      "currency": "USD"
+    },
+    "gemma-4-31b-it": {
+      "inputPer1M": 0.14,
+      "outputPer1M": 0.4,
+      "currency": "USD"
+    },
+    "google/gemma-4-31b-it": {
+      "inputPer1M": 0.14,
+      "outputPer1M": 0.4,
+      "currency": "USD"
+    },
+    "novita/gemma-4-31b-it": {
+      "inputPer1M": 0.14,
+      "outputPer1M": 0.4,
+      "currency": "USD"
+    },
+    "parasail/gemma-4-31b-it": {
+      "inputPer1M": 0.14,
+      "outputPer1M": 0.4,
+      "currency": "USD"
+    },
+    "mercury": {
+      "inputPer1M": 0.25,
+      "outputPer1M": 1,
+      "currency": "USD",
+      "cachedInputPer1M": 0.25
+    },
+    "inception-labs/mercury": {
+      "inputPer1M": 0.25,
+      "outputPer1M": 1,
+      "currency": "USD",
+      "cachedInputPer1M": 0.25
+    },
+    "inception/mercury": {
+      "inputPer1M": 0.25,
+      "outputPer1M": 1,
+      "currency": "USD",
+      "cachedInputPer1M": 0.25
+    },
+    "mercury-2": {
+      "inputPer1M": 0.25,
+      "outputPer1M": 0.75,
+      "currency": "USD"
+    },
+    "inception-labs/mercury-2": {
+      "inputPer1M": 0.25,
+      "outputPer1M": 0.75,
+      "currency": "USD"
+    },
+    "inception/mercury-2": {
+      "inputPer1M": 0.25,
+      "outputPer1M": 0.75,
+      "currency": "USD"
+    },
+    "mercury-coder": {
+      "inputPer1M": 0.25,
+      "outputPer1M": 1,
+      "currency": "USD",
+      "cachedInputPer1M": 0.25
+    },
+    "inception-labs/mercury-coder": {
+      "inputPer1M": 0.25,
+      "outputPer1M": 1,
+      "currency": "USD",
+      "cachedInputPer1M": 0.25
+    },
+    "inception/mercury-coder": {
+      "inputPer1M": 0.25,
+      "outputPer1M": 1,
+      "currency": "USD",
+      "cachedInputPer1M": 0.25
+    },
+    "mercury-coder-small": {
+      "inputPer1M": 0.25,
+      "outputPer1M": 0.75,
+      "currency": "USD"
+    },
+    "inception-labs/mercury-coder-small": {
+      "inputPer1M": 0.25,
+      "outputPer1M": 0.75,
+      "currency": "USD"
+    },
+    "inception/mercury-coder-small": {
+      "inputPer1M": 0.25,
+      "outputPer1M": 0.75,
+      "currency": "USD"
+    },
+    "kat-coder-pro-v1": {
+      "inputPer1M": 0.3,
+      "outputPer1M": 1.2,
+      "currency": "USD",
+      "cachedInputPer1M": 0.06
+    },
+    "kwaipilot/kat-coder-pro-v1": {
+      "inputPer1M": 0.3,
+      "outputPer1M": 1.2,
+      "currency": "USD",
+      "cachedInputPer1M": 0.06
+    },
+    "streamlake/kat-coder-pro-v1": {
+      "inputPer1M": 0.3,
+      "outputPer1M": 1.2,
+      "currency": "USD",
+      "cachedInputPer1M": 0.06
+    },
+    "novita/kat-coder-pro-v1": {
+      "inputPer1M": 0.3,
+      "outputPer1M": 1.2,
+      "currency": "USD",
+      "cachedInputPer1M": 0.06
+    },
+    "kat-coder-pro-v2": {
+      "inputPer1M": 0.3,
+      "outputPer1M": 1.2,
+      "currency": "USD",
+      "cachedInputPer1M": 0.06
+    },
+    "kwaipilot/kat-coder-pro-v2": {
+      "inputPer1M": 0.3,
+      "outputPer1M": 1.2,
+      "currency": "USD",
+      "cachedInputPer1M": 0.06
+    },
+    "streamlake/kat-coder-pro-v2": {
+      "inputPer1M": 0.3,
+      "outputPer1M": 1.2,
+      "currency": "USD",
+      "cachedInputPer1M": 0.06
+    },
+    "llama-3.1-70b": {
+      "inputPer1M": 0.4,
+      "outputPer1M": 0.4,
+      "currency": "USD"
+    },
+    "meta/llama-3.1-70b": {
+      "inputPer1M": 0.4,
+      "outputPer1M": 0.4,
+      "currency": "USD"
+    },
+    "bedrock/llama-3.1-70b": {
+      "inputPer1M": 0.72,
+      "outputPer1M": 0.72,
+      "currency": "USD"
+    },
+    "deepinfra/llama-3.1-70b": {
+      "inputPer1M": 0.4,
+      "outputPer1M": 0.4,
+      "currency": "USD"
+    },
+    "llama-3.1-8b": {
+      "inputPer1M": 0.02,
+      "outputPer1M": 0.05,
+      "currency": "USD"
+    },
+    "meta/llama-3.1-8b": {
+      "inputPer1M": 0.02,
+      "outputPer1M": 0.05,
+      "currency": "USD"
+    },
+    "bedrock/llama-3.1-8b": {
+      "inputPer1M": 0.22,
+      "outputPer1M": 0.22,
+      "currency": "USD"
+    },
+    "cerebras/llama-3.1-8b": {
+      "inputPer1M": 0.1,
+      "outputPer1M": 0.1,
+      "currency": "USD",
+      "cachedInputPer1M": 0.1
+    },
+    "groq/llama-3.1-8b": {
+      "inputPer1M": 0.05,
+      "outputPer1M": 0.08,
+      "currency": "USD",
+      "cachedInputPer1M": 0.03
+    },
+    "deepinfra/llama-3.1-8b": {
+      "inputPer1M": 0.02,
+      "outputPer1M": 0.05,
+      "currency": "USD"
+    },
+    "novita/llama-3.1-8b": {
+      "inputPer1M": 0.02,
+      "outputPer1M": 0.05,
+      "currency": "USD"
+    },
+    "llama-3.2-11b": {
+      "inputPer1M": 0.16,
+      "outputPer1M": 0.16,
+      "currency": "USD"
+    },
+    "meta/llama-3.2-11b": {
+      "inputPer1M": 0.16,
+      "outputPer1M": 0.16,
+      "currency": "USD"
+    },
+    "bedrock/llama-3.2-11b": {
+      "inputPer1M": 0.16,
+      "outputPer1M": 0.16,
+      "currency": "USD"
+    },
+    "llama-3.2-1b": {
+      "inputPer1M": 0.1,
+      "outputPer1M": 0.1,
+      "currency": "USD"
+    },
+    "meta/llama-3.2-1b": {
+      "inputPer1M": 0.1,
+      "outputPer1M": 0.1,
+      "currency": "USD"
+    },
+    "bedrock/llama-3.2-1b": {
+      "inputPer1M": 0.1,
+      "outputPer1M": 0.1,
+      "currency": "USD"
+    },
+    "llama-3.2-3b": {
+      "inputPer1M": 0.15,
+      "outputPer1M": 0.15,
+      "currency": "USD"
+    },
+    "meta/llama-3.2-3b": {
+      "inputPer1M": 0.15,
+      "outputPer1M": 0.15,
+      "currency": "USD"
+    },
+    "bedrock/llama-3.2-3b": {
+      "inputPer1M": 0.15,
+      "outputPer1M": 0.15,
+      "currency": "USD"
+    },
+    "llama-3.2-90b": {
+      "inputPer1M": 0.72,
+      "outputPer1M": 0.72,
+      "currency": "USD"
+    },
+    "meta/llama-3.2-90b": {
+      "inputPer1M": 0.72,
+      "outputPer1M": 0.72,
+      "currency": "USD"
+    },
+    "bedrock/llama-3.2-90b": {
+      "inputPer1M": 0.72,
+      "outputPer1M": 0.72,
+      "currency": "USD"
+    },
+    "llama-3.3-70b": {
+      "inputPer1M": 0.59,
+      "outputPer1M": 0.79,
+      "currency": "USD"
+    },
+    "meta/llama-3.3-70b": {
+      "inputPer1M": 0.59,
+      "outputPer1M": 0.79,
+      "currency": "USD"
+    },
+    "bedrock/llama-3.3-70b": {
+      "inputPer1M": 0.72,
+      "outputPer1M": 0.72,
+      "currency": "USD"
+    },
+    "groq/llama-3.3-70b": {
+      "inputPer1M": 0.59,
+      "outputPer1M": 0.79,
+      "currency": "USD"
+    },
+    "llama-4-maverick": {
+      "inputPer1M": 0.15,
+      "outputPer1M": 0.6,
+      "currency": "USD"
+    },
+    "meta/llama-4-maverick": {
+      "inputPer1M": 0.15,
+      "outputPer1M": 0.6,
+      "currency": "USD"
+    },
+    "bedrock/llama-4-maverick": {
+      "inputPer1M": 0.24,
+      "outputPer1M": 0.97,
+      "currency": "USD"
+    },
+    "deepinfra/llama-4-maverick": {
+      "inputPer1M": 0.15,
+      "outputPer1M": 0.6,
+      "currency": "USD"
+    },
+    "llama-4-scout": {
+      "inputPer1M": 0.11,
+      "outputPer1M": 0.34,
+      "currency": "USD"
+    },
+    "meta/llama-4-scout": {
+      "inputPer1M": 0.11,
+      "outputPer1M": 0.34,
+      "currency": "USD"
+    },
+    "bedrock/llama-4-scout": {
+      "inputPer1M": 0.17,
+      "outputPer1M": 0.66,
+      "currency": "USD"
+    },
+    "deepinfra/llama-4-scout": {
+      "inputPer1M": 0.08,
+      "outputPer1M": 0.3,
+      "currency": "USD"
+    },
+    "groq/llama-4-scout": {
+      "inputPer1M": 0.11,
+      "outputPer1M": 0.34,
+      "currency": "USD"
+    },
+    "muse-spark-1.1": {
+      "inputPer1M": 1.25,
+      "outputPer1M": 4.25,
+      "currency": "USD",
+      "cachedInputPer1M": 0.15
+    },
+    "meta/muse-spark-1.1": {
+      "inputPer1M": 1.25,
+      "outputPer1M": 4.25,
+      "currency": "USD",
+      "cachedInputPer1M": 0.15
+    },
+    "muse-spark-1.2": {
+      "inputPer1M": 1.25,
+      "outputPer1M": 4.25,
+      "currency": "USD",
+      "cachedInputPer1M": 0.15
+    },
+    "meta/muse-spark-1.2": {
+      "inputPer1M": 1.25,
+      "outputPer1M": 4.25,
+      "currency": "USD",
+      "cachedInputPer1M": 0.15
+    },
+    "muse-spark-1.2-contributor": {
+      "inputPer1M": 0.1,
+      "outputPer1M": 0.2,
+      "currency": "USD",
+      "cachedInputPer1M": 0
+    },
+    "meta/muse-spark-1.2-contributor": {
+      "inputPer1M": 0.1,
+      "outputPer1M": 0.2,
+      "currency": "USD",
+      "cachedInputPer1M": 0
+    },
+    "minimax-m2": {
+      "inputPer1M": 0.3,
+      "outputPer1M": 1.2,
+      "currency": "USD",
+      "cachedInputPer1M": 0.03
+    },
+    "minimax/minimax-m2": {
+      "inputPer1M": 0.3,
+      "outputPer1M": 1.2,
+      "currency": "USD",
+      "cachedInputPer1M": 0.03
+    },
+    "minimax-m2.1": {
+      "inputPer1M": 0.3,
+      "outputPer1M": 1.2,
+      "currency": "USD",
+      "cachedInputPer1M": 0.03
+    },
+    "minimax/minimax-m2.1": {
+      "inputPer1M": 0.3,
+      "outputPer1M": 1.2,
+      "currency": "USD",
+      "cachedInputPer1M": 0.03
+    },
+    "bedrock/minimax-m2.1": {
+      "inputPer1M": 0.3,
+      "outputPer1M": 1.2,
+      "currency": "USD",
+      "cachedInputPer1M": 0.03
+    },
+    "novita/minimax-m2.1": {
+      "inputPer1M": 0.3,
+      "outputPer1M": 1.2,
+      "currency": "USD",
+      "cachedInputPer1M": 0.03
+    },
+    "mistral-large-3": {
+      "inputPer1M": 0.5,
+      "outputPer1M": 1.5,
+      "currency": "USD"
+    },
+    "mistral-ai/mistral-large-3": {
+      "inputPer1M": 0.5,
+      "outputPer1M": 1.5,
+      "currency": "USD"
+    },
+    "mistral/mistral-large-3": {
+      "inputPer1M": 0.5,
+      "outputPer1M": 1.5,
+      "currency": "USD"
+    },
+    "mistral-medium": {
+      "inputPer1M": 0.4,
+      "outputPer1M": 2,
+      "currency": "USD"
+    },
+    "mistral-ai/mistral-medium": {
+      "inputPer1M": 0.4,
+      "outputPer1M": 2,
+      "currency": "USD"
+    },
+    "mistral/mistral-medium": {
+      "inputPer1M": 0.4,
+      "outputPer1M": 2,
+      "currency": "USD"
+    },
+    "gpt-4o-2024-05-13": {
+      "inputPer1M": 5,
+      "outputPer1M": 15,
+      "currency": "USD"
+    },
+    "openai/gpt-4o-2024-05-13": {
+      "inputPer1M": 5,
+      "outputPer1M": 15,
+      "currency": "USD"
+    },
+    "gpt-4o-2024-08-06": {
+      "inputPer1M": 2.5,
+      "outputPer1M": 10,
+      "currency": "USD",
+      "cachedInputPer1M": 1.25
+    },
+    "openai/gpt-4o-2024-08-06": {
+      "inputPer1M": 2.5,
+      "outputPer1M": 10,
+      "currency": "USD",
+      "cachedInputPer1M": 1.25
+    },
+    "gpt-4o-mini": {
+      "inputPer1M": 0.15,
+      "outputPer1M": 0.6,
+      "currency": "USD",
+      "cachedInputPer1M": 0.075
+    },
+    "openai/gpt-4o-mini": {
+      "inputPer1M": 0.15,
+      "outputPer1M": 0.6,
+      "currency": "USD",
+      "cachedInputPer1M": 0.075
+    },
+    "azure/gpt-4o-mini": {
+      "inputPer1M": 0.15,
+      "outputPer1M": 0.6,
+      "currency": "USD",
+      "cachedInputPer1M": 0.075
+    },
+    "gpt-4o-mini-search-preview": {
+      "inputPer1M": 0.15,
+      "outputPer1M": 0.6,
+      "currency": "USD"
+    },
+    "openai/gpt-4o-mini-search-preview": {
+      "inputPer1M": 0.15,
+      "outputPer1M": 0.6,
+      "currency": "USD"
+    },
+    "gpt-oss-120b": {
+      "inputPer1M": 0.15,
+      "outputPer1M": 0.6,
+      "currency": "USD"
+    },
+    "openai/gpt-oss-120b": {
+      "inputPer1M": 0.15,
+      "outputPer1M": 0.6,
+      "currency": "USD"
+    },
+    "nebius/gpt-oss-120b": {
+      "inputPer1M": 0.15,
+      "outputPer1M": 0.6,
+      "currency": "USD"
+    },
+    "gpt-oss-20b": {
+      "inputPer1M": 0.07,
+      "outputPer1M": 0.3,
+      "currency": "USD",
+      "cachedInputPer1M": 0.04
+    },
+    "openai/gpt-oss-20b": {
+      "inputPer1M": 0.07,
+      "outputPer1M": 0.3,
+      "currency": "USD",
+      "cachedInputPer1M": 0.04
+    },
+    "bedrock/gpt-oss-20b": {
+      "inputPer1M": 0.07,
+      "outputPer1M": 0.3,
+      "currency": "USD"
+    },
+    "groq/gpt-oss-20b": {
+      "inputPer1M": 0.07,
+      "outputPer1M": 0.3,
+      "currency": "USD",
+      "cachedInputPer1M": 0.04
+    },
+    "o1-pro": {
+      "inputPer1M": 150,
+      "outputPer1M": 600,
+      "currency": "USD"
+    },
+    "openai/o1-pro": {
+      "inputPer1M": 150,
+      "outputPer1M": 600,
+      "currency": "USD"
+    },
+    "o3": {
+      "inputPer1M": 2,
+      "outputPer1M": 8,
+      "currency": "USD",
+      "cachedInputPer1M": 0.5
+    },
+    "openai/o3": {
+      "inputPer1M": 2,
+      "outputPer1M": 8,
+      "currency": "USD",
+      "cachedInputPer1M": 0.5
+    },
+    "o3-mini": {
+      "inputPer1M": 1.1,
+      "outputPer1M": 4.4,
+      "currency": "USD",
+      "cachedInputPer1M": 0.55
+    },
+    "openai/o3-mini": {
+      "inputPer1M": 1.1,
+      "outputPer1M": 4.4,
+      "currency": "USD",
+      "cachedInputPer1M": 0.55
+    },
+    "azure/o3-mini": {
+      "inputPer1M": 1.1,
+      "outputPer1M": 4.4,
+      "currency": "USD",
+      "cachedInputPer1M": 0.55
+    }
+  }
+}
