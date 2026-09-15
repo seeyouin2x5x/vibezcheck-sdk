@@ -231,8 +231,6 @@ export interface CustomerInfo {
   tier?: string;
   /** Billing currency (defaults to 'usd') */
   currency?: string;
-  /** Current prepaid credit balance in USD */
-  balanceUSD?: number;
   /** Flexible custom metadata (key-value attributes) */
   metadata?: Record<string, string | number | boolean | null>;
   /** Arbitrary extra developer fields */
@@ -323,31 +321,6 @@ export interface DatabaseAdapter {
 }
 
 /**
- * Pluggable Payment Provider Interface
- */
-export interface PaymentProvider {
-  name: string;
-  charge?: (costUSD: number, event: UsageEvent) => Promise<void> | void;
-  checkBalance?: (customerId: string) => Promise<{ ok: boolean; balanceUSD?: number }>;
-}
-
-/**
- * Billing Configuration (Universal Auto-Debit, Postpaid metered invoice vs Prepaid credit wallet, Pluggable Providers)
- */
-export interface BillingConfig {
-  /** 'postpaid' = Invoiced at month's end; 'prepaid' = Deducted from credit wallet, locks at $0 */
-  mode?: 'postpaid' | 'prepaid';
-  /** Available prepaid credit balance in USD */
-  balanceUSD?: number;
-  /** Action when balance is low: 'warn' logs/sends event, 'throw' throws CreditExhaustedError */
-  onLowBalance?: 'warn' | 'throw';
-  /** Payment Provider Gateway */
-  provider?: 'polar' | 'lemonsqueezy' | 'paystack' | PaymentProvider;
-  /** Custom charge handler for internal credit wallets / bespoke payment logic */
-  charge?: (costUSD: number, event: UsageEvent) => Promise<void> | void;
-}
-
-/**
  * Profit Pricing & Markup Configuration
  */
 export interface PricingConfig {
@@ -423,8 +396,6 @@ export interface StreamWrapOptions extends CircuitBreakerOptions {
   model?: string;
   /** Provider override if not automatically detectable */
   provider?: string;
-  /** Billing mode configuration (postpaid vs prepaid) */
-  billing?: BillingConfig;
   /** Profit margin & minimum charge configuration */
   pricing?: PricingConfig;
   /** 1-line inline pricing rate card */

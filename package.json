@@ -54,11 +54,6 @@
       "import": "./dist/customers/index.mjs",
       "require": "./dist/customers/index.js"
     },
-    "./auth": {
-      "types": "./dist/auth/index.d.ts",
-      "import": "./dist/auth/index.mjs",
-      "require": "./dist/auth/index.js"
-    },
     "./billing": {
       "types": "./dist/billing/index.d.ts",
       "import": "./dist/billing/index.mjs",

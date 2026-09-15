@@ -107,35 +107,6 @@ describe('VibezCheck v0.4.2 — Duck-Typed Database & Pluggable Providers', () =
     expect(capturedEvents[0].usage.totalTokens).toBe(150);
   });
 
-  test('3. Executes custom payment charge handler in background', async () => {
-    const charges: { costUSD: number; customerId: string }[] = [];
-    const mockCharge = jest.fn(async (costUSD, event) => {
-      charges.push({ costUSD, customerId: event.customerId });
-    });
-
-    const model = createMockModel();
-    const metered = withBilling(model, {
-      customer: 'wallet_user_99',
-      billing: {
-        charge: mockCharge,
-      },
-    });
-
-    const { stream } = await metered.doStream({ prompt: 'test' });
-    const reader = stream.getReader();
-    while (true) {
-      const { done } = await reader.read();
-      if (done) break;
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, 50));
-
-    expect(mockCharge).toHaveBeenCalled();
-    expect(charges.length).toBe(1);
-    expect(charges[0].customerId).toBe('wallet_user_99');
-    expect(charges[0].costUSD).toBeGreaterThan(0);
-  });
-
   test('4. Airbag Error Isolation: Database throws error -> User stream completes safely in 0ms', async () => {
     const failingSupabase = {
       from: jest.fn().mockReturnValue({

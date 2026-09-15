@@ -224,17 +224,20 @@ VibezCheck automatically detects every model used and lists them in the HUD:
 
 Click any model to see its specific spending.
 
----
+## Autonomous Agent Governance & Session Ceilings
 
-## Need Stripe Billing? (Optional)
+Limit a multi-step agent or tool loop to a hard budget with `AgentSession`:
 
-When you want to charge real money, VibezCheck has built-in Stripe helpers:
+```typescript
+import { vibezcheck } from 'vibezcheck';
 
-* **Prepaid Credits**: Let users buy credit balance with Stripe Checkout (`BillingHelper.createTopUpSession`).
-* **Customer API Keys**: Issue `vz_live_...` keys saved in Stripe customer metadata (`ApiKeyAuth`).
-* **Agent Session Ceilings**: Limit a multi-step agent to a hard $1.00 budget with `AgentSession`.
+const session = vibezcheck.session({
+  customer: 'usr_123',
+  sessionBudgetUSD: 1.00, // Hard ceiling for entire session
+});
 
----
+const tools = session.tools(myTools, { costPerActionUSD: 0.05 });
+```
 
 ## 📄 License
 

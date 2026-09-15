@@ -1,5 +1,4 @@
 import { withBilling } from '../src/ai-sdk/with-billing';
-import { createCustomerManager } from '../src/customers/manager';
 import { normalizeCustomer } from '../src/customers/helpers';
 import type { CustomerInfo } from '../src/types';
 
@@ -116,55 +115,5 @@ describe('Customer Information & Rich Metadata', () => {
     expect(dbRecordedRow.user_id).toBe('usr_founder_1');
     expect(dbRecordedRow.metadata.org_id).toBe('org_skynet');
     expect(dbRecordedRow.metadata.department).toBe('R&D');
-  });
-
-  test('CustomerManager provisions and updates Customer with rich metadata', async () => {
-    const manager = createCustomerManager();
-
-    const result = await manager.getOrCreate({
-      userId: 'usr_777',
-      email: 'cto@acme.ai',
-      name: 'John Doe',
-      phone: '+15551234567',
-      orgId: 'org_acme',
-      orgName: 'Acme AI Inc',
-      teamId: 'team_platform',
-      plan: 'growth',
-      tier: 'tier_3',
-      role: 'cto',
-      metadata: {
-        invited_by: 'ceo@acme.ai',
-        seats: 25,
-      },
-    });
-
-    expect(result.id).toBe('usr_777');
-    expect(result.isNew).toBe(true);
-    expect(result.customer.email).toBe('cto@acme.ai');
-    expect(result.customer.name).toBe('John Doe');
-    expect(result.customer.phone).toBe('+15551234567');
-    expect(result.customer.metadata?.vibez_user_id).toBe('usr_777');
-    expect(result.customer.metadata?.org_id).toBe('org_acme');
-    expect(result.customer.metadata?.org_name).toBe('Acme AI Inc');
-    expect(result.customer.metadata?.team_id).toBe('team_platform');
-    expect(result.customer.metadata?.plan).toBe('growth');
-    expect(result.customer.metadata?.tier).toBe('tier_3');
-    expect(result.customer.metadata?.role).toBe('cto');
-    expect(result.customer.metadata?.invited_by).toBe('ceo@acme.ai');
-    expect(result.customer.metadata?.seats).toBe('25');
-
-    // Test updating customer metadata
-    const updated = await manager.updateCustomer('usr_777', {
-      plan: 'enterprise',
-      metadata: {
-        seats: 100,
-        upgraded_at: '2026-09-06',
-      },
-    });
-
-    expect(updated.id).toBe('usr_777');
-    expect(updated.metadata?.plan).toBe('enterprise');
-    expect(updated.metadata?.seats).toBe('100');
-    expect(updated.metadata?.upgraded_at).toBe('2026-09-06');
   });
 });

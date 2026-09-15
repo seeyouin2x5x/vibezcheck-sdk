@@ -135,8 +135,6 @@ describe('Commercial Suite & Tool Metering Engine (v0.6.0)', () => {
       expect(typeof vibezcheck.wrapTool).toBe('function');
       expect(typeof vibezcheck.instrumentToolKit).toBe('function');
       expect(typeof vibezcheck.middleware).toBe('function');
-      expect(typeof vibezcheck.Auth).toBe('function');
-      expect(typeof vibezcheck.Customers).toBe('function');
       expect(typeof vibezcheck.calculateCost).toBe('function');
     });
   });

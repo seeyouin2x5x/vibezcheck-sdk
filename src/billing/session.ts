@@ -7,7 +7,6 @@ export interface AgentSessionOptions {
   maxCostUSD?: number;
   sessionBudgetUSD?: number;
   pricing?: WithBillingOptions['pricing'];
-  billing?: WithBillingOptions['billing'];
   metadata?: Record<string, string | number | boolean>;
   onUsage?: (event: UsageEvent) => void | Promise<void>;
 }
@@ -45,7 +44,6 @@ export class AgentSession {
       ...modelOptions,
       customer: this.customer,
       pricing: modelOptions.pricing || this.options.pricing,
-      billing: modelOptions.billing || this.options.billing,
       onUsage: async (event: UsageEvent) => {
         const callCost = event.cost.retailUSD ?? event.cost.billedUSD ?? event.cost.totalUSD;
         session.totalCostUSD = Number((session.totalCostUSD + callCost).toFixed(8));

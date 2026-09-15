@@ -82,8 +82,6 @@ describe('NPM Package Pre-Publish Readiness & Export Integrity', () => {
     expect(typeof distCjs.calculateCost).toBe('function');
     expect(typeof distCjs.getModelPricing).toBe('function');
     expect(typeof distCjs.registerModelPricing).toBe('function');
-    expect(typeof distCjs.CustomerManager).toBe('function');
-    expect(typeof distCjs.ApiKeyAuth).toBe('function');
   });
 
   test('Subpath CommonJS bundles can be required independently', () => {
@@ -100,11 +98,7 @@ describe('NPM Package Pre-Publish Readiness & Export Integrity', () => {
     expect(typeof aiSdk.createVibezModel).toBe('function');
 
     const customers = require('../dist/customers/index.js');
-    expect(typeof customers.CustomerManager).toBe('function');
     expect(typeof customers.normalizeCustomer).toBe('function');
-
-    const auth = require('../dist/auth/index.js');
-    expect(typeof auth.ApiKeyAuth).toBe('function');
 
     const billing = require('../dist/billing/index.js');
     expect(typeof billing.createAgentSession).toBe('function');

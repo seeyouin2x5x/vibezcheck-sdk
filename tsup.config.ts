@@ -8,7 +8,6 @@ export default defineConfig({
     'ai-sdk/index': 'src/ai-sdk/index.ts',
     'ai-sdk/middleware': 'src/ai-sdk/middleware.ts',
     'customers/index': 'src/customers/index.ts',
-    'auth/index': 'src/auth/index.ts',
     'billing/index': 'src/billing/index.ts',
     'react/index': 'src/react/index.ts',
     'database/index': 'src/database/index.ts',
@@ -21,7 +20,6 @@ export default defineConfig({
   clean: true,
   shims: true,
   external: [
-    'stripe',
     'openai',
     '@anthropic-ai/sdk',
     'ai',

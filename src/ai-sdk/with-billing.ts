@@ -3,7 +3,6 @@ import type {
   UsageEvent,
   CircuitBreakerOptions,
   BudgetExceededEvent,
-  BillingConfig,
   PricingConfig,
   InlineRateConfig,
 } from '../types';
@@ -17,8 +16,6 @@ export interface WithBillingOptions extends CircuitBreakerOptions {
   customer?: CustomerParam;
   /** Direct customer ID */
   customerId?: string;
-  /** Billing mode configuration (Universal Auto-Debit, postpaid vs prepaid, pluggable providers) */
-  billing?: BillingConfig;
   /** Profit margin & minimum charge configuration */
   pricing?: PricingConfig;
   /** 1-line inline pricing rate card */
@@ -243,7 +240,6 @@ export function withBilling<T extends object>(
       ...customerMetadata,
       ...options.metadata,
       ...extraMeta,
-      billingMode: options.billing?.mode || 'postpaid',
     };
 
     const event: UsageEvent = {
@@ -326,41 +322,6 @@ export function withBilling<T extends object>(
         (globalThis as any).after(() => executeDbWrite());
       } else {
         executeDbWrite().catch(() => {});
-      }
-    }
-
-    // 💳 Pluggable Payment Provider Execution (Airbag Isolated)
-    if (options.billing?.charge && typeof options.billing.charge === 'function') {
-      const chargeFn = options.billing.charge;
-      const executeCharge = async () => {
-        try {
-          await chargeFn(cost.totalUSD, event);
-        } catch (err: any) {
-          if (process.env.NODE_ENV !== 'test' && !options.silent) {
-            console.warn(`[vibezcheck] Custom charge handler failed safely:`, err?.message || err);
-          }
-        }
-      };
-      if (typeof globalThis !== 'undefined' && typeof (globalThis as any).after === 'function') {
-        (globalThis as any).after(() => executeCharge());
-      } else {
-        executeCharge().catch(() => {});
-      }
-    } else if (options.billing?.provider && typeof options.billing.provider === 'object' && typeof (options.billing.provider as any).charge === 'function') {
-      const providerCharge = (options.billing.provider as any).charge;
-      const executeCharge = async () => {
-        try {
-          await providerCharge(cost.totalUSD, event);
-        } catch (err: any) {
-          if (process.env.NODE_ENV !== 'test' && !options.silent) {
-            console.warn(`[vibezcheck] Payment provider charge failed safely:`, err?.message || err);
-          }
-        }
-      };
-      if (typeof globalThis !== 'undefined' && typeof (globalThis as any).after === 'function') {
-        (globalThis as any).after(() => executeCharge());
-      } else {
-        executeCharge().catch(() => {});
       }
     }
 

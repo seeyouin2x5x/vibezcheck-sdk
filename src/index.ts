@@ -6,8 +6,6 @@ import { toResponse } from './ai-sdk/to-response';
 import { toVibezDataStream, toVibezDataStreamResponse } from './ai-sdk/data-stream';
 import { createVibezModel, createVibezSession, type VibezCheckModelOptions } from './ai-sdk/declarative';
 import { vibezcheckMiddleware } from './ai-sdk/middleware';
-import { CustomerManager, createCustomerManager } from './customers/manager';
-import { ApiKeyAuth, createApiKeyAuth, extractAuthToken } from './auth';
 import { AgentSession, createAgentSession } from './billing/session';
 import { wrapTool, instrumentToolKit, createTools } from './billing/tools';
 import { isBudgetExceeded, stopWhenBudgetExceeded } from './billing/stop-condition';
@@ -19,7 +17,6 @@ export * from './meter';
 export * from './pricing';
 export * from './ai-sdk';
 export * from './customers';
-export * from './auth';
 export * from './billing';
 export * from './database';
 export { vibezcheckMiddleware } from './ai-sdk/middleware';
@@ -28,23 +25,16 @@ export { vibezcheckMiddleware } from './ai-sdk/middleware';
 /**
  * VibezCheck Unified Client Configuration
  */
-export interface VibezCheckConfig extends MeterOptions {
-  /** Auto-initialize CustomerManager (default: true) */
-  autoCustomers?: boolean;
-}
+export interface VibezCheckConfig extends MeterOptions {}
 
 /**
  * VibezCheck Unified Client Instance
  */
 export class VibezCheckClient {
   public meter: VibezMeter;
-  public customers: CustomerManager;
-  public auth: ApiKeyAuth;
 
   constructor(config: VibezCheckConfig = {}) {
     this.meter = new VibezMeter(config);
-    this.customers = new CustomerManager();
-    this.auth = new ApiKeyAuth();
   }
 
   /**
@@ -162,8 +152,6 @@ vibezcheck.tools = createTools;
 vibezcheck.agent = createAgent;
 vibezcheck.stopWhen = isBudgetExceeded;
 vibezcheck.middleware = vibezcheckMiddleware;
-vibezcheck.Auth = ApiKeyAuth;
-vibezcheck.Customers = CustomerManager;
 vibezcheck.toResponse = toResponse;
 vibezcheck.toDataStream = toVibezDataStream;
 vibezcheck.toVibezDataStream = toVibezDataStream;
