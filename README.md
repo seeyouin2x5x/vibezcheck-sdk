@@ -359,6 +359,16 @@ export default function ChatPage() {
 
 ---
 
+## 🔒 Privacy & Zero Data Retention (ZDR)
+
+VibezCheck is architected with strict Zero Data Retention:
+* **Zero Prompt / Completion Storage**: VibezCheck never stores, logs, inspects, or retains user prompts or AI completions. All data passing through the library stays strictly in your own process memory.
+* **No Proxy Intermediaries**: VibezCheck is an in-process SDK wrapper, not a proxy service. Your API calls travel directly from your application to OpenAI, Anthropic, or Google with zero third-party intermediaries.
+* **Zero Phone-Home Telemetry**: Pure self-contained engine (`dependencies: {}`) with zero telemetry calls home to external analytics servers.
+* **Open Standards**: Fully aligned with leading privacy-first infrastructure like [OpenRouter Data Collection](https://openrouter.ai/docs/guides/privacy/data-collection), [Provider Logging](https://openrouter.ai/docs/guides/privacy/provider-logging), and [Zero Data Retention (ZDR)](https://openrouter.ai/docs/guides/features/zdr).
+
+---
+
 ## 📄 License
 
 MIT © [VibezCheck](https://vibezcheck.xyz)
