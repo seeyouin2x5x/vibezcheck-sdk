@@ -1,10 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { Header } from '@/components/header';
 import { ChatboxTutorial } from '@/components/chatbox-tutorial';
-import { VibezReceipt } from '@/components/vibez-meter';
 import {
   Zap,
   ShieldCheck,
@@ -75,6 +73,27 @@ const DOC_NAV: { category: string; items: DocItem[] }[] = [
     category: 'Core Features',
     items: [
       {
+        id: 'database',
+        title: 'Database Sinks & DIY Adapters',
+        category: 'Core Features',
+        badge: 'v0.5.10',
+        description: 'Store AI usage events in Supabase, custom ORMs (Drizzle, Kysely), or Metronome billing without latency.',
+      },
+      {
+        id: 'serverless',
+        title: 'Serverless Spooling & Flush',
+        category: 'Core Features',
+        badge: 'Zero Drops',
+        description: 'Background event batching with globalThis.after(), waitUntil(), and vibezcheck.flush().',
+      },
+      {
+        id: 'hud',
+        title: 'Floating Telemetry HUD (<VibezCheck />)',
+        category: 'Core Features',
+        badge: 'React UI',
+        description: 'Zero-prop client component displaying live USD costs, token splits, and multi-model breakdowns.',
+      },
+      {
         id: 'safety',
         title: 'Safety Switch (Cost Protection)',
         category: 'Core Features',
@@ -102,14 +121,14 @@ const DOC_NAV: { category: string; items: DocItem[] }[] = [
     ],
   },
   {
-    category: 'UI & Artifacts',
+    category: 'Security & Privacy',
     items: [
       {
-        id: 'artifacts',
-        title: 'Rendering UI in Artifacts',
-        category: 'UI & Artifacts',
-        badge: 'Interactive',
-        description: 'Render real-time cost meters, token receipts, and wallet HUDs directly inside AI chat artifacts.',
+        id: 'privacy',
+        title: 'Zero Data Retention (ZDR)',
+        category: 'Security & Privacy',
+        badge: 'Zero Storage',
+        description: 'How VibezCheck guarantees 100% prompt privacy, zero server-side storage, and direct-to-provider execution.',
       },
     ],
   },
@@ -771,6 +790,212 @@ export async function POST(req: Request) {
             </div>
           )}
 
+          {/* TAB: DATABASE SINKS */}
+          {activeTab === 'database' && (
+            <div className="space-y-8 animate-fadeIn">
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 text-xs font-medium mb-3">
+                  <Zap className="w-3 h-3" />
+                  Decoupled Storage (v0.5.10)
+                </div>
+                <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+                  Database Sinks &amp; Universal DIY Adapters
+                </h1>
+                <p className="text-base text-slate-600 dark:text-zinc-300 mt-2 leading-relaxed">
+                  Persist usage telemetry into Supabase, custom databases (Drizzle, Kysely, Mongo, ClickHouse), or Metronome with 0ms added latency on your user stream.
+                </p>
+              </div>
+
+              {/* 1. Supabase Adapter */}
+              <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/40">
+                      vibezcheck.supabase(client)
+                    </span>
+                    <span className="text-xs text-slate-500 dark:text-zinc-400">First-Party Supabase Sink</span>
+                  </div>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">
+                  Automatically inserts rows into the default <code className="font-mono text-emerald-600 dark:text-emerald-400">vibez_usage</code> table. Completely isolated so database latency never blocks token streaming.
+                </p>
+                <div className="relative group">
+                  <pre className="p-3.5 rounded-xl bg-slate-100 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-[11px] font-mono text-slate-800 dark:text-zinc-200 overflow-x-auto leading-relaxed">
+{`import { createClient } from '@supabase/supabase-js';
+import { openai } from '@ai-sdk/openai';
+import { vibezcheck } from 'vibezcheck';
+
+const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_KEY!);
+
+const model = vibezcheck(openai('gpt-4o-mini'), {
+  customer: 'usr_123',
+  database: vibezcheck.supabase(supabase), // Automatically spools to 'vibez_usage'
+});`}
+                  </pre>
+                </div>
+              </div>
+
+              {/* 2. Universal DIY Adapter */}
+              <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-cyan-50 text-cyan-700 dark:bg-cyan-950/40 dark:text-cyan-400 border border-cyan-200 dark:border-cyan-800/40">
+                      vibezcheck.database(async fn)
+                    </span>
+                    <span className="text-xs text-slate-500 dark:text-zinc-400">Universal DIY Adapter (Drizzle, Kysely, Mongo)</span>
+                  </div>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">
+                  Plug in any database, ORM, or logging pipeline using a simple 1-line callback. Runs inside background life-cycles so database hiccups never crash user chats.
+                </p>
+                <div className="relative group">
+                  <pre className="p-3.5 rounded-xl bg-slate-100 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-[11px] font-mono text-slate-800 dark:text-zinc-200 overflow-x-auto leading-relaxed">
+{`import { openai } from '@ai-sdk/openai';
+import { vibezcheck } from 'vibezcheck';
+
+const model = vibezcheck(openai('gpt-4o-mini'), {
+  customer: 'usr_123',
+  database: vibezcheck.database(async (event) => {
+    // Custom sink: Drizzle, Kysely, Mongo, Prisma, or webhook
+    await db.insert(aiUsageLogs).values({
+      customerId: event.customerId,
+      model: event.model,
+      tokens: event.usage.totalTokens,
+      costUSD: event.cost.totalUSD,
+    });
+  }),
+});`}
+                  </pre>
+                </div>
+              </div>
+
+              {/* 3. Metronome Billing */}
+              <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-400 border border-purple-200 dark:border-purple-800/40">
+                      vibezcheck.metronome(&#123; apiKey &#125;)
+                    </span>
+                    <span className="text-xs text-slate-500 dark:text-zinc-400">Metronome Usage Billing</span>
+                  </div>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">
+                  Directly ingests token usage into Metronome's <code className="font-mono text-purple-600 dark:text-purple-400">/v1/ingest</code> API via zero-dependency native fetch.
+                </p>
+                <div className="relative group">
+                  <pre className="p-3.5 rounded-xl bg-slate-100 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-[11px] font-mono text-slate-800 dark:text-zinc-200 overflow-x-auto leading-relaxed">
+{`const model = vibezcheck(openai('gpt-4o-mini'), {
+  customer: 'cust_metronome_456',
+  database: vibezcheck.metronome({
+    apiKey: process.env.METRONOME_API_KEY!,
+  }),
+});`}
+                  </pre>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB: SERVERLESS SPOOLING */}
+          {activeTab === 'serverless' && (
+            <div className="space-y-8 animate-fadeIn">
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-cyan-500/10 dark:bg-cyan-500/20 text-cyan-700 dark:text-cyan-300 border border-cyan-500/20 text-xs font-medium mb-3">
+                  <Zap className="w-3 h-3" />
+                  Reliability Guarantee
+                </div>
+                <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+                  Serverless Lifecycle Spooling (Zero Dropped Events)
+                </h1>
+                <p className="text-base text-slate-600 dark:text-zinc-300 mt-2 leading-relaxed">
+                  How VibezCheck batches and delivers usage telemetry in ephemeral serverless environments (Vercel, AWS Lambda, Cloudflare Workers) with zero added latency on streaming responses.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-2">
+                  <h3 className="font-bold text-sm text-slate-900 dark:text-white">
+                    1. Automatic Next.js / Vercel after() Hook
+                  </h3>
+                  <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">
+                    VibezCheck automatically detects <code className="font-mono text-emerald-600 dark:text-emerald-400">globalThis.after()</code> in Next.js 15+ App Router. The HTTP response stream finishes instantly for your user, and database writes execute cleanly in the post-response lifecycle without execution timeouts.
+                  </p>
+                </div>
+
+                <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-2">
+                  <h3 className="font-bold text-sm text-slate-900 dark:text-white">
+                    2. Cloudflare Workers waitUntil() Hook
+                  </h3>
+                  <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">
+                    In edge environments, background batching automatically leverages <code className="font-mono text-cyan-600 dark:text-cyan-400">globalThis.waitUntil()</code> to keep edge isolates alive until pending metering batches are flushed.
+                  </p>
+                </div>
+
+                <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-2">
+                  <h3 className="font-bold text-sm text-slate-900 dark:text-white">
+                    3. Explicit Manual Flush: vibezcheck.flush()
+                  </h3>
+                  <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">
+                    In scheduled cron jobs or standalone scripts, call <code className="font-mono text-purple-600 dark:text-purple-400">await vibezcheck.flush()</code> to synchronously drain all active batch queues before process exit:
+                  </p>
+                  <pre className="p-3.5 rounded-xl bg-slate-100 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-[11px] font-mono text-slate-800 dark:text-zinc-200 overflow-x-auto leading-relaxed">
+{`import { vibezcheck } from 'vibezcheck';
+
+// Guarantees all queued usage telemetry is written before worker teardown
+await vibezcheck.flush();`}
+                  </pre>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB: FLOATING HUD (<VibezCheck />) */}
+          {activeTab === 'hud' && (
+            <div className="space-y-8 animate-fadeIn">
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-purple-500/10 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-500/20 text-xs font-medium mb-3">
+                  <Sparkles className="w-3 h-3" />
+                  Client UI Components
+                </div>
+                <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+                  Floating Telemetry HUD (&lt;VibezCheck /&gt;)
+                </h1>
+                <p className="text-base text-slate-600 dark:text-zinc-300 mt-2 leading-relaxed">
+                  A zero-prop floating financial HUD and expandable card that displays real-time tokens and costs directly from your <code className="font-mono text-xs">useChat()</code> messages array.
+                </p>
+              </div>
+
+              <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-4">
+                <h3 className="font-bold text-sm text-slate-900 dark:text-white">
+                  1-Line Client Integration
+                </h3>
+                <pre className="p-3.5 rounded-xl bg-slate-100 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-[11px] font-mono text-slate-800 dark:text-zinc-200 overflow-x-auto leading-relaxed">
+{`'use client';
+
+import { useChat } from '@ai-sdk/react';
+import { VibezCheck, VibezReceipt } from 'vibezcheck/ui';
+
+export default function ChatView() {
+  const { messages } = useChat();
+
+  return (
+    <div>
+      {/* Your chat UI */}
+      <VibezCheck messages={messages} />
+    </div>
+  );
+}`}
+                </pre>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 text-xs text-slate-600 dark:text-zinc-400">
+                  <div>• <strong>⇅ Unit Swap</strong>: Click to toggle between Dollar Cost (<code className="font-mono">$0.0028</code>) and Tokens (<code className="font-mono">1,420 tok</code>).</div>
+                  <div>• <strong>Multi-Model Breakdown</strong>: Displays exact splits when conversations route across multiple models.</div>
+                  <div>• <strong>Customer Privacy</strong>: Wholesale developer costs and margin formulas remain private unless explicitly enabled.</div>
+                  <div>• <strong>Micro-Receipt</strong>: Add <code className="font-mono">&lt;VibezReceipt message=&#123;message&#125; /&gt;</code> under each assistant bubble for clean per-turn badges.</div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* TAB 5: CLI SUITE */}
           {activeTab === 'cli' && (
             <div className="space-y-8 animate-fadeIn">
@@ -855,126 +1080,6 @@ export async function POST(req: Request) {
             </div>
           )}
 
-          {/* TAB: RENDERING UI IN ARTIFACTS */}
-          {activeTab === 'artifacts' && (
-            <div className="space-y-8 animate-fadeIn">
-              <div>
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-purple-500/10 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-500/20 text-xs font-medium mb-3">
-                  <Sparkles className="w-3 h-3" />
-                  Generative UI &amp; Artifacts
-                </div>
-                <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-                  Rendering VibezCheck UI in AI Artifacts
-                </h1>
-                <p className="text-base text-slate-600 dark:text-zinc-300 mt-2 leading-relaxed">
-                  Learn how to embed live token counters, micro-receipt badges, and customer wallet HUDs directly inside interactive AI artifacts (Claude Artifacts, ChatGPT Canvas, Google Antigravity, and isolated web iframes).
-                </p>
-              </div>
-
-              {/* Live Interactive Sandbox Component */}
-              <div className="p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 shadow-xs space-y-6">
-                <div className="flex items-center justify-between border-b border-slate-100 dark:border-zinc-800 pb-4">
-                  <div className="space-y-1">
-                    <h3 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                      <Terminal className="w-4 h-4 text-emerald-500" />
-                      Live Artifact Micro-Badge Preview
-                    </h3>
-                    <p className="text-xs text-slate-500 dark:text-zinc-400">
-                      The featherweight &lt;VibezReceipt /&gt; badge mounts in sub-millisecond time inside your artifact container:
-                    </p>
-                  </div>
-                  <Link
-                    href="/docs/artifacts"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 text-xs font-semibold hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition"
-                  >
-                    Dedicated Page
-                    <ExternalLink className="w-3 h-3" />
-                  </Link>
-                </div>
-
-                {/* Simulated Chat Message with Micro-Badge */}
-                <div className="p-4 rounded-xl bg-slate-50 dark:bg-zinc-950/80 border border-slate-200/80 dark:border-zinc-800/80 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-slate-700 dark:text-zinc-300">
-                      Assistant Response in Side Pane
-                    </span>
-                    <VibezReceipt
-                      model="gpt-6-astra"
-                      tokens={1420}
-                      costUSD={0.0036}
-                      variant="pill"
-                    />
-                  </div>
-                  <div className="p-3.5 rounded-lg bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs text-slate-600 dark:text-zinc-400 font-sans leading-relaxed">
-                    &quot;Interactive artifacts allow users to inspect calculations and code side-by-side. VibezCheck renders continuous usage metrics directly alongside each turn without UI lag.&quot;
-                  </div>
-                </div>
-
-                {/* Integration Guide Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                  <div className="p-4 rounded-xl bg-slate-50 dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800/80 space-y-1.5">
-                    <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 block">
-                      REACT / NEXT.JS
-                    </span>
-                    <p className="text-xs text-slate-600 dark:text-zinc-400">
-                      Import <code className="font-mono text-emerald-600 dark:text-emerald-400">&lt;VibezReceipt message=&#123;m&#125; /&gt;</code> directly from <code className="font-mono">vibezcheck/react</code> into your AI message thread.
-                    </p>
-                  </div>
-
-                  <div className="p-4 rounded-xl bg-slate-50 dark:bg-zinc-950 border border-slate-200/60 dark:border-zinc-800/80 space-y-1.5">
-                    <span className="text-xs font-mono font-bold text-cyan-600 dark:text-cyan-400 block">
-                      STANDALONE IFRAME / HTML
-                    </span>
-                    <p className="text-xs text-slate-600 dark:text-zinc-400">
-                      Use the allowlisted Tailwind script and semantic tokens (<code className="font-mono">--card</code>, <code className="font-mono">--foreground</code>) for isolated sandboxes.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Code Snippet Box */}
-              <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-3">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-semibold text-slate-900 dark:text-white">
-                    Drop-In Next.js Component
-                  </h4>
-                  <button
-                    onClick={() => copyToClipboard(`import { VibezReceipt } from 'vibezcheck/react';
-
-export function ChatTurn({ message }) {
-  return (
-    <div className="space-y-2">
-      <p>{message.content}</p>
-      {message.role === 'assistant' && (
-        <VibezReceipt message={message} variant="pill" />
-      )}
-    </div>
-  );
-}`, 'artifact-react-code')}
-                    className="flex items-center gap-1 text-xs font-mono text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer"
-                  >
-                    {copiedCode === 'artifact-react-code' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                    Copy Code
-                  </button>
-                </div>
-                <pre className="p-4 rounded-xl bg-slate-900 text-zinc-200 font-mono text-xs overflow-x-auto leading-relaxed border border-slate-800">
-                  <code>{`import { VibezReceipt } from 'vibezcheck/react';
-
-export function ChatTurn({ message }) {
-  return (
-    <div className="space-y-2">
-      <p>{message.content}</p>
-      {message.role === 'assistant' && (
-        <VibezReceipt message={message} variant="pill" />
-      )}
-    </div>
-  );
-}`}</code>
-                </pre>
-              </div>
-            </div>
-          )}
-
           {/* TAB 6: MODEL PRICING TABLE */}
           {activeTab === 'pricing' && (
             <div className="space-y-8 animate-fadeIn">
@@ -1037,15 +1142,239 @@ export function ChatTurn({ message }) {
             </div>
           )}
 
-          {/* TAB 7: FAQ */}
-          {(activeTab === 'faq' || activeTab === 'quickstart' || activeTab === 'wallets' || activeTab === 'disconnects') && (
+          {/* TAB: QUICKSTART */}
+          {activeTab === 'quickstart' && (
             <div className="space-y-8 animate-fadeIn">
               <div>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-lime-500/10 dark:bg-lime-500/20 text-lime-700 dark:text-lime-300 border border-lime-500/20 text-xs font-medium mb-3">
+                  <Zap className="w-3 h-3" />
+                  3-Step Setup
+                </div>
+                <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+                  Quickstart: 1-Line AI Token Metering
+                </h1>
+                <p className="text-base text-slate-600 dark:text-zinc-300 mt-2 leading-relaxed">
+                  Add token tracking, profit margins, and spend receipts to an existing Next.js AI SDK project in under 2 minutes.
+                </p>
+              </div>
+
+              {/* Step 1 */}
+              <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-3">
+                <div className="flex items-center gap-2.5">
+                  <span className="flex items-center justify-center w-6 h-6 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold">
+                    1
+                  </span>
+                  <h3 className="font-bold text-sm text-slate-900 dark:text-white">
+                    Install VibezCheck &amp; AI SDK
+                  </h3>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-zinc-400">
+                  Zero external dependencies (<code className="font-mono text-[11px]">dependencies: &#123;&#125;</code>) ensures zero bloat in your production bundles:
+                </p>
+                <div className="flex items-center justify-between p-3 rounded-xl bg-slate-100 dark:bg-zinc-950 font-mono text-xs text-slate-800 dark:text-zinc-200 border border-slate-200 dark:border-zinc-800">
+                  <span>npm install vibezcheck ai @ai-sdk/openai</span>
+                  <button
+                    onClick={() => copyToClipboard('npm install vibezcheck ai @ai-sdk/openai', 'qs-step1')}
+                    className="p-1 rounded bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white transition cursor-pointer"
+                  >
+                    {copiedCode === 'qs-step1' ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Step 2 */}
+              <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-3">
+                <div className="flex items-center gap-2.5">
+                  <span className="flex items-center justify-center w-6 h-6 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold">
+                    2
+                  </span>
+                  <h3 className="font-bold text-sm text-slate-900 dark:text-white">
+                    Wrap your model in app/api/chat/route.ts
+                  </h3>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-zinc-400">
+                  Wrap any model with <code className="font-mono text-[11px]">vibezcheck(model)</code> and transmit via <code className="font-mono text-[11px]">vibezcheck.toResponse(result)</code>:
+                </p>
+                <pre className="p-3.5 rounded-xl bg-slate-100 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-[11px] font-mono text-slate-800 dark:text-zinc-200 overflow-x-auto leading-relaxed">
+{`import { convertToModelMessages, streamText, UIMessage } from 'ai';
+import { openai } from '@ai-sdk/openai';
+import { vibezcheck } from 'vibezcheck';
+
+export const maxDuration = 30;
+
+export async function POST(req: Request) {
+  const { messages }: { messages: UIMessage[] } = await req.json();
+
+  const result = streamText({
+    // ✦ 1 Line: track costs, add 30% profit margin, set $0.50 safety cap
+    model: vibezcheck(openai('gpt-4o-mini'), {
+      customer: 'user_alex@example.com',
+      pricing: { margin: 1.30 }, // +30% profit margin
+      maxCostPerCallUSD: 0.50,   // Circuit breaker auto-stop
+    }),
+    instructions: 'You are a helpful assistant.',
+    messages: await convertToModelMessages(messages),
+  });
+
+  return vibezcheck.toResponse(result);
+}`}
+                </pre>
+              </div>
+
+              {/* Step 3 */}
+              <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-3">
+                <div className="flex items-center gap-2.5">
+                  <span className="flex items-center justify-center w-6 h-6 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold">
+                    3
+                  </span>
+                  <h3 className="font-bold text-sm text-slate-900 dark:text-white">
+                    Add &lt;VibezCheck /&gt; and &lt;VibezReceipt /&gt; to your UI
+                  </h3>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-zinc-400">
+                  Drop the financial HUD and micro-receipt badges directly into your chat view:
+                </p>
+                <pre className="p-3.5 rounded-xl bg-slate-100 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-[11px] font-mono text-slate-800 dark:text-zinc-200 overflow-x-auto leading-relaxed">
+{`'use client';
+
+import { useChat } from '@ai-sdk/react';
+import { VibezCheck, VibezReceipt } from 'vibezcheck/ui';
+
+export default function ChatView() {
+  const { messages } = useChat();
+
+  return (
+    <div className="max-w-xl mx-auto py-10">
+      {/* Message stream */}
+      {messages.map((m) => (
+        <div key={m.id} className="p-4 rounded-xl border mb-3">
+          <div>{m.content}</div>
+          {m.role === 'assistant' && (
+            <div className="mt-2 flex justify-end">
+              <VibezReceipt message={m} />
+            </div>
+          )}
+        </div>
+      ))}
+
+      {/* ✦ 1 Line: Floating HUD showing live tokens and spending */}
+      <VibezCheck messages={messages} />
+    </div>
+  );
+}`}
+                </pre>
+              </div>
+            </div>
+          )}
+
+          {/* TAB: WALLETS */}
+          {activeTab === 'wallets' && (
+            <div className="space-y-8 animate-fadeIn">
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-500/10 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-500/20 text-xs font-medium mb-3">
+                  <CreditCard className="w-3 h-3" />
+                  Prepaid Credits &amp; Stripe
+                </div>
+                <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+                  Customer Wallets &amp; Stripe Monetization
+                </h1>
+                <p className="text-base text-slate-600 dark:text-zinc-300 mt-2 leading-relaxed">
+                  The mobile data plan model for AI: let users top up a $10 credit balance and debit pennies as they chat.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-2">
+                  <h3 className="font-bold text-sm text-slate-900 dark:text-white">
+                    How Wallets Work
+                  </h3>
+                  <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">
+                    Users prepay for usage (e.g. $10.00). Each AI completion deducts exact wholesale costs plus your profit markup (e.g. -$0.0024). When the balance reaches $0.00, calls pause gracefully until a top-up.
+                  </p>
+                </div>
+
+                <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-2">
+                  <h3 className="font-bold text-sm text-slate-900 dark:text-white">
+                    Free Local Simulation Mode
+                  </h3>
+                  <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">
+                    No Stripe account needed to build and test locally. Without API credentials, VibezCheck tracks balances, customer credit deductions, and receipts in local memory with zero setup.
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-3">
+                <h3 className="font-bold text-sm text-slate-900 dark:text-white">
+                  Frontend Wallet Top-Up Callback
+                </h3>
+                <p className="text-xs text-slate-600 dark:text-zinc-400">
+                  Pass your remaining balance and top-up handler directly to <code className="font-mono text-[11px]">&lt;VibezCheck /&gt;</code>:
+                </p>
+                <pre className="p-3.5 rounded-xl bg-slate-100 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-[11px] font-mono text-slate-800 dark:text-zinc-200 overflow-x-auto leading-relaxed">
+{`<VibezCheck
+  messages={messages}
+  remainingBalanceUSD={10.00}
+  onTopUp={(amount) => {
+    // Redirect to your Stripe Checkout route
+    window.location.href = '/api/checkout?amount=' + amount;
+  }}
+/>`}
+                </pre>
+              </div>
+            </div>
+          )}
+
+          {/* TAB: DISCONNECTS */}
+          {activeTab === 'disconnects' && (
+            <div className="space-y-8 animate-fadeIn">
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/10 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/20 text-xs font-medium mb-3">
+                  <ShieldCheck className="w-3 h-3" />
+                  Stream Resiliency
+                </div>
+                <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+                  Disconnect Protection (Partial Token Recovery)
+                </h1>
+                <p className="text-base text-slate-600 dark:text-zinc-300 mt-2 leading-relaxed">
+                  Capture and record partial usage even if a customer closes their browser tab or loses network connectivity mid-stream.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-2">
+                  <h3 className="font-bold text-sm text-slate-900 dark:text-white">
+                    The Problem with Unprotected Streams
+                  </h3>
+                  <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">
+                    If an LLM writes a 2,000-word response and the user closes the tab at word 1,200, naive trackers lose the stream entirely. Upstream AI providers still invoice you for those 1,200 words, leaving developers with unbilled expenses.
+                  </p>
+                </div>
+
+                <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-2">
+                  <h3 className="font-bold text-sm text-slate-900 dark:text-white">
+                    How VibezCheck Catches Every Token
+                  </h3>
+                  <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">
+                    VibezCheck instruments response streams with native <code className="font-mono text-emerald-600 dark:text-emerald-400">AbortSignal</code> listeners. The instant an interruption occurs, it computes the exact tokens delivered up to that millisecond, calculates the fractional dollar cost, and flushes the record to your database via serverless background lifecycles.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB: FAQ */}
+          {activeTab === 'faq' && (
+            <div className="space-y-8 animate-fadeIn">
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-500/10 dark:bg-zinc-500/20 text-slate-700 dark:text-zinc-300 border border-slate-500/20 text-xs font-medium mb-3">
+                  <LifeBuoy className="w-3 h-3" />
+                  Plain English
+                </div>
                 <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
                   Frequently Asked Questions
                 </h1>
                 <p className="text-base text-slate-600 dark:text-zinc-300 mt-2 leading-relaxed">
-                  Clear, human answers to common questions about metering and billing.
+                  Clear, human answers to common questions about metering, billing, and privacy.
                 </p>
               </div>
 
@@ -1070,6 +1399,24 @@ export function ChatTurn({ message }) {
 
                 <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-2">
                   <h3 className="font-bold text-sm text-slate-900 dark:text-white">
+                    What databases and ORMs are supported?
+                  </h3>
+                  <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">
+                    In v0.5.10, we provide first-party support for <strong>Supabase</strong> (<code className="font-mono text-emerald-600 dark:text-emerald-400">vibezcheck.supabase</code>), <strong>Metronome Billing</strong> (<code className="font-mono text-purple-600 dark:text-purple-400">vibezcheck.metronome</code>), and a universal DIY adapter (<code className="font-mono text-cyan-600 dark:text-cyan-400">vibezcheck.database</code>) that lets you connect Drizzle, Kysely, MongoDB, ClickHouse, or custom webhooks with a 1-line callback.
+                  </p>
+                </div>
+
+                <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-2">
+                  <h3 className="font-bold text-sm text-slate-900 dark:text-white">
+                    Does VibezCheck store my prompts or users' messages?
+                  </h3>
+                  <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">
+                    Never. VibezCheck operates with strict <strong>Zero Data Retention (ZDR)</strong>. We only track numeric token counts, model names, and computed costs in local RAM. User prompts, completions, and keys never leave your process and are never sent to VibezCheck servers.
+                  </p>
+                </div>
+
+                <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-2">
+                  <h3 className="font-bold text-sm text-slate-900 dark:text-white">
                     What happens if a user closes their tab mid-sentence?
                   </h3>
                   <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">
@@ -1079,6 +1426,209 @@ export function ChatTurn({ message }) {
               </div>
             </div>
           )}
+          {/* TAB: PRIVACY & ZERO DATA RETENTION (ZDR) */}
+          {activeTab === 'privacy' && (
+            <div className="space-y-8 animate-fadeIn">
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 text-xs font-medium mb-3">
+                  <ShieldCheck className="w-3 h-3 text-emerald-500" />
+                  Zero Data Retention (ZDR) Policy
+                </div>
+                <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+                  Privacy, Security &amp; Zero Data Retention
+                </h1>
+                <p className="text-base text-slate-600 dark:text-zinc-300 mt-2 leading-relaxed">
+                  We believe privacy in AI is non-negotiable. VibezCheck is architected from the ground up so that your user prompts, model completions, and private application context never touch our servers.
+                </p>
+              </div>
+
+              {/* 3 Core Privacy Pillars */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-2">
+                  <div className="flex items-center gap-2 font-bold text-sm text-slate-900 dark:text-white">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                    <span>0 Prompt Retention</span>
+                  </div>
+                  <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">
+                    VibezCheck does not store, log, inspect, or retain user prompts or completions. All data passing through the library stays strictly in your own runtime memory.
+                  </p>
+                </div>
+
+                <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-2">
+                  <div className="flex items-center gap-2 font-bold text-sm text-slate-900 dark:text-white">
+                    <CheckCircle2 className="w-4 h-4 text-cyan-500 shrink-0" />
+                    <span>No Proxy Intermediaries</span>
+                  </div>
+                  <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">
+                    Unlike proxy relays, VibezCheck is an in-process SDK wrapper. Your API calls travel directly from your server to OpenAI, Anthropic, or Google with zero third-party hops.
+                  </p>
+                </div>
+
+                <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-2">
+                  <div className="flex items-center gap-2 font-bold text-sm text-slate-900 dark:text-white">
+                    <CheckCircle2 className="w-4 h-4 text-purple-500 shrink-0" />
+                    <span>0 Phone-Home Telemetry</span>
+                  </div>
+                  <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">
+                    The library contains zero external dependencies (<code className="font-mono text-[11px]">dependencies: &#123;&#125;</code>) and makes zero background telemetry requests to VibezCheck.
+                  </p>
+                </div>
+              </div>
+
+              {/* Data Collection Transparency Table */}
+              <div className="space-y-4">
+                <h3 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+                  Data Collection Breakdown: What We Measure vs. What We NEVER Touch
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-zinc-400 leading-relaxed">
+                  Following the standards set by privacy-first infrastructure like OpenRouter, here is the transparent breakdown of our data handling:
+                </p>
+
+                <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50">
+                  <table className="w-full text-left text-xs border-collapse">
+                    <thead>
+                      <tr className="border-b border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900 text-slate-500 dark:text-zinc-400 font-mono">
+                        <th className="py-3 px-4 font-semibold">Data Category</th>
+                        <th className="py-3 px-4 font-semibold">VibezCheck Handling</th>
+                        <th className="py-3 px-4 font-semibold">Where It Lives</th>
+                        <th className="py-3 px-4 font-semibold">Retention Policy</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 dark:divide-zinc-800">
+                      <tr className="hover:bg-slate-50/50 dark:hover:bg-zinc-800/40">
+                        <td className="py-3 px-4 font-semibold text-slate-900 dark:text-white">
+                          Prompt &amp; Completion Text
+                        </td>
+                        <td className="py-3 px-4 text-red-600 dark:text-red-400 font-medium">
+                          ✕ NEVER collected, inspected, or stored
+                        </td>
+                        <td className="py-3 px-4 text-slate-500 dark:text-zinc-400">
+                          Direct to AI Provider
+                        </td>
+                        <td className="py-3 px-4 font-mono text-emerald-600 dark:text-emerald-400">
+                          0-Day (Zero Retention)
+                        </td>
+                      </tr>
+                      <tr className="hover:bg-slate-50/50 dark:hover:bg-zinc-800/40">
+                        <td className="py-3 px-4 font-semibold text-slate-900 dark:text-white">
+                          Token Counts (Prompt/Completion)
+                        </td>
+                        <td className="py-3 px-4 text-slate-700 dark:text-zinc-300">
+                          ✓ Measured locally in runtime memory
+                        </td>
+                        <td className="py-3 px-4 text-slate-500 dark:text-zinc-400">
+                          Your Server / Local RAM
+                        </td>
+                        <td className="py-3 px-4 font-mono text-slate-500 dark:text-zinc-400">
+                          Ephemeral (Request Lifetime)
+                        </td>
+                      </tr>
+                      <tr className="hover:bg-slate-50/50 dark:hover:bg-zinc-800/40">
+                        <td className="py-3 px-4 font-semibold text-slate-900 dark:text-white">
+                          Calculated Costs &amp; Model IDs
+                        </td>
+                        <td className="py-3 px-4 text-slate-700 dark:text-zinc-300">
+                          ✓ Computed synchronously with bundled offline catalog
+                        </td>
+                        <td className="py-3 px-4 text-slate-500 dark:text-zinc-400">
+                          Your Private Database Sink
+                        </td>
+                        <td className="py-3 px-4 font-mono text-slate-500 dark:text-zinc-400">
+                          Controlled by Developer
+                        </td>
+                      </tr>
+                      <tr className="hover:bg-slate-50/50 dark:hover:bg-zinc-800/40">
+                        <td className="py-3 px-4 font-semibold text-slate-900 dark:text-white">
+                          API Keys (OpenAI, Anthropic, Gemini)
+                        </td>
+                        <td className="py-3 px-4 text-red-600 dark:text-red-400 font-medium">
+                          ✕ NEVER stored or transmitted
+                        </td>
+                        <td className="py-3 px-4 text-slate-500 dark:text-zinc-400">
+                          Your Environment Variables
+                        </td>
+                        <td className="py-3 px-4 font-mono text-emerald-600 dark:text-emerald-400">
+                          Zero Access
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Upstream Provider Policies & External References */}
+              <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-4">
+                <div className="flex items-center gap-2">
+                  <ExternalLink className="w-4 h-4 text-blue-500" />
+                  <h3 className="font-bold text-sm text-slate-900 dark:text-white">
+                    Upstream Provider Policies &amp; Industry Standards
+                  </h3>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">
+                  VibezCheck complies with and complements leading industry privacy frameworks. For teams requiring strict regulatory compliance (HIPAA, SOC2, GDPR), we recommend pairing VibezCheck with Zero Data Retention agreements from upstream providers:
+                </p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                  <a
+                    href="https://openrouter.ai/docs/guides/privacy/data-collection"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="p-3.5 rounded-xl border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-950/60 hover:border-slate-400 dark:hover:border-zinc-600 transition group"
+                  >
+                    <div className="text-xs font-semibold text-slate-900 dark:text-white flex items-center justify-between">
+                      <span>Data Collection</span>
+                      <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-blue-500 transition" />
+                    </div>
+                    <p className="text-[11px] text-slate-500 dark:text-zinc-400 mt-1">
+                      Learn how modern AI routers handle data collection boundaries.
+                    </p>
+                  </a>
+
+                  <a
+                    href="https://openrouter.ai/docs/guides/privacy/provider-logging"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="p-3.5 rounded-xl border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-950/60 hover:border-slate-400 dark:hover:border-zinc-600 transition group"
+                  >
+                    <div className="text-xs font-semibold text-slate-900 dark:text-white flex items-center justify-between">
+                      <span>Provider Logging</span>
+                      <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-blue-500 transition" />
+                    </div>
+                    <p className="text-[11px] text-slate-500 dark:text-zinc-400 mt-1">
+                      Inspect upstream provider retention periods and model training rules.
+                    </p>
+                  </a>
+
+                  <a
+                    href="https://openrouter.ai/docs/guides/features/zdr"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="p-3.5 rounded-xl border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-950/60 hover:border-slate-400 dark:hover:border-zinc-600 transition group"
+                  >
+                    <div className="text-xs font-semibold text-slate-900 dark:text-white flex items-center justify-between">
+                      <span>Zero Data Retention</span>
+                      <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-blue-500 transition" />
+                    </div>
+                    <p className="text-[11px] text-slate-500 dark:text-zinc-400 mt-1">
+                      Enforce strict 0-day retention policies across all AI inferences.
+                    </p>
+                  </a>
+                </div>
+              </div>
+
+              {/* Developer & Customer Confidentiality in the UI */}
+              <div className="p-5 rounded-2xl bg-emerald-500/5 dark:bg-emerald-950/20 border border-emerald-500/20 space-y-2">
+                <div className="flex items-center gap-2 text-sm font-bold text-emerald-800 dark:text-emerald-300">
+                  <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                  <span>Customer Privacy Mode Built-In</span>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">
+                  When you render <code className="font-mono text-emerald-600 dark:text-emerald-400">&lt;VibezCheck /&gt;</code> in your frontend, developer wholesale costs and profit margin multipliers are automatically hidden from end-users. Customers only see their transparent billed cost and token count, protecting your proprietary business formulas.
+                </p>
+              </div>
+            </div>
+          )}
+
         </main>
       </div>
     </div>

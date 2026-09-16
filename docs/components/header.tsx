@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Moon, Sun, Search, ExternalLink, ChevronDown } from 'lucide-react';
+import { Moon, Sun, Search, ExternalLink, ChevronDown, ShieldCheck } from 'lucide-react';
 import { SearchModal } from './search-modal';
 
 export function Header() {
@@ -69,10 +69,14 @@ export function Header() {
           </a>
           <a href="/releases" className="hover:text-slate-950 dark:hover:text-white transition text-emerald-600 dark:text-emerald-400 font-semibold inline-flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-            v0.5.5 Notes
+            v0.5.10 Notes
           </a>
           <a href="/docs?section=cli" className="hover:text-slate-950 dark:hover:text-white transition">
             CLI Suite
+          </a>
+          <a href="/docs?section=privacy" className="hover:text-slate-950 dark:hover:text-white transition inline-flex items-center gap-1">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+            <span>Zero Data Retention</span>
           </a>
         </nav>
       </div>

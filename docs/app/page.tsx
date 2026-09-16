@@ -8,7 +8,7 @@ import { QrCard } from '@/components/qr-card';
 import { AiSdkShowcase } from '@/components/ai-sdk-showcase';
 import { Conversation, Message } from '@/components/ai-elements';
 import { VibezCheck } from '@/components/vibez-meter';
-import { Copy, Check } from 'lucide-react';
+import { Copy, Check, ShieldCheck } from 'lucide-react';
 
 export default function Home() {
   const { messages, append, isLoading, stop } = useChat({
@@ -60,9 +60,18 @@ export default function Home() {
       <div className="flex-1 flex flex-col items-center w-full max-w-5xl mx-auto px-4 pt-20 pb-40">
         {/* Hero Section (Non-technical plain English) */}
         <div className="text-center max-w-2xl mx-auto mt-4 mb-2 space-y-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-[11px] font-medium text-slate-600 dark:text-zinc-300 shadow-2xs">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>0ms Added Latency · Stripe Metering · Automatic Safety Fuse</span>
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-[11px] font-medium text-slate-600 dark:text-zinc-300 shadow-2xs">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span>0ms Added Latency · Stripe Metering · Automatic Safety Fuse</span>
+            </div>
+            <a
+              href="/docs?section=privacy"
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40 text-[11px] font-medium text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition shadow-2xs cursor-pointer"
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+              <span>100% Zero Data Retention (ZDR)</span>
+            </a>
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
             The Electric Meter for AI Apps

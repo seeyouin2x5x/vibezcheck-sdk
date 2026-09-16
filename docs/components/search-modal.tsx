@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
@@ -126,6 +126,51 @@ const SEARCH_ITEMS: SearchItem[] = [
     href: '/docs',
     iconName: 'fileText',
     keywords: ['overview', 'docs', 'philosophy', 'why', 'concept', 'mobile data', 'analogy'],
+  },
+  {
+    id: 'database',
+    title: 'Database Sinks (Supabase, Custom DIY, Metronome)',
+    description: 'Persist AI usage events into Supabase, custom ORMs (Drizzle, Kysely), or Metronome billing with 0ms added latency',
+    category: 'Feature',
+    href: '/docs?section=database',
+    iconName: 'zap',
+    keywords: ['database', 'supabase', 'drizzle', 'kysely', 'metronome', 'adapter', 'custom', 'storage', 'orm', 'sink'],
+  },
+  {
+    id: 'serverless',
+    title: 'Serverless Spooling & Background Flush',
+    description: 'Zero-drop event batching using globalThis.after(), waitUntil(), and vibezcheck.flush()',
+    category: 'Feature',
+    href: '/docs?section=serverless',
+    iconName: 'zap',
+    keywords: ['serverless', 'spooling', 'flush', 'after', 'waituntil', 'cloudflare', 'vercel', 'batcher'],
+  },
+  {
+    id: 'hud',
+    title: 'Floating Telemetry HUD (<VibezCheck />)',
+    description: 'Zero-prop client component displaying live USD costs, token splits, and multi-model breakdowns',
+    category: 'Docs',
+    href: '/docs?section=hud',
+    iconName: 'fileText',
+    keywords: ['hud', 'vibezcheck', 'component', 'ui', 'pill', 'tokens', 'cost', 'multi-model'],
+  },
+  {
+    id: 'release-0510',
+    title: 'Release v0.5.10 Notes',
+    description: 'Decoupled database sinks, universal DIY adapters, serverless spooling & 700+ offline pricing catalog',
+    category: 'Feature',
+    href: '/releases',
+    iconName: 'sparkles',
+    keywords: ['release', '0.5.10', 'notes', 'changelog', 'update', 'latest', 'version'],
+  },
+  {
+    id: 'privacy',
+    title: 'Zero Data Retention (ZDR) & Privacy',
+    description: '100% prompt privacy, zero server-side storage, no proxy intermediaries, and full provider data policies',
+    category: 'Docs',
+    href: '/docs?section=privacy',
+    iconName: 'shield',
+    keywords: ['privacy', 'zero data retention', 'zdr', 'data collection', 'retention', 'security', 'gdpr', 'openrouter', 'prompts', 'logging'],
   },
 ];
 
