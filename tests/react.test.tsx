@@ -1,6 +1,6 @@
 import React from 'react';
 import { renderToString } from 'react-dom/server';
-import { useVibez, extractSessionStats } from '../src/react';
+import { useVibez, extractSessionStats, VibezCheck, VibezCheckHUD } from '../src/react';
 
 describe('useVibez React Hook & Session Extraction Engine (v0.6.0)', () => {
   it('should initialize with zero totals when empty messages array is passed', () => {
@@ -123,5 +123,17 @@ describe('useVibez React Hook & Session Extraction Engine (v0.6.0)', () => {
     expect(stats.wholesaleUSD).toBeGreaterThan(0);
     expect(stats.profitUSD).toBeGreaterThan(0);
   });
+
+  it('should render <VibezCheck /> and <VibezCheckHUD /> as identical components', () => {
+    expect(typeof VibezCheck).toBe('function');
+    expect(typeof VibezCheckHUD).toBe('function');
+    expect(VibezCheckHUD).toBe(VibezCheck);
+
+    const html1 = renderToString(<VibezCheck messages={[]} />);
+    const html2 = renderToString(<VibezCheckHUD messages={[]} />);
+    expect(html1).toBe(html2);
+    expect(html1).toContain('$0.00');
+  });
 });
+
 

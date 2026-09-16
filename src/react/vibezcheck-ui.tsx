@@ -1546,4 +1546,5 @@ export function VibezCheck({
 }
 
 export const VibezPill = VibezCheck;
+export const VibezCheckHUD = VibezCheck;
 export default VibezCheck;
