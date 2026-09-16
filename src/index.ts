@@ -10,7 +10,13 @@ import { AgentSession, createAgentSession } from './billing/session';
 import { wrapTool, instrumentToolKit, createTools } from './billing/tools';
 import { isBudgetExceeded, stopWhenBudgetExceeded } from './billing/stop-condition';
 import { createAgent } from './billing/agent';
-import { createSupabaseAdapter, createPrismaAdapter, createSqlAdapter } from './database';
+import {
+  createSupabaseAdapter,
+  createPrismaAdapter,
+  createSqlAdapter,
+  createDatabaseAdapter,
+  createMetronomeAdapter,
+} from './database';
 
 export * from './types';
 export * from './meter';
@@ -159,6 +165,10 @@ vibezcheck.toDataStreamResponse = toVibezDataStreamResponse;
 vibezcheck.supabase = createSupabaseAdapter;
 vibezcheck.prisma = createPrismaAdapter;
 vibezcheck.sql = createSqlAdapter;
+vibezcheck.database = createDatabaseAdapter;
+vibezcheck.createDatabaseAdapter = createDatabaseAdapter;
+vibezcheck.metronome = createMetronomeAdapter;
+vibezcheck.createMetronomeAdapter = createMetronomeAdapter;
 vibezcheck.syncPricing = syncPricingManifest;
 vibezcheck.syncPricingManifest = syncPricingManifest;
 vibezcheck.triggerBackgroundSync = triggerBackgroundSync;

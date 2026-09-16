@@ -2,6 +2,7 @@ import { vibezcheck, withBilling, type UsageEvent } from '../src';
 import { createSupabaseAdapter } from '../src/database/supabase';
 import { createPrismaAdapter } from '../src/database/prisma';
 import { createSqlAdapter } from '../src/database/sql';
+import { createDatabaseAdapter, createMetronomeAdapter } from '../src/database/adapter';
 
 describe('VibezCheck — 1-Line Database Sinks (Supabase, Prisma, SQL)', () => {
   const createMockModel = () => {
@@ -360,4 +361,193 @@ describe('VibezCheck — 1-Line Database Sinks (Supabase, Prisma, SQL)', () => {
       expect(queryFn).toHaveBeenCalled();
     });
   });
+
+  describe('4. vibezcheck.database / createDatabaseAdapter', () => {
+    test('attaches to vibezcheck', () => {
+      expect(typeof vibezcheck.database).toBe('function');
+      expect(typeof vibezcheck.createDatabaseAdapter).toBe('function');
+    });
+
+    test('accepts a 1-line callback function', async () => {
+      const savedEvents: UsageEvent[] = [];
+      const adapter = vibezcheck.database(async (event) => {
+        savedEvents.push(event);
+      });
+
+      expect(adapter.name).toBe('custom');
+      await adapter.save(
+        mockUsageEvent({
+          id: 'evt_custom_1',
+          customerId: 'cus_drizzle_user',
+          cost: {
+            inputCostUSD: 0.002,
+            outputCostUSD: 0.001,
+            totalUSD: 0.003,
+            currency: 'USD',
+          },
+        })
+      );
+
+      expect(savedEvents.length).toBe(1);
+      expect(savedEvents[0].id).toBe('evt_custom_1');
+      expect(savedEvents[0].customerId).toBe('cus_drizzle_user');
+      expect(savedEvents[0].cost.totalUSD).toBe(0.003);
+    });
+
+    test('accepts DatabaseAdapterOptions with custom name and getBalance', async () => {
+      const saved: UsageEvent[] = [];
+      const adapter = createDatabaseAdapter({
+        name: 'clickhouse-sink',
+        save: async (event) => {
+          saved.push(event);
+        },
+        getBalance: async (customerId) => {
+          return customerId === 'cus_vip' ? 50.0 : 0.0;
+        },
+      });
+
+      expect(adapter.name).toBe('clickhouse-sink');
+      expect(await adapter.getBalance?.('cus_vip')).toBe(50.0);
+      expect(await adapter.getBalance?.('cus_regular')).toBe(0.0);
+
+      await adapter.save(mockUsageEvent());
+      expect(saved.length).toBe(1);
+    });
+
+    test('works end-to-end with withBilling', async () => {
+      const events: UsageEvent[] = [];
+      const model = createMockModel();
+      const metered = withBilling(model, {
+        customer: 'custom_e2e_user',
+        database: vibezcheck.database(async (event) => {
+          events.push(event);
+        }),
+      });
+
+      const { stream } = await metered.doStream();
+      const reader = stream.getReader();
+      while (true) {
+        const { done } = await reader.read();
+        if (done) break;
+      }
+
+      await new Promise((r) => setTimeout(r, 60));
+
+      expect(events.length).toBe(1);
+      expect(events[0].customerId).toBe('custom_e2e_user');
+      expect(events[0].id).toBeDefined();
+      expect(events[0].id?.startsWith('evt_')).toBe(true);
+    });
+  });
+
+  describe('5. vibezcheck.metronome / createMetronomeAdapter', () => {
+    const originalFetch = globalThis.fetch;
+    afterEach(() => {
+      globalThis.fetch = originalFetch;
+    });
+
+    test('attaches to vibezcheck', () => {
+      expect(typeof vibezcheck.metronome).toBe('function');
+      expect(typeof vibezcheck.createMetronomeAdapter).toBe('function');
+    });
+
+    test('formats payload conforming to Metronome /v1/ingest API', async () => {
+      let interceptedUrl = '';
+      let interceptedHeaders: any = {};
+      let interceptedBody: any = null;
+
+      globalThis.fetch = jest.fn().mockImplementation(async (url: string, init: any) => {
+        interceptedUrl = url;
+        interceptedHeaders = init.headers;
+        interceptedBody = JSON.parse(init.body);
+        return {
+          ok: true,
+          status: 200,
+          text: async () => '{"status":"ok"}',
+        } as any;
+      });
+
+      const adapter = vibezcheck.metronome({
+        apiKey: 'test-metronome-api-key',
+      });
+
+      expect(adapter.name).toBe('metronome');
+
+      await adapter.save(
+        mockUsageEvent({
+          id: 'evt_metro_123',
+          customerId: 'cus_metro_cust',
+          model: 'gpt-4o-mini',
+          provider: 'openai',
+          usage: { inputTokens: 100, outputTokens: 50, totalTokens: 150 },
+          cost: {
+            inputCostUSD: 0.0001,
+            outputCostUSD: 0.00005,
+            totalUSD: 0.00015,
+            currency: 'USD',
+          },
+          metadata: { orgId: 'org_acme' },
+        })
+      );
+
+      expect(interceptedUrl).toBe('https://api.metronome.com/v1/ingest');
+      expect(interceptedHeaders.Authorization).toBe('Bearer test-metronome-api-key');
+      expect(interceptedHeaders['Content-Type']).toBe('application/json');
+      expect(Array.isArray(interceptedBody)).toBe(true);
+      expect(interceptedBody.length).toBe(1);
+
+      const event = interceptedBody[0];
+      expect(event.transaction_id).toBe('evt_metro_123');
+      expect(event.customer_id).toBe('cus_metro_cust');
+      expect(event.event_type).toBe('ai_inference');
+      expect(event.properties.model).toBe('gpt-4o-mini');
+      expect(event.properties.input_tokens).toBe(100);
+      expect(event.properties.output_tokens).toBe(50);
+      expect(event.properties.total_tokens).toBe(150);
+      expect(event.properties.cost_usd).toBe(0.00015);
+      expect(event.properties.orgId).toBe('org_acme');
+    });
+
+    test('supports custom eventType and mapProperties', async () => {
+      let interceptedBody: any = null;
+      globalThis.fetch = jest.fn().mockImplementation(async (_url: string, init: any) => {
+        interceptedBody = JSON.parse(init.body);
+        return { ok: true, status: 200 } as any;
+      });
+
+      const adapter = createMetronomeAdapter({
+        apiKey: 'key_123',
+        eventType: 'llm_tokens_consumed',
+        mapProperties: (e) => ({
+          custom_model: e.model,
+          billed_amount: e.cost.totalUSD,
+        }),
+      });
+
+      await adapter.save(
+        mockUsageEvent({
+          id: 'evt_custom_prop',
+          customerId: 'cust_prop',
+        })
+      );
+
+      expect(interceptedBody[0].event_type).toBe('llm_tokens_consumed');
+      expect(interceptedBody[0].properties.custom_model).toBe('openai/gpt-4o-mini');
+      expect(interceptedBody[0].properties.billed_amount).toBe(0.0012);
+    });
+
+    test('throws error if Metronome returns non-ok response', async () => {
+      globalThis.fetch = jest.fn().mockResolvedValue({
+        ok: false,
+        status: 401,
+        text: async () => 'Unauthorized',
+      } as any);
+
+      const adapter = createMetronomeAdapter({ apiKey: 'bad_key' });
+      await expect(adapter.save(mockUsageEvent())).rejects.toThrow(
+        '[vibezcheck] Metronome ingest failed with HTTP 401: Unauthorized'
+      );
+    });
+  });
 });
+
