@@ -1,10 +1,8 @@
 import { vibezcheck, withBilling, type UsageEvent } from '../src';
 import { createSupabaseAdapter } from '../src/database/supabase';
-import { createPrismaAdapter } from '../src/database/prisma';
-import { createSqlAdapter } from '../src/database/sql';
 import { createDatabaseAdapter, createMetronomeAdapter } from '../src/database/adapter';
 
-describe('VibezCheck — 1-Line Database Sinks (Supabase, Prisma, SQL)', () => {
+describe('VibezCheck — Database Sinks (Supabase, Custom, Metronome)', () => {
   const createMockModel = () => {
     return {
       modelId: 'openai/gpt-4o-mini',
@@ -164,205 +162,7 @@ describe('VibezCheck — 1-Line Database Sinks (Supabase, Prisma, SQL)', () => {
     });
   });
 
-  describe('2. vibezcheck.prisma adapter', () => {
-    test('attaches to vibezcheck and supports direct model delegate', async () => {
-      expect(typeof vibezcheck.prisma).toBe('function');
-
-      const createdRecords: any[] = [];
-      const mockModelDelegate = {
-        create: jest.fn().mockImplementation(async (args) => {
-          createdRecords.push(args.data);
-          return args.data;
-        }),
-      };
-
-      const adapter = vibezcheck.prisma(mockModelDelegate);
-      expect(adapter.name).toBe('prisma');
-
-      await adapter.save(
-        mockUsageEvent({
-          model: 'anthropic/claude-3-5-sonnet',
-          provider: 'anthropic',
-          usage: { inputTokens: 200, outputTokens: 100, totalTokens: 300 },
-          cost: {
-            inputCostUSD: 0.003,
-            outputCostUSD: 0.0015,
-            totalUSD: 0.0045,
-            currency: 'USD',
-          },
-          customerId: 'cus_prisma_456',
-        })
-      );
-
-      expect(mockModelDelegate.create).toHaveBeenCalled();
-      expect(createdRecords.length).toBe(1);
-      expect(createdRecords[0].customerId).toBe('cus_prisma_456');
-      expect(createdRecords[0].model).toBe('anthropic/claude-3-5-sonnet');
-      expect(createdRecords[0].totalTokens).toBe(300);
-      expect(createdRecords[0].costUSD).toBe(0.0045);
-    });
-
-    test('supports passing root PrismaClient with model option', async () => {
-      const createdRecords: any[] = [];
-      const mockPrisma = {
-        aiUsageEvent: {
-          create: jest.fn().mockImplementation(async (args) => {
-            createdRecords.push(args.data);
-            return args.data;
-          }),
-        },
-      };
-
-      const adapter = createPrismaAdapter(mockPrisma, { model: 'aiUsageEvent' });
-      await adapter.save(
-        mockUsageEvent({
-          customerId: 'cus_root_client',
-        })
-      );
-
-      expect(mockPrisma.aiUsageEvent.create).toHaveBeenCalled();
-      expect(createdRecords[0].customerId).toBe('cus_root_client');
-    });
-
-    test('auto-detects common model names like aiUsage / vibezUsage on client', async () => {
-      const mockPrisma = {
-        vibezUsage: {
-          create: jest.fn().mockResolvedValue({ id: 1 }),
-        },
-      };
-
-      const adapter = vibezcheck.prisma(mockPrisma);
-      await adapter.save(
-        mockUsageEvent({
-          model: 'gpt-4o',
-          customerId: 'cus_auto_detect',
-        })
-      );
-
-      expect(mockPrisma.vibezUsage.create).toHaveBeenCalled();
-    });
-
-    test('queries prepaid balance via balanceModel', async () => {
-      const mockBalanceModel = {
-        findUnique: jest.fn().mockResolvedValue({ customerId: 'cus_789', balanceUSD: 15.75 }),
-      };
-
-      const mockModel = { create: jest.fn() };
-      const adapter = vibezcheck.prisma(mockModel, {
-        balanceModel: mockBalanceModel,
-        balanceField: 'balanceUSD',
-      });
-
-      const balance = await adapter.getBalance!('cus_789');
-      expect(balance).toBe(15.75);
-    });
-
-    test('works end-to-end with withBilling', async () => {
-      const createdRecords: any[] = [];
-      const mockModelDelegate = {
-        create: jest.fn().mockImplementation(async (args) => {
-          createdRecords.push(args.data);
-          return args.data;
-        }),
-      };
-
-      const model = createMockModel();
-      const metered = withBilling(model, {
-        customer: 'prisma_pipeline_user',
-        database: vibezcheck.prisma(mockModelDelegate),
-      });
-
-      const { stream } = await metered.doStream();
-      const reader = stream.getReader();
-      while (true) {
-        const { done } = await reader.read();
-        if (done) break;
-      }
-
-      await new Promise((r) => setTimeout(r, 60));
-
-      expect(mockModelDelegate.create).toHaveBeenCalled();
-      expect(createdRecords.length).toBe(1);
-      expect(createdRecords[0].customerId).toBe('prisma_pipeline_user');
-    });
-  });
-
-  describe('3. vibezcheck.sql adapter', () => {
-    test('attaches to vibezcheck and supports query callback function', async () => {
-      expect(typeof vibezcheck.sql).toBe('function');
-
-      const executedQueries: Array<{ query: string; params: any[] }> = [];
-      const queryFn = jest.fn(async (query: string, params: any[]) => {
-        executedQueries.push({ query, params });
-        return { rowCount: 1 };
-      });
-
-      const adapter = vibezcheck.sql(queryFn);
-      expect(adapter.name).toBe('sql');
-
-      await adapter.save(
-        mockUsageEvent({
-          model: 'deepseek-chat',
-          provider: 'deepseek',
-          usage: { inputTokens: 500, outputTokens: 250, totalTokens: 750 },
-          cost: {
-            inputCostUSD: 0.0001,
-            outputCostUSD: 0.00005,
-            totalUSD: 0.00015,
-            currency: 'USD',
-          },
-          customerId: 'cus_neon_sql',
-        })
-      );
-
-      expect(queryFn).toHaveBeenCalled();
-      expect(executedQueries.length).toBe(1);
-      expect(executedQueries[0].query).toContain('INSERT INTO vibez_usage');
-      expect(executedQueries[0].params[0]).toBe('cus_neon_sql');
-      expect(executedQueries[0].params[2]).toBe('deepseek-chat');
-    });
-
-    test('supports SQLite / MySQL ? parameter style', async () => {
-      const executed: any[] = [];
-      const mockSqlite = {
-        run: jest.fn(async (query: string, params: any[]) => {
-          executed.push({ query, params });
-        }),
-      };
-
-      const adapter = createSqlAdapter(mockSqlite, { parameterStyle: '?' });
-      await adapter.save(
-        mockUsageEvent({
-          customerId: 'sqlite_user',
-        })
-      );
-
-      expect(mockSqlite.run).toHaveBeenCalled();
-      expect(executed[0].query).toContain('VALUES (?, ?, ?, ?');
-    });
-
-    test('works end-to-end with withBilling', async () => {
-      const queryFn = jest.fn().mockResolvedValue({ rowCount: 1 });
-      const model = createMockModel();
-      const metered = withBilling(model, {
-        customer: 'sql_e2e_user',
-        database: vibezcheck.sql(queryFn),
-      });
-
-      const { stream } = await metered.doStream();
-      const reader = stream.getReader();
-      while (true) {
-        const { done } = await reader.read();
-        if (done) break;
-      }
-
-      await new Promise((r) => setTimeout(r, 60));
-
-      expect(queryFn).toHaveBeenCalled();
-    });
-  });
-
-  describe('4. vibezcheck.database / createDatabaseAdapter', () => {
+  describe('2. vibezcheck.database / createDatabaseAdapter', () => {
     test('attaches to vibezcheck', () => {
       expect(typeof vibezcheck.database).toBe('function');
       expect(typeof vibezcheck.createDatabaseAdapter).toBe('function');
@@ -440,7 +240,7 @@ describe('VibezCheck — 1-Line Database Sinks (Supabase, Prisma, SQL)', () => {
     });
   });
 
-  describe('5. vibezcheck.metronome / createMetronomeAdapter', () => {
+  describe('3. vibezcheck.metronome / createMetronomeAdapter', () => {
     const originalFetch = globalThis.fetch;
     afterEach(() => {
       globalThis.fetch = originalFetch;

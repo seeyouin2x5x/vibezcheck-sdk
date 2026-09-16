@@ -113,7 +113,7 @@ describe('NPM Package Pre-Publish Readiness & Export Integrity', () => {
 
     const database = require('../dist/database/index.js');
     expect(typeof database.createSupabaseAdapter).toBe('function');
-    expect(typeof database.createPrismaAdapter).toBe('function');
-    expect(typeof database.createSqlAdapter).toBe('function');
+    expect(typeof database.createDatabaseAdapter).toBe('function');
+    expect(typeof database.createMetronomeAdapter).toBe('function');
   });
 });

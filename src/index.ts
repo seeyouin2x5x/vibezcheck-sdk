@@ -12,8 +12,6 @@ import { isBudgetExceeded, stopWhenBudgetExceeded } from './billing/stop-conditi
 import { createAgent } from './billing/agent';
 import {
   createSupabaseAdapter,
-  createPrismaAdapter,
-  createSqlAdapter,
   createDatabaseAdapter,
   createMetronomeAdapter,
 } from './database';
@@ -163,8 +161,6 @@ vibezcheck.toDataStream = toVibezDataStream;
 vibezcheck.toVibezDataStream = toVibezDataStream;
 vibezcheck.toDataStreamResponse = toVibezDataStreamResponse;
 vibezcheck.supabase = createSupabaseAdapter;
-vibezcheck.prisma = createPrismaAdapter;
-vibezcheck.sql = createSqlAdapter;
 vibezcheck.database = createDatabaseAdapter;
 vibezcheck.createDatabaseAdapter = createDatabaseAdapter;
 vibezcheck.metronome = createMetronomeAdapter;
