@@ -1,11 +1,58 @@
 import type { UsageEvent, UsageSummary, MeterOptions } from '../types';
 
+/**
+ * Detects whether the current runtime is a serverless environment
+ * (AWS Lambda, Vercel Serverless, Cloudflare Workers/Pages, Netlify, Deno Deploy, Next.js)
+ */
+export function isServerlessEnvironment(): boolean {
+  if (typeof process !== 'undefined' && process.env) {
+    if (
+      process.env.VERCEL ||
+      process.env.AWS_LAMBDA_FUNCTION_NAME ||
+      process.env.LAMBDA_TASK_ROOT ||
+      process.env.NETLIFY ||
+      process.env.DENO_DEPLOYMENT_ID ||
+      process.env.CF_PAGES ||
+      process.env.NEXT_RUNTIME
+    ) {
+      return true;
+    }
+  }
+  if (typeof globalThis !== 'undefined') {
+    const g = globalThis as any;
+    if (g.EdgeRuntime || g.WebSocketPair) {
+      return true;
+    }
+  }
+  return false;
+}
+
+const activeBatchers = new Set<MeterBatcher>();
+let exitListenerAttached = false;
+
+function ensureExitListener() {
+  if (exitListenerAttached) return;
+  if (typeof process !== 'undefined' && typeof process.once === 'function') {
+    try {
+      process.once('beforeExit', () => {
+        for (const batcher of activeBatchers) {
+          batcher.flush().catch(() => {});
+        }
+      });
+      exitListenerAttached = true;
+    } catch {
+      // Fallback for restricted sandboxes
+    }
+  }
+}
+
 export class MeterBatcher {
   private queue: UsageEvent[] = [];
   private timer: NodeJS.Timeout | null = null;
   private isFlushing: boolean = false;
   private readonly maxBatchSize: number;
   private readonly flushIntervalMs: number;
+  private readonly isExplicitFlushInterval: boolean;
   private readonly onUsageCallback?: (event: UsageEvent) => void | Promise<void>;
   private readonly onBatchCallback?: (events: UsageEvent[]) => void | Promise<void>;
   private readonly onErrorCallback?: (error: Error, events: UsageEvent[]) => void;
@@ -23,10 +70,14 @@ export class MeterBatcher {
   constructor(options: MeterOptions = {}) {
     this.maxBatchSize = options.batching?.maxBatchSize ?? 50;
     this.flushIntervalMs = options.batching?.flushIntervalMs ?? 50;
+    this.isExplicitFlushInterval = options.batching?.flushIntervalMs !== undefined;
     this.onUsageCallback = options.onUsage;
     this.onBatchCallback = options.onBatch;
     this.onErrorCallback = options.onError;
     this.debug = options.debug ?? false;
+
+    activeBatchers.add(this);
+    ensureExitListener();
   }
 
   /**
@@ -67,7 +118,31 @@ export class MeterBatcher {
       this.flush().catch((err) => {
         if (this.debug) console.error('[vibezcheck] Batch flush error:', err);
       });
-    } else if (!this.timer) {
+      return;
+    }
+
+    // 5. Serverless Lifecycle Spooling: Auto-register with after() or waitUntil()
+    if (typeof globalThis !== 'undefined') {
+      const g = globalThis as any;
+      if (typeof g.after === 'function') {
+        g.after(() => this.flush().catch(() => {}));
+        return;
+      }
+      if (typeof g.waitUntil === 'function') {
+        g.waitUntil(this.flush().catch(() => {}));
+        return;
+      }
+    }
+
+    // In serverless environments where timers are frozen on response, auto-flush immediately unless explicit interval given
+    if (isServerlessEnvironment() && !this.isExplicitFlushInterval) {
+      this.flush().catch((err) => {
+        if (this.debug) console.error('[vibezcheck] Serverless auto-flush error:', err);
+      });
+      return;
+    }
+
+    if (!this.timer) {
       this.timer = setTimeout(() => {
         this.timer = null;
         this.flush().catch((err) => {

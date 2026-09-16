@@ -92,16 +92,21 @@ export function withBilling<T extends object>(
   const scheduleFlush = () => {
     try {
       const flushPromise = meter.flush();
-      // Next.js 15+ after() or Cloudflare Workers waitUntil()
+      // Next.js 15+ after() or Cloudflare Workers / Vercel Edge waitUntil()
       if (typeof globalThis !== 'undefined') {
         const g = globalThis as any;
         if (typeof g.after === 'function') {
           g.after(() => flushPromise);
           return;
         }
+        if (typeof g.waitUntil === 'function') {
+          g.waitUntil(flushPromise);
+          return;
+        }
       }
+      flushPromise.catch(() => {});
     } catch {
-      // Fallback in environments without after()
+      // Fallback in environments without after() or waitUntil()
     }
   };
 
@@ -319,11 +324,18 @@ export function withBilling<T extends object>(
         }
       };
 
-      if (typeof globalThis !== 'undefined' && typeof (globalThis as any).after === 'function') {
-        (globalThis as any).after(() => executeDbWrite());
-      } else {
-        executeDbWrite().catch(() => {});
+      if (typeof globalThis !== 'undefined') {
+        const g = globalThis as any;
+        if (typeof g.after === 'function') {
+          g.after(() => executeDbWrite());
+          return;
+        }
+        if (typeof g.waitUntil === 'function') {
+          g.waitUntil(executeDbWrite());
+          return;
+        }
       }
+      executeDbWrite().catch(() => {});
     }
 
     scheduleFlush();

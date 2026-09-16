@@ -176,6 +176,7 @@ vibezcheck.syncVercelGateway = syncVercelGateway;
 vibezcheck.syncVercel = syncVercelGateway;
 vibezcheck.triggerVercelGatewaySync = triggerVercelGatewaySync;
 vibezcheck.VERCEL_GATEWAY_MODELS_URL = VERCEL_GATEWAY_MODELS_URL;
+vibezcheck.flush = () => vibez.flush();
 
 /**
  * Singleton client instance
