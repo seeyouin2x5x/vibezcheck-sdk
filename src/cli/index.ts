@@ -24,7 +24,7 @@ function getCliVersion(): string {
       }
     }
   } catch {}
-  return '0.5.9';
+  return '0.5.10';
 }
 
 function printBanner() {
