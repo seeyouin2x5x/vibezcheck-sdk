@@ -1,59 +1,56 @@
-# VibezCheck
+# ✦ VibezCheck
 
-Know what every AI request costs.
+Know what every AI request costs.  
+The cost layer for AI applications.
 
-VibezCheck is a lightweight TypeScript library for measuring
-AI usage and calculating the real dollar cost of model requests.
-
-[![npm version](https://img.shields.io/npm/v/vibezcheck.svg?color=cb3837)](https://npmjs.org/package/vibezcheck)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![TypeScript](https://img.shields.io/badge/TypeScript-Strict-blue.svg)](https://www.typescriptlang.org/)
-[![Latency](https://img.shields.io/badge/Latency-0ms%20Added-orange.svg)]()
-[![Dependencies](https://img.shields.io/badge/Dependencies-0%20Runtime-success.svg)]()
-
----
-
-## Why
-
-Tokens are useful for engineers.  
-Dollars are useful for businesses.
-
-VibezCheck connects:
+VibezCheck measures AI usage in real dollars — per request, customer, feature, model, or agent session.
 
 ```text
-AI request → usage → cost
+AI request → tokens → provider cost → customer economics
 ```
-
-Without a metering layer, AI pricing and product economics are disconnected:
-- **What users do**: Messages, documents, autonomous agents, voice, images, tool calls.
-- **What you pay for**: Input tokens, output tokens, context cache hits, reasoning tokens, retries.
-- **What the business needs**: Cost per customer, spend limits, margin, revenue.
-
-VibezCheck connects the two with in-process, zero-latency calculation.
-
----
-
-## Install
 
 ```bash
 npm install vibezcheck
 ```
 
-Or using your package manager of choice:
+---
 
-```bash
-pnpm add vibezcheck
-# or
-bun add vibezcheck
+## Why VibezCheck?
+
+Tokens are useful for engineers.  
+Dollars are useful for businesses.
+
+AI providers bill you in tokens.
+
+Your users buy:
+- messages
+- documents
+- agent runs
+- API calls
+- credits
+- subscriptions
+
+VibezCheck connects the two.
+
+```text
+What your user does
+       ↓
+   AI usage
+       ↓
+ Provider cost
+       ↓
+Customer economics
 ```
+
+Without a metering layer, you know what your users are doing — but not necessarily what each action costs you.
 
 ---
 
-## Quick start
+## ⚡ Quick Start
 
-### 1. Vercel AI SDK (1 Line)
+### Vercel AI SDK
 
-Wrap any model to track request costs, customer attribution, and spend caps:
+Wrap an existing model:
 
 ```typescript
 import { streamText } from 'ai';
@@ -63,16 +60,182 @@ import { vibezcheck } from 'vibezcheck';
 const result = streamText({
   model: vibezcheck(openai('gpt-4o-mini'), {
     customer: 'user_123',
-    pricing: { margin: 1.3 }, // +30% retail profit margin
-    maxCostPerCallUSD: 0.50,  // Auto-terminates runaway calls at $0.50
+    maxCostPerCallUSD: 0.50,
   }),
   prompt: 'Summarize quantum computing in three sentences.',
 });
 ```
 
-### 2. Native Provider Streams (OpenAI, Anthropic, Gemini)
+That's it.
 
-Meter raw streaming responses outside the Vercel AI SDK with 0ms added latency:
+VibezCheck can now calculate the request's usage and provider cost while the request runs.
+
+**Example:**
+> `✦ $0.0028 · 1,420 tok · gpt-4o-mini`
+
+- No VibezCheck proxy.
+- No required database.
+- No required cloud account.
+
+---
+
+## 💰 Measure
+
+VibezCheck gives your application an economic view of AI usage.
+
+### Request cost
+
+```typescript
+const cost = vibezcheck.calculateCost('gpt-4o-mini', {
+  promptTokens: 1240,
+  completionTokens: 150,
+});
+console.log(cost.totalUSD);
+// 0.000276
+```
+
+### Customer attribution
+
+```typescript
+const model = vibezcheck(openai('gpt-4o-mini'), {
+  customer: 'user_123',
+  threadId: 'thread_456',
+  metadata: {
+    plan: 'pro',
+    feature: 'document-analysis',
+  },
+});
+```
+
+Track usage by:
+- customer
+- organization
+- feature
+- thread
+- model
+- agent session
+
+---
+
+## 🛡️ Control
+
+AI agents can make multiple calls before a workflow finishes.  
+Put a ceiling on them.
+
+### Per-request limits
+
+```typescript
+const model = vibezcheck(openai('gpt-4o-mini'), {
+  maxCostPerCallUSD: 0.25,
+  maxTokensPerCall: 4000,
+});
+```
+
+### Agent session budgets
+
+```typescript
+const session = vibezcheck.session({
+  customer: 'tenant_123',
+  sessionBudgetUSD: 2.00,
+});
+```
+
+The entire workflow gets a hard spending ceiling.
+
+### Tool costs
+
+```typescript
+const tools = session.tools(agentTools, {
+  web_search: {
+    costUSD: 0.01,
+  },
+  code_interpreter: {
+    costUSD: 0.05,
+  },
+});
+```
+
+Now you can account for:
+
+```text
+LLM usage + Tool usage = Agent cost
+```
+
+---
+
+## 💳 Monetize
+
+Your provider cost can become part of your application's pricing model.
+
+```typescript
+const model = vibezcheck(openai('gpt-4o-mini'), {
+  customer: 'user_123',
+  pricing: {
+    markup: 1.3,
+  },
+});
+```
+
+A 1.3x markup means:
+
+```text
+Provider cost   $1.00
+Customer price  $1.30
+─────────────────────
+Markup            30%
+```
+
+This lets you build products where AI usage can map directly to:
+- credits
+- usage limits
+- customer pricing
+- subscriptions
+- metered billing
+
+---
+
+## 🧾 AI Cost Receipts
+
+Show users the cost of individual AI responses.
+
+```tsx
+import { VibezReceipt } from 'vibezcheck/ui';
+
+{message.role === 'assistant' && (
+  <VibezReceipt message={message} />
+)}
+```
+
+**Example:**
+> `✦ $0.0001 · 31 tok · gpt-4o-mini`
+
+For complete conversations, use the spending HUD:
+
+```tsx
+import { VibezCheck } from 'vibezcheck/ui';
+
+<VibezCheck messages={messages} />
+```
+
+The HUD can show:
+
+```text
+┌─────────────────────────┐
+│ AI Usage                │
+│                         │
+│ $0.0248                 │
+│ 12,420 tokens           │
+│                         │
+│ gpt-4o-mini     $0.0182 │
+│ gpt-4o          $0.0066 │
+└─────────────────────────┘
+```
+
+---
+
+## 🔌 Native Provider Streams
+
+VibezCheck also works outside the Vercel AI SDK.
 
 ```typescript
 import OpenAI from 'openai';
@@ -83,77 +246,55 @@ const client = vibezcheck.create();
 
 const stream = await openai.chat.completions.create({
   model: 'gpt-4o-mini',
-  messages: [{ role: 'user', content: 'Hello!' }],
+  messages: [
+    {
+      role: 'user',
+      content: 'Hello!',
+    },
+  ],
   stream: true,
-  stream_options: { include_usage: true },
+  stream_options: {
+    include_usage: true,
+  },
 });
 
 const meteredStream = client.wrapStream(stream, {
   model: 'gpt-4o-mini',
   customer: 'user_123',
   onUsage: (event) => {
-    console.log(`Cost: $${event.cost.totalUSD} (${event.usage.totalTokens} tokens)`);
+    console.log(
+      `Cost: $${event.cost.totalUSD} (${event.usage.totalTokens} tokens)`
+    );
   },
 });
 ```
 
-### 3. Synchronous Cost Calculation (Offline)
+Use VibezCheck with native provider streams without routing requests through a VibezCheck gateway.
 
-Compute the exact dollar cost of any token usage synchronously:
+---
+
+## 💵 Offline Pricing Engine
+
+VibezCheck includes a bundled pricing catalog so known model costs can be calculated locally.
 
 ```typescript
-import { vibezcheck } from 'vibezcheck';
-
-const cost = vibezcheck.calculateCost('gpt-4o-mini', {
-  promptTokens: 1240,
-  completionTokens: 150,
-});
-
-console.log(cost.totalUSD); // $0.000276
+const rates = vibezcheck.getModelPricing('gpt-4o-mini');
+console.log(rates);
+// { inputPer1M: 0.15, outputPer1M: 0.60 }
 ```
 
----
+Calculate costs synchronously:
 
-## What you get
+```typescript
+const cost = vibezcheck.calculateCost('gpt-4o-mini', {
+  promptTokens: 1000,
+  completionTokens: 500,
+});
+console.log(cost.totalUSD);
+// 0.00045
+```
 
-- **Request-level AI cost**: Exact dollar cost calculated in-process per model request.
-- **Token usage**: Full breakdown of prompt, completion, cached reads, and reasoning tokens.
-- **Streaming support**: Real-time stream interception without buffering or delaying chunk delivery.
-- **Model pricing**: Pre-bundled rate cards for 700+ models, with optional dynamic sync.
-- **Customer attribution**: Tag usage with `customer`, `organization`, `featureId`, or `threadId`.
-- **Circuit breakers**: Prevent runaway agent loops with `maxCostPerCallUSD` and `maxTokensPerCall`.
-- **Profit margins**: Apply retail markups (e.g. `margin: 1.4` for 40% gross margin) to billed costs.
-- **Database sinks**: Built-in background sinks for Supabase, Metronome, and custom DIY adapters (Drizzle, Prisma, MongoDB).
-- **React UI widgets**: Optional drop-in `<VibezReceipt />` micro-badge and `<VibezCheck />` financial HUD from `vibezcheck/ui`.
-
----
-
-## Built for production
-
-- **Lightweight**: Zero external runtime dependencies (`dependencies: {}`). Clean, tree-shakeable ESM/CJS exports.
-- **Developer-first**: Wraps directly around your existing AI SDK or model client in a single line of code.
-- **No prompt storage by default**: 100% Zero Data Retention (ZDR). User prompts and model completions remain strictly in your application memory and are never logged or transmitted.
-- **Zero latency overhead**: In-process math executes synchronously during streaming.
-- **Airbag failure isolation**: Database or telemetry reporting errors run asynchronously in non-blocking lifecycles (`globalThis.after()` / `waitUntil()`) and will never crash user-facing streams.
-- **Offline resilience**: Rates and calculations work immediately in air-gapped environments without external internet calls.
-
----
-
-## Supported models
-
-Pre-bundled pricing catalog across 700+ foundation models, inference providers, and runtimes:
-
-| Provider | Supported Models |
-|---|---|
-| **OpenAI** | GPT-4o, GPT-4o-mini, o1, o3-mini, GPT-4-turbo, text-embedding-3 |
-| **Anthropic** | Claude 3.5 Sonnet, Claude 3.5 Haiku, Claude 3 Opus |
-| **Google** | Gemini 2.0 Flash, Gemini 1.5 Pro, Gemini 1.5 Flash |
-| **DeepSeek** | DeepSeek R1, DeepSeek V3 |
-| **Groq / Meta** | Llama 3.3 70B, Llama 3.1 8B, Llama 3.1 405B |
-| **Mistral AI** | Mistral Large 2, Codestral, Pixtral |
-| **Cloud Gateways** | AWS Bedrock, Azure OpenAI, OpenRouter, Vercel AI Gateway |
-
-To sync the latest upstream rate cards dynamically:
+Optional pricing synchronization:
 
 ```typescript
 await vibezcheck.syncPricing();
@@ -162,191 +303,344 @@ await vibezcheck.syncVercelGateway();
 
 ---
 
-## How it works
+## 📊 700+ Model Pricing Catalog
 
-```text
-Your application
-      |
-      +---- AI provider (OpenAI / Anthropic / Gemini)
-      |
-      +---- VibezCheck meter (in-process, 0ms latency)
-                |
-                +---- Cost calculation (micro-cents)
-                +---- Spend limits & circuit breakers
-                +---- Usage attribution (customer / feature)
-                +---- Async reporting (Stripe / DB / Metronome)
-```
+VibezCheck ships with pricing information for hundreds of models and providers.
 
-1. **Direct Connection**: Your application communicates directly with model providers without routing through third-party proxy gateways.
-2. **In-Process Metering**: VibezCheck measures tokens, cache discounts, and reasoning rates synchronously in your runtime memory.
-3. **Async Non-Blocking Reporting**: Telemetry events dispatch asynchronously using serverless hooks (`globalThis.after()`, `waitUntil()`), preserving uninterrupted streaming performance.
+| Provider | Examples |
+|---|---|
+| **OpenAI** | GPT-4o, GPT-4o-mini, o1, o3-mini |
+| **Anthropic** | Claude 3.5 Sonnet, Claude 3.5 Haiku, Claude 3 Opus |
+| **Google** | Gemini 2.0 Flash, Gemini 1.5 Pro, Gemini 1.5 Flash |
+| **DeepSeek** | DeepSeek R1, DeepSeek V3 |
+| **Meta / Groq** | Llama 3.3 70B, Llama 3.1 8B |
+| **Mistral** | Mistral Large, Codestral, Pixtral |
+| **Gateways / Cloud** | AWS Bedrock, Azure OpenAI, OpenRouter, Vercel AI Gateway |
+
+Pricing is bundled locally for offline calculations and can optionally be refreshed.
 
 ---
 
-## Examples
+## 🗄️ Store Usage Events
 
-### AI chatbot
+VibezCheck does not require a database.  
+When you want persistence, attach a sink.
 
-Meter chat routes and display cost receipts on assistant responses:
+### Supabase
 
-**Server route (`app/api/chat/route.ts`):**
 ```typescript
-import { streamText, convertToModelMessages } from 'ai';
-import { openai } from '@ai-sdk/openai';
-import { vibezcheck } from 'vibezcheck';
-
-export async function POST(req: Request) {
-  const { messages } = await req.json();
-
-  const result = streamText({
-    model: vibezcheck(openai('gpt-4o-mini'), {
-      customer: 'user_alex',
-      pricing: { margin: 1.25 }, // 25% profit margin
-      maxCostPerCallUSD: 0.10,   // $0.10 cap per message
-    }),
-    messages: await convertToModelMessages(messages),
-  });
-
-  return vibezcheck.toResponse(result);
-}
+const model = vibezcheck(openai('gpt-4o-mini'), {
+  customer: 'user_123',
+  database: vibezcheck.supabase(supabase),
+});
 ```
 
-**Client component (`components/chat.tsx`):**
-```tsx
-'use client';
+### Custom database
 
-import { useChat } from '@ai-sdk/react';
-import { VibezReceipt, VibezCheck } from 'vibezcheck/ui';
+Use your existing infrastructure:
 
-export function Chat() {
-  const { messages } = useChat();
-
-  return (
-    <div>
-      {messages.map((m) => (
-        <div key={m.id}>
-          <p>{m.content}</p>
-          {m.role === 'assistant' && <VibezReceipt message={m} />}
-        </div>
-      ))}
-      <VibezCheck messages={messages} />
-    </div>
-  );
-}
+```typescript
+const model = vibezcheck(openai('gpt-4o-mini'), {
+  customer: 'user_123',
+  database: vibezcheck.database(async (event) => {
+    await db.insert(usageEvents).values({
+      customerId: event.customerId,
+      model: event.model,
+      tokens: event.usage.totalTokens,
+      costUSD: event.cost.totalUSD,
+    });
+  }),
+});
 ```
+
+Use your own:
+- PostgreSQL
+- Supabase
+- Drizzle
+- Prisma
+- MongoDB
+- ClickHouse
+- webhooks
+- analytics systems
 
 ---
 
-### AI agent
+## 💳 Billing Integrations
 
-Enforce a session-wide budget cap over multi-turn agent loops and bill for tool invocations:
+Usage events can be connected to billing systems such as Stripe or Metronome.
+
+For example:
 
 ```typescript
-import { vibezcheck } from 'vibezcheck';
+const model = vibezcheck('openai/gpt-4o-mini', {
+  customer: 'cus_123',
+  database: vibezcheck.database(async (event) => {
+    // Send event to your billing system
+    await recordBillableUsage({
+      customerId: event.customerId,
+      costUSD: event.cost.totalUSD,
+    });
+  }),
+});
+```
 
-// Initialize agent session with hard spend cap
+VibezCheck gives you the usage event.  
+You decide how that usage becomes revenue.
+
+---
+
+## 🧠 AI Agents
+
+Agentic applications need more than token tracking.  
+They need economic boundaries.
+
+```typescript
 const session = vibezcheck.session({
-  customer: 'tenant_enterprise_99',
-  sessionBudgetUSD: 2.00, // Terminate if total agent loop exceeds $2.00
+  customer: 'enterprise_123',
+  sessionBudgetUSD: 5.00,
 });
 
-// Attach pricing to agent tools
 const tools = session.tools(agentTools, {
-  web_search: { costUSD: 0.01 },
-  code_interpreter: { costUSD: 0.05 },
+  web_search: {
+    costUSD: 0.01,
+  },
+  code_interpreter: {
+    costUSD: 0.05,
+  },
 });
 
-// Run agent loop with automatic circuit breaker
 const result = await runAutonomousWorkflow({
   model: session.model('gpt-4o'),
   tools,
 });
 ```
 
+VibezCheck can track:
+
+```text
+Model calls + Tool calls + Multiple turns
+                  ↓
+          Total agent cost
+```
+
 ---
 
-### Document processing
+## 🏗️ Production Characteristics
 
-Track per-document parsing, embedding, and summarization costs:
+### Zero runtime dependencies
+`dependencies: {}`  
+The core library does not require an external runtime dependency.  
+Provider SDKs, React, and database clients are optional integrations.
+
+### No network proxy
+Model requests continue directly between your application and the provider.  
+VibezCheck runs inside your application.
+
+### No prompt storage by default
+VibezCheck does not need to store prompts or model completions to calculate usage and cost.  
+Your application controls what gets persisted through optional database adapters.
+
+### Failure isolation
+Telemetry and database reporting should not become a dependency of the user-facing AI response.  
+VibezCheck supports asynchronous reporting through serverless lifecycle mechanisms such as:
+- Next.js / Vercel `globalThis.after()`
+- Cloudflare Workers `waitUntil()`
+
+### Offline capable
+The bundled pricing catalog allows cost calculations without requiring an external network request.
+
+---
+
+## 🔄 How It Works
+
+```text
+Your Application
+       │
+       ▼
+┌──────────────────┐
+│   AI Provider    │
+│ OpenAI / Claude  │
+│  Gemini / etc.   │
+└────────┬─────────┘
+         │
+         ▼
+┌──────────────────┐
+│   VibezCheck     │
+│                  │
+│     Usage        │
+│     Cost         │
+│  Attribution     │
+│     Limits       │
+└────────┬─────────┘
+         │
+    ┌────┴────┐
+    ▼         ▼
+Application  Async sinks
+ economics   DB / billing / analytics
+```
+
+The important part:  
+Your model traffic stays in your application path.  
+VibezCheck adds the economic layer around it.
+
+---
+
+## 🧩 Supported Integrations
+
+### AI SDKs
+- Vercel AI SDK
+- OpenAI
+- Anthropic
+- Gemini
+- Native streaming APIs
+
+### Storage
+- Supabase
+- Custom database adapters
+- PostgreSQL
+- Drizzle
+- Prisma
+- MongoDB
+- ClickHouse
+
+### Billing
+- Stripe
+- Metronome
+- Custom billing systems
+
+### UI
+- React
+- `<VibezReceipt />`
+- `<VibezCheck />`
+
+---
+
+## 🔍 CLI
+
+Audit your project for potentially unmetered AI calls:
+
+```bash
+npx vibezcheck audit
+```
+
+Generate starter examples:
+
+```bash
+npx vibezcheck examples
+```
+
+---
+
+## 🚀 Complete Example
+
+A typical AI chat application can look like this:
 
 ```typescript
+import { streamText } from 'ai';
+import { openai } from '@ai-sdk/openai';
 import { vibezcheck } from 'vibezcheck';
 
-export async function processDocument(docId: string, text: string, customerId: string) {
-  const client = vibezcheck.create();
+export async function POST(req: Request) {
+  const { messages, userId } = await req.json();
 
-  // Track embedding cost
-  const embeddingResponse = await generateEmbeddings(text);
-  client.track(embeddingResponse, {
-    customer: customerId,
-    model: 'text-embedding-3-small',
+  const result = streamText({
+    model: vibezcheck(openai('gpt-4o-mini'), {
+      customer: userId,
+      pricing: {
+        markup: 1.3,
+      },
+      maxCostPerCallUSD: 0.50,
+    }),
+    messages,
   });
 
-  // Track summarization cost
-  const summaryResponse = await summarizeText(text);
-  client.track(summaryResponse, {
-    customer: customerId,
-    model: 'gpt-4o-mini',
-  });
-
-  const summary = client.getUsageSummary();
-  console.log(`Document ${docId} processed for $${summary.totalCostUSD}`);
-  await client.flush();
+  return vibezcheck.toResponse(result);
 }
 ```
 
+Your application now has:
+- ✓ Model usage
+- ✓ Dollar cost
+- ✓ Customer attribution
+- ✓ Pricing / markup
+- ✓ Per-request protection
+- ✓ Streaming support
+
 ---
 
-### Usage-based billing
+## 🎯 The Economic Layer for AI
 
-Send billable usage events directly to Stripe Meters or Metronome:
+AI applications are becoming more autonomous.  
+More messages.  
+More context.  
+More tool calls.  
+More model calls.  
+More cost.
 
-```typescript
-import { vibezcheck } from 'vibezcheck';
-import Stripe from 'stripe';
+VibezCheck gives your application a way to understand that cost at the point where the AI request happens.
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
-
-const model = vibezcheck('openai/gpt-4o-mini', {
-  customer: 'cus_stripe_12345',
-  pricing: { margin: 1.5 }, // 50% target gross contribution margin
-  database: vibezcheck.database(async (event) => {
-    // Send billable event to Stripe Meters
-    await stripe.billing.meterEvents.create({
-      event_name: 'ai_compute_units',
-      payload: {
-        value: Math.round(event.cost.totalUSD * 100).toString(), // Billed cents
-        stripe_customer_id: event.customerId,
-      },
-    });
-  }),
-});
+```text
+       MEASURE
+          │
+    ┌─────┴─────┐
+    │           │
+ tokens      dollars
+    │           │
+    └─────┬─────┘
+          │
+       CONTROL
+  budgets / limits
+          │
+      MONETIZE
+  pricing / billing
 ```
+
+**Know what every AI request costs.**
 
 ---
 
 ## Roadmap
 
-- **V0 (Current)**: Lightweight in-process NPM library with 700+ model pricing catalog, circuit breakers, and streaming support.
-- **V1**: Cloud cost history, customer attribution, and multi-project environments.
-- **V2**: Advanced per-customer budgets, soft spend alerts, and Slack/webhook notifications.
-- **V3**: Unit economics analytics, gross contribution tracking, and runaway anomaly detection.
-- **V4**: Native usage billing bridges (Stripe Billing, Lago, Metronome).
+### Current
+- Request-level cost metering
+- 700+ model pricing catalog
+- Streaming support
+- Customer attribution
+- Circuit breakers
+- Agent session budgets
+- Tool cost tracking
+- React usage UI
+- Database sinks
+
+### Next
+- Persistent cost history
+- Per-customer budgets
+- Spend alerts
+- Cost anomaly detection
+- Native billing integrations
+- Unit economics analytics
 
 ---
 
 ## Contributing
 
-Contributions are welcome!
-- To add or update model pricing rates: see `src/pricing/catalog.ts`.
-- To run tests: `pnpm test`
-- To check types: `pnpm typecheck`
+Contributions are welcome.
 
-Please ensure all tests pass and no external runtime dependencies are introduced.
+```bash
+pnpm install
+pnpm test
+pnpm typecheck
+```
+
+To update model pricing:  
+`src/pricing/catalog.ts`
+
+Please ensure tests pass and no unnecessary runtime dependencies are introduced.
 
 ---
 
 ## License
 
-MIT © [VibezCheck](https://vibezcheck.xyz)  
+MIT © VibezCheck  
+[Website](https://vibezcheck.xyz/) · [npm](https://www.npmjs.com/package/vibezcheck)  
 Contact: [yt@vibezcheck.app](mailto:yt@vibezcheck.app)
