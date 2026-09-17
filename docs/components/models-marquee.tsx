@@ -57,30 +57,35 @@ export function ModelsMarquee({ onSelectModelName, className = '' }: ModelsMarqu
       {/* Marquee Container with Left and Right Gradient Fade Edges */}
       <div className="relative w-full space-y-2.5">
         {/* Left Fade Gradient Mask */}
-        <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-16 sm:w-28 bg-gradient-to-r from-[#f8fafc] dark:from-[#090d16] to-transparent z-10" />
+        <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-16 sm:w-28 bg-gradient-to-r from-[#fbfbfd] dark:from-[#0c0d10] to-transparent z-10" />
 
         {/* Right Fade Gradient Mask */}
-        <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-16 sm:w-28 bg-gradient-to-l from-[#f8fafc] dark:from-[#090d16] to-transparent z-10" />
+        <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-16 sm:w-28 bg-gradient-to-l from-[#fbfbfd] dark:from-[#0c0d10] to-transparent z-10" />
 
         {/* ✦ Row 1: Frontier Models & Providers (Moving naturally from right) */}
         <div className="flex overflow-hidden">
-          <div className="animate-marquee-left flex items-center gap-6 sm:gap-8">
+          <div className="animate-marquee-left flex items-center gap-4 sm:gap-6 py-1">
             {/* First sequence */}
             {ROW_1_MODELS.map((item) => (
               <button
                 key={`row1-a-${item.id}`}
                 type="button"
                 onClick={() => onSelectModelName?.(item.name)}
-                className="group flex items-center gap-2 px-2.5 py-1 rounded-full hover:bg-slate-200/60 dark:hover:bg-zinc-800/60 transition cursor-pointer shrink-0 text-left select-none"
+                className="group flex items-center gap-2 px-3 py-1.5 rounded-full bg-white dark:bg-zinc-900/90 border border-slate-200/80 dark:border-zinc-800 shadow-2xs hover:border-slate-300 dark:hover:border-zinc-700 hover:bg-slate-50 dark:hover:bg-zinc-800 transition cursor-pointer shrink-0 text-left select-none"
                 title={`Select ${item.name} (${item.provider})`}
               >
-                <LobeIcon name={item.icon} size={22} alt={item.name} className="shrink-0 transition-transform group-hover:scale-110" />
-                <span className="font-medium text-xs text-slate-700 dark:text-zinc-300 group-hover:text-slate-950 dark:group-hover:text-white transition-colors whitespace-nowrap">
+                <LobeIcon name={item.icon} size={18} alt={item.name} className="shrink-0 transition-transform group-hover:scale-110" />
+                <span className="font-medium text-xs text-slate-800 dark:text-zinc-200 group-hover:text-slate-950 dark:group-hover:text-white transition-colors whitespace-nowrap">
                   {item.name}
                 </span>
                 <span className="text-[10px] text-slate-400 dark:text-zinc-500 font-mono whitespace-nowrap">
                   · {item.provider}
                 </span>
+                {item.rate && (
+                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 border border-slate-200/60 dark:border-zinc-700/60">
+                    {item.rate}
+                  </span>
+                )}
               </button>
             ))}
 
@@ -90,16 +95,21 @@ export function ModelsMarquee({ onSelectModelName, className = '' }: ModelsMarqu
                 key={`row1-b-${item.id}`}
                 type="button"
                 onClick={() => onSelectModelName?.(item.name)}
-                className="group flex items-center gap-2 px-2.5 py-1 rounded-full hover:bg-slate-200/60 dark:hover:bg-zinc-800/60 transition cursor-pointer shrink-0 text-left select-none"
+                className="group flex items-center gap-2 px-3 py-1.5 rounded-full bg-white dark:bg-zinc-900/90 border border-slate-200/80 dark:border-zinc-800 shadow-2xs hover:border-slate-300 dark:hover:border-zinc-700 hover:bg-slate-50 dark:hover:bg-zinc-800 transition cursor-pointer shrink-0 text-left select-none"
                 title={`Select ${item.name} (${item.provider})`}
               >
-                <LobeIcon name={item.icon} size={22} alt={item.name} className="shrink-0 transition-transform group-hover:scale-110" />
-                <span className="font-medium text-xs text-slate-700 dark:text-zinc-300 group-hover:text-slate-950 dark:group-hover:text-white transition-colors whitespace-nowrap">
+                <LobeIcon name={item.icon} size={18} alt={item.name} className="shrink-0 transition-transform group-hover:scale-110" />
+                <span className="font-medium text-xs text-slate-800 dark:text-zinc-200 group-hover:text-slate-950 dark:group-hover:text-white transition-colors whitespace-nowrap">
                   {item.name}
                 </span>
                 <span className="text-[10px] text-slate-400 dark:text-zinc-500 font-mono whitespace-nowrap">
                   · {item.provider}
                 </span>
+                {item.rate && (
+                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 border border-slate-200/60 dark:border-zinc-700/60">
+                    {item.rate}
+                  </span>
+                )}
               </button>
             ))}
           </div>
@@ -107,23 +117,28 @@ export function ModelsMarquee({ onSelectModelName, className = '' }: ModelsMarqu
 
         {/* ✦ Row 2: Inference Engines, Cloud Hosts & Multimodal Models */}
         <div className="flex overflow-hidden">
-          <div className="animate-marquee-right flex items-center gap-6 sm:gap-8">
+          <div className="animate-marquee-right flex items-center gap-4 sm:gap-6 py-1">
             {/* First sequence */}
             {ROW_2_PROVIDERS.map((item) => (
               <button
                 key={`row2-a-${item.id}`}
                 type="button"
                 onClick={() => onSelectModelName?.(item.name)}
-                className="group flex items-center gap-2 px-2.5 py-1 rounded-full hover:bg-slate-200/60 dark:hover:bg-zinc-800/60 transition cursor-pointer shrink-0 text-left select-none"
+                className="group flex items-center gap-2 px-3 py-1.5 rounded-full bg-white dark:bg-zinc-900/90 border border-slate-200/80 dark:border-zinc-800 shadow-2xs hover:border-slate-300 dark:hover:border-zinc-700 hover:bg-slate-50 dark:hover:bg-zinc-800 transition cursor-pointer shrink-0 text-left select-none"
                 title={`Select ${item.name} (${item.provider})`}
               >
-                <LobeIcon name={item.icon} size={22} alt={item.name} className="shrink-0 transition-transform group-hover:scale-110" />
-                <span className="font-medium text-xs text-slate-700 dark:text-zinc-300 group-hover:text-slate-950 dark:group-hover:text-white transition-colors whitespace-nowrap">
+                <LobeIcon name={item.icon} size={18} alt={item.name} className="shrink-0 transition-transform group-hover:scale-110" />
+                <span className="font-medium text-xs text-slate-800 dark:text-zinc-200 group-hover:text-slate-950 dark:group-hover:text-white transition-colors whitespace-nowrap">
                   {item.name}
                 </span>
                 <span className="text-[10px] text-slate-400 dark:text-zinc-500 font-mono whitespace-nowrap">
                   · {item.provider}
                 </span>
+                {item.rate && (
+                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 border border-slate-200/60 dark:border-zinc-700/60">
+                    {item.rate}
+                  </span>
+                )}
               </button>
             ))}
 
@@ -133,16 +148,21 @@ export function ModelsMarquee({ onSelectModelName, className = '' }: ModelsMarqu
                 key={`row2-b-${item.id}`}
                 type="button"
                 onClick={() => onSelectModelName?.(item.name)}
-                className="group flex items-center gap-2 px-2.5 py-1 rounded-full hover:bg-slate-200/60 dark:hover:bg-zinc-800/60 transition cursor-pointer shrink-0 text-left select-none"
+                className="group flex items-center gap-2 px-3 py-1.5 rounded-full bg-white dark:bg-zinc-900/90 border border-slate-200/80 dark:border-zinc-800 shadow-2xs hover:border-slate-300 dark:hover:border-zinc-700 hover:bg-slate-50 dark:hover:bg-zinc-800 transition cursor-pointer shrink-0 text-left select-none"
                 title={`Select ${item.name} (${item.provider})`}
               >
-                <LobeIcon name={item.icon} size={22} alt={item.name} className="shrink-0 transition-transform group-hover:scale-110" />
-                <span className="font-medium text-xs text-slate-700 dark:text-zinc-300 group-hover:text-slate-950 dark:group-hover:text-white transition-colors whitespace-nowrap">
+                <LobeIcon name={item.icon} size={18} alt={item.name} className="shrink-0 transition-transform group-hover:scale-110" />
+                <span className="font-medium text-xs text-slate-800 dark:text-zinc-200 group-hover:text-slate-950 dark:group-hover:text-white transition-colors whitespace-nowrap">
                   {item.name}
                 </span>
                 <span className="text-[10px] text-slate-400 dark:text-zinc-500 font-mono whitespace-nowrap">
                   · {item.provider}
                 </span>
+                {item.rate && (
+                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 border border-slate-200/60 dark:border-zinc-700/60">
+                    {item.rate}
+                  </span>
+                )}
               </button>
             ))}
           </div>

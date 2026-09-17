@@ -2647,6 +2647,22 @@ export async function POST(req: Request) {
           </SandboxPreview>
         </SandboxBody>
       </Sandbox>
+
+      {/* ✦ Supported Models & Providers Marquee */}
+      <div className="mt-8 pt-6 border-t border-slate-200/80 dark:border-zinc-800/80">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 px-1 mb-3">
+          <div className="flex items-center gap-2">
+            <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="font-mono text-[11px] uppercase tracking-wider text-slate-600 dark:text-zinc-400 font-semibold">
+              Supported Models & Inference Providers (700+)
+            </span>
+          </div>
+          <span className="text-[11px] font-mono text-slate-400 dark:text-zinc-500">
+            Click any model to inspect live rates in sandbox
+          </span>
+        </div>
+        <ModelsMarquee onSelectModelName={handleSelectModelFromMarquee} />
+      </div>
     </section>
   );
 }
