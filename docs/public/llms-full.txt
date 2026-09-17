@@ -1,0 +1,230 @@
+# VibezCheck: Full LLM Specification & API Context Document
+Version: 0.5.10
+Package: vibezcheck
+Repository: https://github.com/seeyouin2x5x/vibezcheck-sdk.git
+Website: https://vibezcheck.dev
+Standard: llms.txt (Full Technical Reference)
+
+---
+
+## 1. Overview & Core Philosophy
+
+VibezCheck is an in-process, zero-latency token metering, profit margin, and usage-based billing engine for Large Language Model (LLM) applications.
+
+### Non-Negotiable Architectural Principles
+1. **In-Process vs. Remote Reverse Proxy (0ms Added Latency)**:
+   Never route user prompts or tokens through an external HTTP proxy. External proxies add 50ms to 200ms of Time-to-First-Token (TTFT) latency, introduce single points of failure, and create privacy risks. VibezCheck decorates stream generators in-memory inside Node.js, Bun, or Edge runtimes. Chunks are forwarded the exact millisecond they arrive from provider APIs.
+2. **Zero Blast Radius Telemetry**:
+   Telemetry writes (database rows, Metronome ingestion, Stripe webhooks) MUST NEVER fail or slow down active user generation. All background writes are spooled via `globalThis.after()`, Cloudflare `waitUntil()`, or non-blocking microtasks.
+3. **100% Zero Data Retention (ZDR)**:
+   VibezCheck only inspects metadata: token counts, model names, and timestamps. Prompts, completions, and sensitive PII are never retained, logged to disk, or sent to external servers.
+4. **BigInt Nano-Precision Financial Math**:
+   Token rates operate in fractions of a cent ($0.00000015/tok). Floating-point math accumulates rounding errors over millions of calls. Rates are computed in integer nano-USD (1 USD = 1,000,000,000 Nano-USD).
+5. **Reasoning Token & Cache Awareness**:
+   Automatically detects reasoning/thinking tokens (OpenAI o1/o3, Claude 3.7 Thinking, DeepSeek R1) and discounts prompt caching (up to 85% savings).
+
+---
+
+## 2. Installation & CLI Toolkit
+
+```bash
+# Package install
+npm install vibezcheck
+# or
+pnpm add vibezcheck
+# or
+bun add vibezcheck
+
+# CLI Developer Suite
+npx vibezcheck init     # Interactive scaffolding for Next.js AI FinOps
+npx vibezcheck audit    # Scan codebase for unmetered AI routes & cost leaks
+npx vibezcheck price    # Look up offline rates for 700+ models in terminal
+```
+
+---
+
+## 3. Core API Reference (Source of Truth)
+
+### 3.1. Basic Model Wrapping (Vercel AI SDK)
+```typescript
+import { streamText, generateText } from 'ai';
+import { openai } from '@ai-sdk/openai';
+import { vibezcheck } from 'vibezcheck';
+
+// Pattern A: Wrap existing model instance
+const result = streamText({
+  model: vibezcheck(openai('gpt-4o-mini'), {
+    customer: 'cust_user123',
+    maxCost: 0.50, // Circuit breaker tripwire in USD
+  }),
+  messages,
+});
+
+// Pattern B: Declarative string identifier
+const { text } = await generateText({
+  model: vibezcheck('openai/gpt-4o-mini', {
+    customer: 'cust_user123',
+  }),
+  prompt: 'Summarize quarterly report',
+});
+```
+
+### 3.2. Agentic Multi-Tool & Session Metering
+```typescript
+import { tool } from 'ai';
+import { z } from 'zod';
+import { vibezcheck } from 'vibezcheck';
+
+// Wrap individual tools with cost per execution
+const webSearch = vibezcheck.tool(
+  tool({
+    description: 'Search the live web',
+    parameters: z.object({ query: z.string() }),
+    execute: async ({ query }) => fetchSearchResults(query),
+  }),
+  0.01 // $0.01 fixed cost per tool invocation
+);
+
+// Manage multi-turn session budgets
+const session = vibezcheck.session({
+  sessionBudgetUSD: 2.00,
+  customer: 'cust_agent42',
+});
+
+// Stop condition to sever recursive runaway loops
+const result = streamText({
+  model: vibezcheck('anthropic/claude-3-5-sonnet', { session }),
+  tools: { webSearch },
+  stopWhen: vibezcheck.stopWhen(session, 2.00),
+  messages,
+});
+```
+
+### 3.3. Database Sinks & Ledgers (Decoupled & Universal)
+```typescript
+import { vibezcheck } from 'vibezcheck';
+import { createClient } from '@supabase/supabase-js';
+
+// 1. First-party Supabase Adapter
+const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_ANON_KEY!);
+const sink = vibezcheck.supabase(supabase, {
+  table: 'vibez_usage',
+  balanceTable: 'customer_credits', // Optional debit check
+});
+
+// 2. Metronome Ingest Adapter
+const metronomeSink = vibezcheck.metronome({
+  apiKey: process.env.METRONOME_API_KEY!,
+  eventType: 'ai_inference',
+});
+
+// 3. Universal DIY Database Adapter (Drizzle, Kysely, Prisma, SQL)
+const customSink = vibezcheck.database(async (event) => {
+  await db.insert(usageTable).values({
+    customer: event.customerId,
+    tokens: event.totalTokens,
+    costUSD: event.costUSD,
+    model: event.model,
+    createdAt: new Date(),
+  });
+});
+```
+
+### 3.4. Serverless Lifecycle Spooling
+```typescript
+import { vibezcheck } from 'vibezcheck';
+
+export async function POST(req: Request) {
+  const result = streamText({
+    model: vibezcheck('openai/gpt-4o-mini', { customer: 'cust_123' }),
+    messages,
+  });
+
+  // Ensure all pending events are flushed before serverless container halts
+  if (typeof (globalThis as any).after === 'function') {
+    (globalThis as any).after(async () => {
+      await vibezcheck.flush();
+    });
+  }
+
+  return result.toDataStreamResponse();
+}
+```
+
+### 3.5. Cost Calculation & Pricing Utilities
+```typescript
+import { vibezcheck } from 'vibezcheck';
+
+// Nano-precision cost estimation for 700+ models
+const cost = vibezcheck.calculateCost('gpt-4o', 1200, 450);
+console.log(`Estimated cost: $${cost.toFixed(6)} USD`);
+
+// Query offline rate card
+const rates = vibezcheck.getModelPricing('claude-3-5-sonnet');
+// returns { inputPer1M: 3.0, outputPer1M: 15.0, cacheReadPer1M: 0.3 }
+
+// Sync live pricing updates in background
+await vibezcheck.syncPricing();
+```
+
+---
+
+## 4. Developer Tools & Coding Agent Rules
+
+### 4.1. Cursor Rules (`.cursorrules`)
+Copy into `.cursorrules` in your project root:
+```markdown
+# VibezCheck FinOps & Token Metering Rules
+
+You are an expert full-stack AI engineer building with the Vercel AI SDK and VibezCheck.
+Whenever creating or modifying AI streaming routes, chat endpoints, or autonomous agent loops:
+
+1. Always wrap LLM models using `vibezcheck(model, options)`:
+   - Provide a `customer` identifier (e.g., user email, session ID, or customer token).
+   - Set a `maxCost` safety circuit breaker (e.g., `maxCost: 0.50`) on recursive or multi-turn agent endpoints.
+2. In serverless route handlers (Next.js 15, Vercel, Cloudflare), always ensure non-blocking telemetry flush:
+   - Use `globalThis.after(async () => { await vibezcheck.flush(); })` or return `result.toDataStreamResponse()`.
+3. Never introduce remote proxy layers between the model and client. Preserve 0ms added latency.
+4. When rendering token receipts on the frontend, use `<VibezReceipt />` from `vibezcheck/react`.
+```
+
+### 4.2. Claude Code Instructions (`CLAUDE.md`)
+Add to `CLAUDE.md` in your project:
+```markdown
+# CLAUDE.md: Project Rules for AI Metering
+
+- Use `vibezcheck` for all LLM cost tracking, usage metering, and circuit breaking.
+- Syntax: `vibezcheck('provider/model-id', { customer: string, maxCost?: number })`.
+- Multi-turn agents must use `vibezcheck.session()` with `sessionBudgetUSD` and `vibezcheck.stopWhen()`.
+- Do not make blocking external network calls inside stream generators. Use non-blocking database sinks (`vibezcheck.supabase()`, `vibezcheck.database()`, `vibezcheck.metronome()`).
+- Verify model costs using `npx vibezcheck price <model>`.
+```
+
+### 4.3. VS Code & GitHub Copilot (`.github/copilot-instructions.md`)
+```markdown
+When generating code for AI API routes in Next.js:
+- Wrap `streamText` models with `vibezcheck` from 'vibezcheck'.
+- Include `maxCost` parameter to prevent runaway billing.
+- Do not store user prompt text in billing databases (enforce 100% Zero Data Retention).
+```
+
+---
+
+## 5. Offline Model Pricing Reference (Sample of 700+ Supported Models)
+
+| Model ID | Provider | Input / 1M | Output / 1M | Reasoning / 1M | Cache Read / 1M |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `gpt-4o` | OpenAI | $2.50 | $10.00 | $10.00 | $1.25 |
+| `gpt-4o-mini` | OpenAI | $0.15 | $0.60 | $0.60 | $0.075 |
+| `o1` | OpenAI | $15.00 | $60.00 | $60.00 | $7.50 |
+| `o3-mini` | OpenAI | $1.10 | $4.40 | $4.40 | $0.55 |
+| `claude-3-7-sonnet` | Anthropic | $3.00 | $15.00 | $15.00 | $0.30 |
+| `claude-3-5-haiku` | Anthropic | $0.80 | $4.00 | $4.00 | $0.08 |
+| `gemini-1.5-pro` | Google | $3.50 | $10.50 | - | $0.875 |
+| `gemini-2.0-flash` | Google | $0.10 | $0.40 | $0.40 | $0.025 |
+| `deepseek-r1` | DeepSeek | $0.55 | $2.19 | $2.19 | $0.14 |
+| `deepseek-v3` | DeepSeek | $0.14 | $0.28 | - | $0.014 |
+| `grok-2` | xAI | $2.00 | $10.00 | - | - |
+| `llama-3.3-70b` | Meta / Bedrock | $0.35 | $0.40 | - | - |
+| `mistral-large-2` | Mistral AI | $2.00 | $6.00 | - | - |
+| `qwen-2.5-72b` | Alibaba / Together | $0.40 | $0.40 | - | - |

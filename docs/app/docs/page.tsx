@@ -26,6 +26,15 @@ import {
   ExternalLink,
   MessageSquare,
   Code2,
+  Bot,
+  Cpu,
+  FileText,
+  Database,
+  Server,
+  Settings,
+  Globe,
+  Download,
+  Filter,
 } from 'lucide-react';
 
 interface DocItem {
@@ -66,6 +75,25 @@ const DOC_NAV: { category: string; items: DocItem[] }[] = [
         category: 'Getting Started',
         badge: 'New',
         description: 'Scaffold starters, scan for cost leaks, and check prices in your terminal.',
+      },
+    ],
+  },
+  {
+    category: 'Developer Tools & Agents',
+    items: [
+      {
+        id: 'devtools',
+        title: 'Cursor, Claude Code & VSCode',
+        category: 'Developer Tools & Agents',
+        badge: 'AI Rules',
+        description: 'Rule files and context for Cursor (.cursorrules), Claude Code (CLAUDE.md), Windsurf, and Copilot.',
+      },
+      {
+        id: 'llms-txt',
+        title: 'llms.txt & AEO Standard',
+        category: 'Developer Tools & Agents',
+        badge: 'llmstxt.org',
+        description: 'Machine-readable documentation for Perplexity, ChatGPT Search, Cursor, and AI agents.',
       },
     ],
   },
@@ -136,10 +164,17 @@ const DOC_NAV: { category: string; items: DocItem[] }[] = [
     category: 'Reference',
     items: [
       {
+        id: 'api-reference',
+        title: 'Library API Reference',
+        category: 'Reference',
+        badge: 'v0.5.10',
+        description: 'TypeScript signatures for vibezcheck(), tools, sessions, database adapters, and UI components.',
+      },
+      {
         id: 'pricing',
         title: 'Model Pricing Directory',
         category: 'Reference',
-        description: 'Official token prices for OpenAI, Anthropic, Gemini, and DeepSeek.',
+        description: 'Official token prices for OpenAI, Anthropic, Gemini, DeepSeek, and 700+ models.',
       },
       {
         id: 'faq',
@@ -152,19 +187,35 @@ const DOC_NAV: { category: string; items: DocItem[] }[] = [
 ];
 
 const MODEL_PRICES = [
-  { model: 'gpt-4o', provider: 'OpenAI', input: 2.50, output: 10.00, reasoning: 10.00, speed: 'Fast' },
-  { model: 'gpt-4o-mini', provider: 'OpenAI', input: 0.15, output: 0.60, reasoning: 0.60, speed: 'Ultra-Fast' },
-  { model: 'o3-mini', provider: 'OpenAI', input: 1.10, output: 4.40, reasoning: 4.40, speed: 'Thinking' },
-  { model: 'claude-3-7-sonnet', provider: 'Anthropic', input: 3.00, output: 15.00, reasoning: 15.00, speed: 'Deep Reasoning' },
-  { model: 'claude-3-5-haiku', provider: 'Anthropic', input: 0.80, output: 4.00, reasoning: 4.00, speed: 'Instant' },
-  { model: 'gemini-2.0-flash', provider: 'Google', input: 0.10, output: 0.40, reasoning: 0.40, speed: 'Realtime' },
-  { model: 'deepseek-r1', provider: 'DeepSeek', input: 0.55, output: 2.19, reasoning: 2.19, speed: 'Open Reasoning' },
+  { model: 'gpt-4o', provider: 'OpenAI', input: 2.50, cached: 1.25, output: 10.00, reasoning: 10.00, context: '128k', speed: 'Fast' },
+  { model: 'gpt-4o-mini', provider: 'OpenAI', input: 0.15, cached: 0.075, output: 0.60, reasoning: 0.60, context: '128k', speed: 'Ultra-Fast' },
+  { model: 'o3-mini', provider: 'OpenAI', input: 1.10, cached: 0.55, output: 4.40, reasoning: 4.40, context: '200k', speed: 'Thinking' },
+  { model: 'o1', provider: 'OpenAI', input: 15.00, cached: 7.50, output: 60.00, reasoning: 60.00, context: '200k', speed: 'Deep Reasoning' },
+  { model: 'gpt-4.5-preview', provider: 'OpenAI', input: 75.00, cached: 37.50, output: 150.00, reasoning: 150.00, context: '128k', speed: 'Frontier' },
+  { model: 'claude-3-7-sonnet', provider: 'Anthropic', input: 3.00, cached: 0.30, output: 15.00, reasoning: 15.00, context: '200k', speed: 'Deep Reasoning' },
+  { model: 'claude-3-5-sonnet', provider: 'Anthropic', input: 3.00, cached: 0.30, output: 15.00, reasoning: 15.00, context: '200k', speed: 'Fast' },
+  { model: 'claude-3-5-haiku', provider: 'Anthropic', input: 0.80, cached: 0.08, output: 4.00, reasoning: 4.00, context: '200k', speed: 'Instant' },
+  { model: 'gemini-2.0-flash', provider: 'Google', input: 0.10, cached: 0.025, output: 0.40, reasoning: 0.40, context: '1M', speed: 'Realtime' },
+  { model: 'gemini-2.0-flash-thinking', provider: 'Google', input: 0.10, cached: 0.025, output: 0.40, reasoning: 0.40, context: '1M', speed: 'Reasoning' },
+  { model: 'gemini-1.5-pro', provider: 'Google', input: 1.25, cached: 0.31, output: 5.00, reasoning: 5.00, context: '2M', speed: 'Deep Context' },
+  { model: 'deepseek-r1', provider: 'DeepSeek', input: 0.55, cached: 0.14, output: 2.19, reasoning: 2.19, context: '64k', speed: 'Open Reasoning' },
+  { model: 'deepseek-v3', provider: 'DeepSeek', input: 0.14, cached: 0.014, output: 0.28, reasoning: 0.28, context: '64k', speed: 'Cost Killer' },
+  { model: 'mistral-large-2411', provider: 'Mistral', input: 2.00, cached: 0.50, output: 6.00, reasoning: 6.00, context: '128k', speed: 'Enterprise' },
+  { model: 'llama-3.3-70b-instruct', provider: 'Meta / Groq', input: 0.59, cached: 0.30, output: 0.79, reasoning: 0.79, context: '128k', speed: '300 tok/s' },
+  { model: 'qwen-2.5-72b-instruct', provider: 'Alibaba', input: 0.35, cached: 0.20, output: 0.40, reasoning: 0.40, context: '128k', speed: 'Fast' },
 ];
 
 export default function DocsPage() {
   const [activeTab, setActiveTab] = useState<string>('overview');
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
+
+  // Developer Tools tab selection
+  const [devToolTab, setDevToolTab] = useState<'cursor' | 'claude' | 'vscode' | 'windsurf' | 'mcp'>('cursor');
+
+  // Pricing Directory filter state
+  const [pricingFilter, setPricingFilter] = useState<string>('all');
+  const [pricingSearch, setPricingSearch] = useState<string>('');
 
   // Interactive Margin Calculator state
   const [marginMultiplier, setMarginMultiplier] = useState<number>(1.3);
@@ -191,6 +242,16 @@ export default function DocsPage() {
     setCopiedCode(id);
     setTimeout(() => setCopiedCode(null), 2000);
   };
+
+  const filteredModels = MODEL_PRICES.filter((m) => {
+    const matchesProvider =
+      pricingFilter === 'all' || m.provider.toLowerCase().includes(pricingFilter.toLowerCase());
+    const matchesSearch =
+      m.model.toLowerCase().includes(pricingSearch.toLowerCase()) ||
+      m.provider.toLowerCase().includes(pricingSearch.toLowerCase()) ||
+      m.speed.toLowerCase().includes(pricingSearch.toLowerCase());
+    return matchesProvider && matchesSearch;
+  });
 
   return (
     <div className="min-h-screen flex flex-col bg-[#fafafa] dark:bg-[#0c0c0e] text-slate-900 dark:text-zinc-100 transition-colors">
@@ -1625,6 +1686,796 @@ export default function ChatView() {
                 <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">
                   When you render <code className="font-mono text-emerald-600 dark:text-emerald-400">&lt;VibezCheck /&gt;</code> in your frontend, developer wholesale costs and profit margin multipliers are automatically hidden from end-users. Customers only see their transparent billed cost and token count, protecting your proprietary business formulas.
                 </p>
+              </div>
+            </div>
+          )}
+
+          {/* TAB: DEVELOPER TOOLS & AGENT RULES */}
+          {activeTab === 'devtools' && (
+            <div className="space-y-8 animate-fadeIn">
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-violet-500/10 dark:bg-violet-500/20 text-violet-700 dark:text-violet-300 border border-violet-500/20 text-xs font-medium mb-3">
+                  <Bot className="w-3.5 h-3.5" />
+                  Coding Agents &amp; IDE Rules
+                </div>
+                <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+                  Developer Tools, Agent Rules &amp; MCP
+                </h1>
+                <p className="text-base text-slate-600 dark:text-zinc-300 mt-2 leading-relaxed">
+                  Equip Cursor, Claude Code, Windsurf, GitHub Copilot, and custom agentic frameworks with exact instructions. These rules guarantee your AI code editors generate zero-latency, profit-metered routes with proper safety circuit breakers.
+                </p>
+              </div>
+
+              {/* Tool Selection Tabs */}
+              <div className="flex flex-wrap gap-2 p-1.5 rounded-xl bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800">
+                {[
+                  { id: 'cursor', label: 'Cursor (.cursorrules)', icon: FileCode },
+                  { id: 'claude', label: 'Claude Code (CLAUDE.md)', icon: Terminal },
+                  { id: 'vscode', label: 'VS Code & Copilot', icon: Code2 },
+                  { id: 'windsurf', label: 'Windsurf (.windsurfrules)', icon: Sparkles },
+                  { id: 'mcp', label: 'Model Context Protocol (MCP)', icon: Cpu },
+                ].map((tool) => {
+                  const Icon = tool.icon;
+                  const isSelected = devToolTab === tool.id;
+                  return (
+                    <button
+                      key={tool.id}
+                      onClick={() => setDevToolTab(tool.id as any)}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition cursor-pointer ${
+                        isSelected
+                          ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-xs font-semibold'
+                          : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200 hover:bg-white/50 dark:hover:bg-zinc-800/50'
+                      }`}
+                    >
+                      <Icon className="w-3.5 h-3.5 shrink-0" />
+                      <span>{tool.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* CURSOR CONTENT */}
+              {devToolTab === 'cursor' && (
+                <div className="space-y-6">
+                  <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <FileCode className="w-4 h-4 text-violet-500" />
+                        <h3 className="font-bold text-sm text-slate-900 dark:text-white">
+                          .cursorrules (Project Root)
+                        </h3>
+                      </div>
+                      <button
+                        onClick={() =>
+                          copyToClipboard(
+                            `# VibezCheck Rules for Cursor AI\n\nYou are an expert full-stack AI engineer building with VibezCheck and the Vercel AI SDK.\n\n## Core Principles\n1. ZERO PROXY LATENCY: VibezCheck is an in-process SDK wrapper, NOT an HTTP proxy. Never introduce intermediary proxy URLs or 3rd-party relays.\n2. DECLARATIVE MODEL: Wrap models using \`vibezcheck(model, options)\` directly in \`streamText\` or \`generateText\`.\n3. DISCONNECT PROTECTION: Always return responses using \`vibezcheck.toDataStreamResponse(result)\` so interrupted client streams are metered accurately.\n4. SAFETY SWITCH: Always include a safety budget cap (\`budgetUSD\` or \`vibezcheck.stopWhen({ budgetUSD })\`) to prevent infinite recursion bills.\n5. DATABASE SINKS: Use \`vibezcheck.supabase(client)\` or \`vibezcheck.database(async (event) => ...)\` for non-blocking asynchronous event logging.\n6. SERVERLESS FLUSH: In Edge/Serverless runtimes, call \`vibezcheck.flush()\` inside \`globalThis.after()\` or Next.js \`waitUntil()\`.\n7. CLIENT TELEMETRY: Render \`<VibezReceipt />\` or \`<VibezCheck />\` from \`vibezcheck/ui\` for live user-facing telemetry without leaking developer margins.\n\n## Example Route Pattern\n\`\`\`typescript\nimport { streamText } from 'ai';\nimport { openai } from '@ai-sdk/openai';\nimport { vibezcheck } from 'vibezcheck';\n\nexport async function POST(req: Request) {\n  const { messages, customerId } = await req.json();\n\n  const result = streamText({\n    model: vibezcheck(openai('gpt-4o-mini'), {\n      customer: customerId,\n      budgetUSD: 0.10,\n      marginMultiplier: 1.30,\n    }),\n    messages,\n  });\n\n  return vibezcheck.toDataStreamResponse(result);\n}\n\`\`\``,
+                            'cursor-rules-copy'
+                          )
+                        }
+                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 text-xs text-slate-700 dark:text-zinc-300 transition cursor-pointer"
+                      >
+                        {copiedCode === 'cursor-rules-copy' ? (
+                          <>
+                            <Check className="w-3.5 h-3.5 text-emerald-500" />
+                            <span>Copied!</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="w-3.5 h-3.5" />
+                            <span>Copy .cursorrules</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+
+                    <pre className="p-4 rounded-xl bg-slate-900 text-slate-100 text-xs font-mono overflow-x-auto leading-relaxed border border-slate-800">
+{`# VibezCheck Rules for Cursor AI
+
+You are an expert full-stack AI engineer building with VibezCheck and the Vercel AI SDK.
+
+## Core Principles
+1. ZERO PROXY LATENCY: VibezCheck is an in-process SDK wrapper, NOT an HTTP proxy. Never introduce intermediary proxy URLs or 3rd-party relays.
+2. DECLARATIVE MODEL: Wrap models using vibezcheck(model, options) directly in streamText or generateText.
+3. DISCONNECT PROTECTION: Always return responses using vibezcheck.toDataStreamResponse(result) so interrupted client streams are metered accurately.
+4. SAFETY SWITCH: Always include a safety budget cap (budgetUSD or vibezcheck.stopWhen({ budgetUSD })) to prevent infinite recursion bills.
+5. DATABASE SINKS: Use vibezcheck.supabase(client) or vibezcheck.database(async (event) => ...) for non-blocking asynchronous event logging.
+6. SERVERLESS FLUSH: In Edge/Serverless runtimes, call vibezcheck.flush() inside globalThis.after() or Next.js waitUntil().
+7. CLIENT TELEMETRY: Render <VibezReceipt /> or <VibezCheck /> from vibezcheck/ui for live user-facing telemetry without leaking developer margins.`}
+                    </pre>
+                  </div>
+
+                  {/* Add Docs to Cursor feature */}
+                  <div className="p-5 rounded-2xl bg-gradient-to-br from-violet-500/5 to-cyan-500/5 border border-violet-500/20 space-y-3">
+                    <div className="flex items-center gap-2 font-bold text-sm text-slate-900 dark:text-white">
+                      <Sparkles className="w-4 h-4 text-violet-500" />
+                      <span>Add Live VibezCheck Context via Cursor @Docs</span>
+                    </div>
+                    <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">
+                      You can index the entire VibezCheck library into Cursor with zero hallucination risk.
+                    </p>
+                    <ol className="list-decimal list-inside text-xs text-slate-600 dark:text-zinc-400 space-y-1.5 pl-1">
+                      <li>Open Cursor Settings <kbd className="font-mono px-1.5 py-0.5 rounded bg-slate-200 dark:bg-zinc-800 text-[10px]">Cmd + ,</kbd> &rarr; <strong>Features</strong> &rarr; <strong>Docs</strong></li>
+                      <li>Click <strong>Add new doc</strong></li>
+                      <li>Prefix / URL: <code className="font-mono text-violet-600 dark:text-violet-400 font-semibold">https://vibezcheck.com/llms.txt</code></li>
+                      <li>Name: <code className="font-mono">VibezCheck</code></li>
+                      <li>Now in any Cursor chat, type <code className="font-mono bg-violet-500/10 text-violet-600 dark:text-violet-300 px-1 py-0.5 rounded">@VibezCheck</code> to retrieve exact library signatures!</li>
+                    </ol>
+                  </div>
+                </div>
+              )}
+
+              {/* CLAUDE CODE CONTENT */}
+              {devToolTab === 'claude' && (
+                <div className="space-y-6">
+                  <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Terminal className="w-4 h-4 text-amber-500" />
+                        <h3 className="font-bold text-sm text-slate-900 dark:text-white">
+                          CLAUDE.md (Project Root for Claude Code CLI)
+                        </h3>
+                      </div>
+                      <button
+                        onClick={() =>
+                          copyToClipboard(
+                            `# VibezCheck Guidelines for Claude Code\n\n## Project Commands\n- Setup starter: \`npx vibezcheck init\`\n- Scan cost leaks: \`npx vibezcheck scan\`\n- Check prices: \`npx vibezcheck pricing [model]\`\n- Build: \`pnpm build\`\n- Test: \`pnpm test\`\n\n## Architecture Rules\n- SDK Type: In-process token instrumentation (0ms latency, zero third-party proxy relays).\n- Token Pricing: Bundled offline catalog (\`akwaba/src/pricing\`). No external network requests needed for cost calculation.\n- Streaming Routes: Wrap models with \`vibezcheck(model, { customer, budgetUSD, marginMultiplier })\`.\n- Disconnect Safety: Instrument with \`vibezcheck.toDataStreamResponse(result)\` to meter partial completions when users close tabs.\n- Serverless Flushing: In Edge/Serverless environments, batch usage with \`waitUntil(vibezcheck.flush())\` or \`globalThis.after(() => vibezcheck.flush())\`.\n- UI Components: Use \`<VibezReceipt />\` or \`<VibezCheck />\` from \`vibezcheck/ui\` for frontend billing telemetry.`,
+                            'claude-md-copy'
+                          )
+                        }
+                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 text-xs text-slate-700 dark:text-zinc-300 transition cursor-pointer"
+                      >
+                        {copiedCode === 'claude-md-copy' ? (
+                          <>
+                            <Check className="w-3.5 h-3.5 text-emerald-500" />
+                            <span>Copied!</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="w-3.5 h-3.5" />
+                            <span>Copy CLAUDE.md</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+
+                    <pre className="p-4 rounded-xl bg-slate-900 text-slate-100 text-xs font-mono overflow-x-auto leading-relaxed border border-slate-800">
+{`# VibezCheck Guidelines for Claude Code
+
+## Project Commands
+- Setup starter: npx vibezcheck init
+- Scan cost leaks: npx vibezcheck scan
+- Check prices: npx vibezcheck pricing [model]
+- Build: pnpm build
+- Test: pnpm test
+
+## Architecture Rules
+- SDK Type: In-process token instrumentation (0ms latency, zero third-party proxy relays).
+- Token Pricing: Bundled offline catalog (akwaba/src/pricing). No external network requests needed for cost calculation.
+- Streaming Routes: Wrap models with vibezcheck(model, { customer, budgetUSD, marginMultiplier }).
+- Disconnect Safety: Instrument with vibezcheck.toDataStreamResponse(result) to meter partial completions when users close tabs.
+- Serverless Flushing: In Edge/Serverless environments, batch usage with waitUntil(vibezcheck.flush()) or globalThis.after(() => vibezcheck.flush()).
+- UI Components: Use <VibezReceipt /> or <VibezCheck /> from vibezcheck/ui for frontend billing telemetry.`}
+                    </pre>
+                  </div>
+                </div>
+              )}
+
+              {/* VS CODE & COPILOT CONTENT */}
+              {devToolTab === 'vscode' && (
+                <div className="space-y-6">
+                  <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Code2 className="w-4 h-4 text-blue-500" />
+                        <h3 className="font-bold text-sm text-slate-900 dark:text-white">
+                          .github/copilot-instructions.md
+                        </h3>
+                      </div>
+                      <button
+                        onClick={() =>
+                          copyToClipboard(
+                            `# GitHub Copilot Instructions for VibezCheck\n\nWhen writing AI endpoints in Next.js:\n- Always meter LLM calls using the \`vibezcheck\` package.\n- Never route calls through HTTP proxies; VibezCheck runs directly in-process.\n- Include cost circuit breakers with \`budgetUSD: 0.10\` to safeguard against infinite loops.\n- When wrapping streaming responses, use \`vibezcheck.toDataStreamResponse(result)\`.\n- Import UI widgets like \`<VibezReceipt />\` from \`vibezcheck/ui\`.`,
+                            'copilot-md-copy'
+                          )
+                        }
+                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 text-xs text-slate-700 dark:text-zinc-300 transition cursor-pointer"
+                      >
+                        {copiedCode === 'copilot-md-copy' ? (
+                          <>
+                            <Check className="w-3.5 h-3.5 text-emerald-500" />
+                            <span>Copied!</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="w-3.5 h-3.5" />
+                            <span>Copy Copilot Rules</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+
+                    <pre className="p-4 rounded-xl bg-slate-900 text-slate-100 text-xs font-mono overflow-x-auto leading-relaxed border border-slate-800">
+{`# GitHub Copilot Instructions for VibezCheck
+
+When writing AI endpoints in Next.js:
+- Always meter LLM calls using the \`vibezcheck\` package.
+- Never route calls through HTTP proxies; VibezCheck runs directly in-process.
+- Include cost circuit breakers with \`budgetUSD: 0.10\` to safeguard against infinite loops.
+- When wrapping streaming responses, use \`vibezcheck.toDataStreamResponse(result)\`.
+- Import UI widgets like \`<VibezReceipt />\` from \`vibezcheck/ui\`.`}
+                    </pre>
+                  </div>
+                </div>
+              )}
+
+              {/* WINDSURF CONTENT */}
+              {devToolTab === 'windsurf' && (
+                <div className="space-y-6">
+                  <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-teal-500" />
+                        <h3 className="font-bold text-sm text-slate-900 dark:text-white">
+                          .windsurfrules (Codeium Windsurf Cascade)
+                        </h3>
+                      </div>
+                      <button
+                        onClick={() =>
+                          copyToClipboard(
+                            `# Windsurf Cascade Rules for VibezCheck\n\n- Package: \`vibezcheck\` (v0.5.10)\n- Core method: \`vibezcheck(model, { customer, budgetUSD, marginMultiplier })\`\n- Architecture: Zero-latency in-memory telemetry, offline pricing catalog, direct upstream API calls.\n- Sinks: \`vibezcheck.supabase(supabaseClient)\`, \`vibezcheck.database(async (event) => ...)\`\n- Flush: \`vibezcheck.flush()\` in Next.js Edge/Serverless lifecycles.`,
+                            'windsurf-rules-copy'
+                          )
+                        }
+                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 text-xs text-slate-700 dark:text-zinc-300 transition cursor-pointer"
+                      >
+                        {copiedCode === 'windsurf-rules-copy' ? (
+                          <>
+                            <Check className="w-3.5 h-3.5 text-emerald-500" />
+                            <span>Copied!</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="w-3.5 h-3.5" />
+                            <span>Copy .windsurfrules</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+
+                    <pre className="p-4 rounded-xl bg-slate-900 text-slate-100 text-xs font-mono overflow-x-auto leading-relaxed border border-slate-800">
+{`# Windsurf Cascade Rules for VibezCheck
+
+- Package: vibezcheck (v0.5.10)
+- Core method: vibezcheck(model, { customer, budgetUSD, marginMultiplier })
+- Architecture: Zero-latency in-memory telemetry, offline pricing catalog, direct upstream API calls.
+- Sinks: vibezcheck.supabase(supabaseClient), vibezcheck.database(async (event) => ...)
+- Flush: vibezcheck.flush() in Next.js Edge/Serverless lifecycles.`}
+                    </pre>
+                  </div>
+                </div>
+              )}
+
+              {/* MCP CONTENT */}
+              {devToolTab === 'mcp' && (
+                <div className="space-y-6">
+                  <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Cpu className="w-4 h-4 text-emerald-500" />
+                        <h3 className="font-bold text-sm text-slate-900 dark:text-white">
+                          Model Context Protocol (MCP) Server Config
+                        </h3>
+                      </div>
+                      <button
+                        onClick={() =>
+                          copyToClipboard(
+                            `{\n  "mcpServers": {\n    "vibezcheck": {\n      "command": "npx",\n      "args": ["-y", "vibezcheck", "mcp"]\n    }\n  }\n}`,
+                            'mcp-copy'
+                          )
+                        }
+                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 text-xs text-slate-700 dark:text-zinc-300 transition cursor-pointer"
+                      >
+                        {copiedCode === 'mcp-copy' ? (
+                          <>
+                            <Check className="w-3.5 h-3.5 text-emerald-500" />
+                            <span>Copied!</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="w-3.5 h-3.5" />
+                            <span>Copy MCP Config</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+
+                    <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">
+                      Add this configuration to your Claude Desktop config (<code className="font-mono text-[11px]">claude_desktop_config.json</code>) or Cursor MCP settings to allow your AI assistant to query live model token prices and calculate costs on the fly.
+                    </p>
+
+                    <pre className="p-4 rounded-xl bg-slate-900 text-slate-100 text-xs font-mono overflow-x-auto leading-relaxed border border-slate-800">
+{`{
+  "mcpServers": {
+    "vibezcheck": {
+      "command": "npx",
+      "args": ["-y", "vibezcheck", "mcp"]
+    }
+  }
+}`}
+                    </pre>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* TAB: LLMS.TXT & AEO STANDARD */}
+          {activeTab === 'llms-txt' && (
+            <div className="space-y-8 animate-fadeIn">
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-cyan-500/10 dark:bg-cyan-500/20 text-cyan-700 dark:text-cyan-300 border border-cyan-500/20 text-xs font-medium mb-3">
+                  <Globe className="w-3.5 h-3.5" />
+                  Answer Engine Optimization (AEO)
+                </div>
+                <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+                  llms.txt Standard &amp; AI Search Optimization
+                </h1>
+                <p className="text-base text-slate-600 dark:text-zinc-300 mt-2 leading-relaxed">
+                  VibezCheck is fully compliant with the <strong>llms.txt</strong> open specification (proposed by llmstxt.org). We serve concise, clean Markdown context specifically engineered for search engines like Perplexity, ChatGPT Search, Claude, and developer coding agents.
+                </p>
+              </div>
+
+              {/* Endpoints Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-xs font-bold text-cyan-600 dark:text-cyan-400">
+                      /llms.txt
+                    </span>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-700 dark:text-cyan-300">
+                      Curated Index
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">
+                    Lightweight, structured overview with core concepts, quickstarts, API signatures, and deep links. Optimized for fast agent context injection.
+                  </p>
+                  <div className="flex items-center gap-2 pt-1">
+                    <a
+                      href="/llms.txt"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 text-xs font-medium text-slate-800 dark:text-zinc-200 transition"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                      <span>View Live /llms.txt</span>
+                    </a>
+                    <button
+                      onClick={() => copyToClipboard('curl -s https://vibezcheck.com/llms.txt', 'curl-llms')}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 hover:border-slate-400 text-xs font-mono text-slate-700 dark:text-zinc-300 transition cursor-pointer"
+                    >
+                      {copiedCode === 'curl-llms' ? (
+                        <Check className="w-3.5 h-3.5 text-emerald-500" />
+                      ) : (
+                        <Copy className="w-3.5 h-3.5" />
+                      )}
+                      <span>Copy curl</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-xs font-bold text-purple-600 dark:text-purple-400">
+                      /llms-full.txt
+                    </span>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-700 dark:text-purple-300">
+                      Complete Knowledge
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">
+                    Single-file un-truncated documentation containing the complete SDK reference, pricing table, recipes, and database adapters for frontier reasoning models.
+                  </p>
+                  <div className="flex items-center gap-2 pt-1">
+                    <a
+                      href="/llms-full.txt"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 text-xs font-medium text-slate-800 dark:text-zinc-200 transition"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                      <span>View /llms-full.txt</span>
+                    </a>
+                    <button
+                      onClick={() => copyToClipboard('curl -s https://vibezcheck.com/llms-full.txt', 'curl-full')}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 hover:border-slate-400 text-xs font-mono text-slate-700 dark:text-zinc-300 transition cursor-pointer"
+                    >
+                      {copiedCode === 'curl-full' ? (
+                        <Check className="w-3.5 h-3.5 text-emerald-500" />
+                      ) : (
+                        <Copy className="w-3.5 h-3.5" />
+                      )}
+                      <span>Copy curl</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Comparison Table */}
+              <div className="space-y-4">
+                <h3 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+                  Why AEO Matters: Standard HTML vs. Clean llms.txt
+                </h3>
+                <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50">
+                  <table className="w-full text-left text-xs border-collapse">
+                    <thead>
+                      <tr className="border-b border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900 text-slate-500 dark:text-zinc-400 font-mono">
+                        <th className="py-3 px-4 font-semibold">Metric</th>
+                        <th className="py-3 px-4 font-semibold">Scraped HTML Pages</th>
+                        <th className="py-3 px-4 font-semibold">VibezCheck /llms.txt</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 dark:divide-zinc-800">
+                      <tr className="hover:bg-slate-50/50 dark:hover:bg-zinc-800/40">
+                        <td className="py-3 px-4 font-semibold text-slate-900 dark:text-white">Context Size</td>
+                        <td className="py-3 px-4 text-red-600 dark:text-red-400">80KB – 250KB (bloated DOM, scripts)</td>
+                        <td className="py-3 px-4 text-emerald-600 dark:text-emerald-400 font-medium">3KB – 45KB pure Markdown (90% reduction)</td>
+                      </tr>
+                      <tr className="hover:bg-slate-50/50 dark:hover:bg-zinc-800/40">
+                        <td className="py-3 px-4 font-semibold text-slate-900 dark:text-white">Hallucination Rate</td>
+                        <td className="py-3 px-4 text-red-600 dark:text-red-400">High (parses cookie banners, outdated blogs)</td>
+                        <td className="py-3 px-4 text-emerald-600 dark:text-emerald-400 font-medium">0% (Strictly grounded in v0.5.10 library types)</td>
+                      </tr>
+                      <tr className="hover:bg-slate-50/50 dark:hover:bg-zinc-800/40">
+                        <td className="py-3 px-4 font-semibold text-slate-900 dark:text-white">AI Search Grounding</td>
+                        <td className="py-3 px-4 text-slate-500 dark:text-zinc-400">Inconsistent citations across web crawls</td>
+                        <td className="py-3 px-4 text-emerald-600 dark:text-emerald-400 font-medium">Deterministic grounding for Perplexity &amp; ChatGPT</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB: MODEL PRICING DIRECTORY */}
+          {activeTab === 'pricing' && (
+            <div className="space-y-8 animate-fadeIn">
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 text-xs font-medium mb-3">
+                  <DollarSign className="w-3.5 h-3.5" />
+                  700+ Models Catalog
+                </div>
+                <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+                  Model Pricing Directory
+                </h1>
+                <p className="text-base text-slate-600 dark:text-zinc-300 mt-2 leading-relaxed">
+                  Real-time wholesale token prices across OpenAI, Anthropic, Google, DeepSeek, and open-source models. VibezCheck packages this entire pricing catalog offline into the library for <strong>0ms calculation latency</strong>.
+                </p>
+              </div>
+
+              {/* Filter & Search Bar */}
+              <div className="space-y-3">
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <div className="relative flex-1">
+                    <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
+                    <input
+                      type="text"
+                      placeholder="Search models (e.g. gpt-4o, claude, deepseek)..."
+                      value={pricingSearch}
+                      onChange={(e) => setPricingSearch(e.target.value)}
+                      className="w-full pl-9 pr-3 py-2 text-xs bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg focus:outline-hidden focus:border-slate-400 dark:focus:border-zinc-600 transition"
+                    />
+                  </div>
+                </div>
+
+                {/* Provider Pills */}
+                <div className="flex flex-wrap gap-1.5">
+                  {['all', 'OpenAI', 'Anthropic', 'Google', 'DeepSeek', 'Mistral', 'Meta / Groq', 'Alibaba'].map((prov) => (
+                    <button
+                      key={prov}
+                      onClick={() => setPricingFilter(prov)}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-medium transition cursor-pointer ${
+                        pricingFilter === prov
+                          ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-semibold'
+                          : 'bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-600 dark:text-zinc-400 hover:border-slate-400'
+                      }`}
+                    >
+                      {prov === 'all' ? 'All Providers' : prov}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Pricing Table */}
+              <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="border-b border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900 text-slate-500 dark:text-zinc-400 font-mono">
+                      <th className="py-3 px-4 font-semibold">Model</th>
+                      <th className="py-3 px-4 font-semibold">Provider</th>
+                      <th className="py-3 px-4 font-semibold">Input / 1M</th>
+                      <th className="py-3 px-4 font-semibold">Prompt Cache / 1M</th>
+                      <th className="py-3 px-4 font-semibold">Output / 1M</th>
+                      <th className="py-3 px-4 font-semibold">Reasoning / 1M</th>
+                      <th className="py-3 px-4 font-semibold">Context</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-zinc-800">
+                    {filteredModels.map((m) => (
+                      <tr key={m.model} className="hover:bg-slate-50/50 dark:hover:bg-zinc-800/40">
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono font-semibold text-slate-900 dark:text-white">
+                              {m.model}
+                            </span>
+                            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400">
+                              {m.speed}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4 text-slate-600 dark:text-zinc-400">
+                          {m.provider}
+                        </td>
+                        <td className="py-3 px-4 font-mono font-medium text-slate-900 dark:text-white">
+                          \${m.input.toFixed(2)}
+                        </td>
+                        <td className="py-3 px-4 font-mono text-emerald-600 dark:text-emerald-400">
+                          \${m.cached?.toFixed(3) || (m.input * 0.5).toFixed(3)}
+                        </td>
+                        <td className="py-3 px-4 font-mono font-medium text-slate-900 dark:text-white">
+                          \${m.output.toFixed(2)}
+                        </td>
+                        <td className="py-3 px-4 font-mono text-purple-600 dark:text-purple-400">
+                          \${m.reasoning.toFixed(2)}
+                        </td>
+                        <td className="py-3 px-4 font-mono text-slate-500 dark:text-zinc-400">
+                          {m.context}
+                        </td>
+                      </tr>
+                    ))}
+                    {filteredModels.length === 0 && (
+                      <tr>
+                        <td colSpan={7} className="py-8 text-center text-xs text-slate-500 dark:text-zinc-400">
+                          No models found matching your search.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Zero Network Cost Callout */}
+              <div className="p-5 rounded-2xl bg-amber-500/5 dark:bg-amber-950/20 border border-amber-500/20 space-y-2">
+                <div className="flex items-center gap-2 font-bold text-sm text-amber-800 dark:text-amber-300">
+                  <Sparkles className="w-4 h-4 text-amber-500" />
+                  <span>Offline Pricing Engine (0ms Lookups)</span>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">
+                  Unlike APIs that require making a network call to fetch prices for each request, VibezCheck compiles pricing manifests locally into your application bundle. When calculating tokens via <code className="font-mono text-amber-600 dark:text-amber-400">vibezcheck.calculateCost()</code>, math runs synchronously in memory with zero network delay.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* TAB: LIBRARY API REFERENCE (SOURCE OF TRUTH) */}
+          {activeTab === 'api-reference' && (
+            <div className="space-y-8 animate-fadeIn">
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-500/10 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-500/20 text-xs font-medium mb-3">
+                  <Code2 className="w-3.5 h-3.5" />
+                  Source of Truth (v0.5.10)
+                </div>
+                <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+                  Library API Reference
+                </h1>
+                <p className="text-base text-slate-600 dark:text-zinc-300 mt-2 leading-relaxed">
+                  Complete TypeScript signatures and parameters directly matching <code className="font-mono text-blue-600 dark:text-blue-400">akwaba/src/index.ts</code>.
+                </p>
+              </div>
+
+              {/* Method 1: vibezcheck(model, options) */}
+              <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-100 dark:border-zinc-800 pb-3">
+                  <h3 className="font-mono text-sm font-bold text-slate-900 dark:text-white">
+                    vibezcheck(modelOrId, options?)
+                  </h3>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-500/10 text-blue-700 dark:text-blue-300">
+                    Vercel AI SDK Wrapper
+                  </span>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">
+                  Declarative model resolver for Vercel AI SDK <code className="font-mono text-[11px]">streamText</code> and <code className="font-mono text-[11px]">generateText</code>. Accepts either a string model ID or an existing LanguageModel instance.
+                </p>
+                <pre className="p-3.5 rounded-xl bg-slate-900 text-slate-100 text-xs font-mono overflow-x-auto leading-relaxed border border-slate-800">
+{`import { streamText } from 'ai';
+import { openai } from '@ai-sdk/openai';
+import { vibezcheck } from 'vibezcheck';
+
+const result = streamText({
+  model: vibezcheck(openai('gpt-4o-mini'), {
+    customer: 'user_123',
+    budgetUSD: 0.15,          // Circuit breaker limit
+    marginMultiplier: 1.30,   // Charge customer 30% profit markup
+    onCost: (cost) => {
+      console.log('Wholesale:', cost.wholesaleCostUSD, 'Billed:', cost.billedCostUSD);
+    },
+  }),
+  messages,
+});`}
+                </pre>
+              </div>
+
+              {/* Method 2: vibezcheck.wrapStream(stream, options) */}
+              <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-100 dark:border-zinc-800 pb-3">
+                  <h3 className="font-mono text-sm font-bold text-slate-900 dark:text-white">
+                    vibezcheck.wrapStream(stream, options?)
+                  </h3>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300">
+                    Raw SDK Stream Wrapper
+                  </span>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">
+                  Instruments raw response streams from the official OpenAI, Anthropic, or Google SDKs directly in-memory with 0ms latency.
+                </p>
+                <pre className="p-3.5 rounded-xl bg-slate-900 text-slate-100 text-xs font-mono overflow-x-auto leading-relaxed border border-slate-800">
+{`const stream = await openai.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [{ role: 'user', content: 'Hello' }],
+  stream: true,
+});
+
+// Pass native stream through zero-latency word meter
+return vibezcheck.wrapStream(stream, {
+  customer: 'user_123',
+  model: 'gpt-4o',
+});`}
+                </pre>
+              </div>
+
+              {/* Method 3: vibezcheck.tool & vibezcheck.tools */}
+              <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-100 dark:border-zinc-800 pb-3">
+                  <h3 className="font-mono text-sm font-bold text-slate-900 dark:text-white">
+                    vibezcheck.tool(tool, costUSD)
+                  </h3>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-500/10 text-purple-700 dark:text-purple-300">
+                    Agent Tool Billing
+                  </span>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">
+                  Instruments an AI tool with an execution cost. Every time the model executes the tool, the fixed cost is debited from the session budget and customer wallet.
+                </p>
+                <pre className="p-3.5 rounded-xl bg-slate-900 text-slate-100 text-xs font-mono overflow-x-auto leading-relaxed border border-slate-800">
+{`import { tool } from 'ai';
+import { z } from 'zod';
+import { vibezcheck } from 'vibezcheck';
+
+const webSearch = vibezcheck.tool(
+  tool({
+    description: 'Search the live web',
+    parameters: z.object({ query: z.string() }),
+    execute: async ({ query }) => fetchSearchResults(query),
+  }),
+  0.02 // Debits $0.02 per search execution
+);`}
+                </pre>
+              </div>
+
+              {/* Method 4: vibezcheck.session & vibezcheck.stopWhen */}
+              <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-100 dark:border-zinc-800 pb-3">
+                  <h3 className="font-mono text-sm font-bold text-slate-900 dark:text-white">
+                    vibezcheck.session(&#123; budgetUSD, customerId &#125;)
+                  </h3>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
+                    Agent Loop Circuit Breaker
+                  </span>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">
+                  Creates an <code className="font-mono text-[11px]">AgentSession</code> to track cumulative token usage and tool invocation costs across multi-turn agent execution loops.
+                </p>
+                <pre className="p-3.5 rounded-xl bg-slate-900 text-slate-100 text-xs font-mono overflow-x-auto leading-relaxed border border-slate-800">
+{`const session = vibezcheck.session({
+  customerId: 'cust_abc',
+  budgetUSD: 0.50, // Hard ceiling for entire multi-step task
+});
+
+const result = streamText({
+  model: vibezcheck('gpt-4o-mini', { session }),
+  tools: { webSearch },
+  stopWhen: vibezcheck.stopWhen({ session, budgetUSD: 0.50 }),
+});`}
+                </pre>
+              </div>
+
+              {/* Method 5: vibezcheck.supabase & vibezcheck.database */}
+              <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-100 dark:border-zinc-800 pb-3">
+                  <h3 className="font-mono text-sm font-bold text-slate-900 dark:text-white">
+                    vibezcheck.supabase() &amp; vibezcheck.database()
+                  </h3>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-700 dark:text-cyan-300">
+                    Database Sinks
+                  </span>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">
+                  Asynchronous database adapters for logging usage events without adding latency to the client stream.
+                </p>
+                <pre className="p-3.5 rounded-xl bg-slate-900 text-slate-100 text-xs font-mono overflow-x-auto leading-relaxed border border-slate-800">
+{`// 1. First-party Supabase Adapter
+vibezcheck.supabase(supabaseClient, {
+  table: 'ai_usage_events',
+  autoDebitWallet: true,
+});
+
+// 2. Universal DIY Adapter (Drizzle, Kysely, Prisma, Webhooks)
+vibezcheck.database(async (event) => {
+  await db.insert(aiUsageEvents).values({
+    customerId: event.customerId,
+    model: event.model,
+    promptTokens: event.promptTokens,
+    completionTokens: event.completionTokens,
+    costUSD: event.billedCostUSD,
+  });
+});`}
+                </pre>
+              </div>
+
+              {/* Method 6: Serverless Flush */}
+              <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-100 dark:border-zinc-800 pb-3">
+                  <h3 className="font-mono text-sm font-bold text-slate-900 dark:text-white">
+                    vibezcheck.flush()
+                  </h3>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-700 dark:text-amber-300">
+                    Serverless Lifecycle
+                  </span>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">
+                  Flushes all in-memory usage events and batched database writes before a serverless function terminates.
+                </p>
+                <pre className="p-3.5 rounded-xl bg-slate-900 text-slate-100 text-xs font-mono overflow-x-auto leading-relaxed border border-slate-800">
+{`// Inside Next.js App Router (Node.js or Edge runtime)
+globalThis.after(() => {
+  vibezcheck.flush();
+});
+
+// Or using Next.js waitUntil
+waitUntil(vibezcheck.flush());`}
+                </pre>
+              </div>
+
+              {/* Frontend Components: <VibezReceipt /> & <VibezCheck /> */}
+              <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-100 dark:border-zinc-800 pb-3">
+                  <h3 className="font-mono text-sm font-bold text-slate-900 dark:text-white">
+                    &lt;VibezReceipt /&gt; &amp; &lt;VibezCheck /&gt;
+                  </h3>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
+                    React UI Components
+                  </span>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">
+                  Drop-in React micro-components for displaying telemetry, token splits, and live cost receipts in chat boxes or agent workflows.
+                </p>
+                <pre className="p-3.5 rounded-xl bg-slate-900 text-slate-100 text-xs font-mono overflow-x-auto leading-relaxed border border-slate-800">
+{`import { VibezReceipt, VibezCheck } from 'vibezcheck/ui';
+
+export function ChatMessage({ message }) {
+  return (
+    <div>
+      <p>{message.content}</p>
+      {/* Renders inline micro-badge: "$0.0014 · 120 tok · gpt-4o-mini" */}
+      <VibezReceipt
+        costUSD={message.costUSD}
+        tokens={message.tokens}
+        model={message.model}
+      />
+    </div>
+  );
+}`}
+                </pre>
               </div>
             </div>
           )}

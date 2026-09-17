@@ -9,19 +9,17 @@ import {
   ChevronRight,
   ExternalLink,
   Sparkles,
-  Volume2,
   CreditCard,
+  Calculator as CalcIcon,
   ShieldCheck,
-  Percent,
-  LifeBuoy,
   Bot,
   RotateCcw,
-  CheckCircle2,
   ShieldAlert,
   Search,
-  BarChart2,
   Terminal,
-  AlertTriangle,
+  Database,
+  Zap,
+  TrendingUp,
 } from 'lucide-react';
 import {
   Sandbox,
@@ -32,202 +30,925 @@ import {
 } from './ai-elements/sandbox';
 import { VibezReceipt } from '@/components/vibez-meter';
 import { LobeIcon } from './lobe-icon';
+import { ModelsMarquee } from './models-marquee';
 
-export type CapabilityTab = 'chatbot' | 'text' | 'image' | 'speech' | 'transcription' | 'video';
-
-export type AgentRecipeTab = 'stripe' | 'circuit-breaker' | 'margin' | 'abort' | 'session';
+export type ShowcaseTab =
+  | 'chatbot'
+  | 'tools-session'
+  | 'spend-limit'
+  | 'database'
+  | 'stripe-metronome'
+  | 'calculator';
 
 export interface AiSdkShowcaseProps {
-  audienceTab?: 'humans' | 'agents';
-  onAudienceChange?: (tab: 'humans' | 'agents') => void;
+  audienceTab?: 'humans' | 'agents' | 'calculator';
+  onAudienceChange?: (tab: 'humans' | 'agents' | 'calculator') => void;
   onProviderPkgChange?: (pkg: string) => void;
+  onCorePkgChange?: (pkg: string) => void;
+  cmdTab?: 'cli' | 'core' | 'ai-sdk';
 }
 
-export type RuntimeEngine = 'gateway' | 'provider' | 'custom';
-
-export interface AgentRecipeConfig {
-  id: AgentRecipeTab;
-  name: string;
-  badge: string;
-  iconName: string;
-  prompt: string;
-  getOutput: (providerName: string, modelId: string) => string;
-}
-
-export const AGENT_RECIPES: Record<AgentRecipeTab, AgentRecipeConfig> = {
-  stripe: {
-    id: 'stripe',
-    name: 'Customer Wallet',
-    badge: 'Stripe',
-    iconName: 'stripe',
-    prompt: 'Audit infrastructure expenditure for customer cus_live_94x19K and itemize anomalies.',
-    getOutput: (provider, model) =>
-      `Reconciliation complete via ${provider} (${model}): Analyzed 1,420 infrastructure events for cus_live_94x19K. Identified 2 anomalies: egress spike (+38%) in us-east-1 and an orphaned GPU cluster ($142/mo). All usage metered in real time against customer balance.`,
-  },
-  'circuit-breaker': {
-    id: 'circuit-breaker',
-    name: 'Safety Switch',
-    badge: 'Safety',
-    iconName: 'shield',
-    prompt: 'Autonomous agent: recursively crawl web endpoints to index API schemas.',
-    getOutput: (provider, model) =>
-      `Recursive agent reasoning loop initialized with ${provider} (${model}). Loop #1 indexed root sitemap. Loop #2 discovered circular redirect loop... Execution severed immediately by VibezCheck circuit breaker at the $0.50 trip wire.`,
-  },
-  margin: {
-    id: 'margin',
-    name: 'Profit Markup',
-    badge: 'Margin',
-    iconName: 'percent',
-    prompt: 'Generate enterprise competitor benchmark matrix across pricing and latency.',
-    getOutput: (provider, model) =>
-      `Benchmark synthesized via ${provider} (${model}): Generated competitive analysis matrix across 5 industry providers. Unit economics and SLAs calculated with zero added latency.`,
-  },
-  abort: {
-    id: 'abort',
-    name: 'Disconnect Shield',
-    badge: 'Abort',
-    iconName: 'life-buoy',
-    prompt: 'Generate comprehensive 50-page technical architecture blueprint.',
-    getOutput: (provider, model) =>
-      `Architecture Blueprint via ${provider} (${model}): Section 1.1 Core Ingestion Engine with partitioned consumer streams... [Stream severed by client disconnect after 142 tokens — all partial tokens captured & billed]`,
-  },
-  session: {
-    id: 'session',
-    name: 'Spending Limit',
-    badge: 'Session',
-    iconName: 'bot',
-    prompt: 'Research market trends and compile financial charts within $2 budget.',
-    getOutput: (provider, model) =>
-      `Orchestrated 3 autonomous tool invocations (webSearchTool, dataAnalysisTool, codeExecutionTool) with ${provider} (${model}) under a unified $2.00 session budget. All tool steps executed within cap.`,
-  },
-};
-
-interface ModelPreset {
+export interface ModelPreset {
   id: string;
   name: string;
-  provider: string;
+  provider: 'OpenAI' | 'Anthropic' | 'Google' | 'DeepSeek' | 'xAI';
+  coreSdkPkg: string;
   providerPkg: string;
   providerFn: string;
   modelString: string;
   modelId: string;
   badge: string;
   iconName: string;
-  prompt: string;
-  output: string;
+  inputPer1M: number;
+  outputPer1M: number;
+  cachedInputPer1M?: number;
   tokens: number;
   costUSD: number;
   latencyMs: number;
 }
 
-const PRESETS: ModelPreset[] = [
+export interface CompanyInfo {
+  id: string;
+  name: 'OpenAI' | 'Anthropic' | 'Google' | 'DeepSeek' | 'xAI';
+  iconName: string;
+  defaultModelId: string;
+}
+
+export const COMPANIES: CompanyInfo[] = [
+  { id: 'openai', name: 'OpenAI', iconName: 'openai', defaultModelId: 'gpt-5.6-sol' },
+  { id: 'anthropic', name: 'Anthropic', iconName: 'anthropic', defaultModelId: 'claude-3-7-sonnet' },
+  { id: 'google', name: 'Google', iconName: 'google-color', defaultModelId: 'gemini-3.7-flash' },
+  { id: 'deepseek', name: 'DeepSeek', iconName: 'deepseek-color', defaultModelId: 'deepseek-v4-pro' },
+  { id: 'xai', name: 'xAI', iconName: 'grok', defaultModelId: 'grok-4.6' },
+];
+
+export function getCompanyIcon(provider: string): string {
+  const p = provider.toLowerCase();
+  if (p.includes('openai')) return 'openai';
+  if (p.includes('anthropic')) return 'anthropic';
+  if (p.includes('google')) return 'google-color';
+  if (p.includes('deepseek')) return 'deepseek-color';
+  if (p.includes('xai') || p.includes('grok')) return 'grok';
+  return 'lobehub';
+}
+
+/**
+ * Registry of Models & Rates sourced directly from akwaba/src/pricing/table.ts
+ */
+export const PRESETS: ModelPreset[] = [
+  // --- OpenAI (Modern & Reasoning) ---
   {
-    id: 'anthropic-opus',
-    name: 'Anthropic Claude Opus',
-    provider: 'Anthropic',
-    providerPkg: '@ai-sdk/anthropic',
-    providerFn: 'anthropic',
-    modelString: 'anthropic/claude-opus-4.8',
-    modelId: 'claude-opus-4.8',
-    badge: 'AI',
-    iconName: 'claude-color',
-    prompt: 'Explain the concept of quantum entanglement.',
-    output:
-      'Quantum entanglement is when two particles become linked so that measuring one instantly affects the other, no matter the distance between them.',
-    tokens: 154,
-    costUSD: 0.00185,
-    latencyMs: 142,
-  },
-  {
-    id: 'xai-grok',
-    name: 'xAI Grok 4.6',
-    provider: 'xAI',
-    providerPkg: '@ai-sdk/xai',
-    providerFn: 'xai',
-    modelString: 'xai/grok-4.6',
-    modelId: 'grok-4.6',
-    badge: '𝕏',
-    iconName: 'grok',
-    prompt: 'Explain the concept of quantum entanglement.',
-    output:
-      "Entanglement is nature's way of keeping a secret between two particles. Once entangled, observing one instantly reveals information about the other — no signal needed, no matter how far apart they are.",
-    tokens: 142,
-    costUSD: 0.00085,
-    latencyMs: 98,
-  },
-  {
-    id: 'openai-gpt4o',
-    name: 'OpenAI GPT-4o Mini',
+    id: 'gpt-5.6-sol',
+    name: 'GPT-5.6 Sol',
     provider: 'OpenAI',
+    coreSdkPkg: 'openai',
+    providerPkg: '@ai-sdk/openai',
+    providerFn: 'openai',
+    modelString: 'openai/gpt-5.6-sol',
+    modelId: 'gpt-5.6-sol',
+    badge: 'Sol',
+    iconName: 'openai',
+    inputPer1M: 4.0,
+    outputPer1M: 20.0,
+    cachedInputPer1M: 0.4,
+    tokens: 150,
+    costUSD: 0.0014,
+    latencyMs: 110,
+  },
+  {
+    id: 'gpt-5.6-terra',
+    name: 'GPT-5.6 Terra',
+    provider: 'OpenAI',
+    coreSdkPkg: 'openai',
+    providerPkg: '@ai-sdk/openai',
+    providerFn: 'openai',
+    modelString: 'openai/gpt-5.6-terra',
+    modelId: 'gpt-5.6-terra',
+    badge: 'Terra',
+    iconName: 'openai',
+    inputPer1M: 2.0,
+    outputPer1M: 12.0,
+    cachedInputPer1M: 0.2,
+    tokens: 145,
+    costUSD: 0.0008,
+    latencyMs: 105,
+  },
+  {
+    id: 'gpt-5.6-luna',
+    name: 'GPT-5.6 Luna',
+    provider: 'OpenAI',
+    coreSdkPkg: 'openai',
+    providerPkg: '@ai-sdk/openai',
+    providerFn: 'openai',
+    modelString: 'openai/gpt-5.6-luna',
+    modelId: 'gpt-5.6-luna',
+    badge: 'Luna',
+    iconName: 'openai',
+    inputPer1M: 0.2,
+    outputPer1M: 1.2,
+    cachedInputPer1M: 0.02,
+    tokens: 140,
+    costUSD: 0.00008,
+    latencyMs: 75,
+  },
+  {
+    id: 'gpt-5',
+    name: 'GPT-5',
+    provider: 'OpenAI',
+    coreSdkPkg: 'openai',
+    providerPkg: '@ai-sdk/openai',
+    providerFn: 'openai',
+    modelString: 'openai/gpt-5',
+    modelId: 'gpt-5',
+    badge: 'GPT-5',
+    iconName: 'openai',
+    inputPer1M: 4.0,
+    outputPer1M: 20.0,
+    cachedInputPer1M: 0.4,
+    tokens: 160,
+    costUSD: 0.0015,
+    latencyMs: 120,
+  },
+  {
+    id: 'gpt-5-mini',
+    name: 'GPT-5 Mini',
+    provider: 'OpenAI',
+    coreSdkPkg: 'openai',
+    providerPkg: '@ai-sdk/openai',
+    providerFn: 'openai',
+    modelString: 'openai/gpt-5-mini',
+    modelId: 'gpt-5-mini',
+    badge: 'Mini',
+    iconName: 'openai',
+    inputPer1M: 0.2,
+    outputPer1M: 1.2,
+    cachedInputPer1M: 0.02,
+    tokens: 135,
+    costUSD: 0.000075,
+    latencyMs: 80,
+  },
+  {
+    id: 'gpt-4o',
+    name: 'GPT-4o (Omni)',
+    provider: 'OpenAI',
+    coreSdkPkg: 'openai',
+    providerPkg: '@ai-sdk/openai',
+    providerFn: 'openai',
+    modelString: 'openai/gpt-4o',
+    modelId: 'gpt-4o',
+    badge: '4o',
+    iconName: 'openai',
+    inputPer1M: 2.5,
+    outputPer1M: 10.0,
+    cachedInputPer1M: 1.25,
+    tokens: 140,
+    costUSD: 0.00075,
+    latencyMs: 115,
+  },
+  {
+    id: 'gpt-4o-mini',
+    name: 'GPT-4o Mini',
+    provider: 'OpenAI',
+    coreSdkPkg: 'openai',
     providerPkg: '@ai-sdk/openai',
     providerFn: 'openai',
     modelString: 'openai/gpt-4o-mini',
     modelId: 'gpt-4o-mini',
-    badge: 'GPT',
+    badge: 'Mini',
     iconName: 'openai',
-    prompt: 'Explain the concept of quantum entanglement.',
-    output:
-      'Quantum computing leverages superposition and entanglement to solve complex mathematical problems exponentially faster than traditional binary systems.',
+    inputPer1M: 0.15,
+    outputPer1M: 0.6,
+    cachedInputPer1M: 0.075,
     tokens: 138,
-    costUSD: 0.00069,
-    latencyMs: 110,
+    costUSD: 0.000045,
+    latencyMs: 85,
   },
   {
-    id: 'google-gemini',
-    name: 'Google Gemini 2.5',
+    id: 'o3-mini',
+    name: 'o3-mini',
+    provider: 'OpenAI',
+    coreSdkPkg: 'openai',
+    providerPkg: '@ai-sdk/openai',
+    providerFn: 'openai',
+    modelString: 'openai/o3-mini',
+    modelId: 'o3-mini',
+    badge: 'o3',
+    iconName: 'openai',
+    inputPer1M: 1.1,
+    outputPer1M: 4.4,
+    cachedInputPer1M: 0.55,
+    tokens: 180,
+    costUSD: 0.00043,
+    latencyMs: 165,
+  },
+
+  // --- Anthropic (Modern & Extended Thinking) ---
+  {
+    id: 'claude-3-7-sonnet',
+    name: 'Claude 3.7 Sonnet',
+    provider: 'Anthropic',
+    coreSdkPkg: '@anthropic-ai/sdk',
+    providerPkg: '@ai-sdk/anthropic',
+    providerFn: 'anthropic',
+    modelString: 'anthropic/claude-3-7-sonnet',
+    modelId: 'claude-3-7-sonnet',
+    badge: '3.7',
+    iconName: 'claude-color',
+    inputPer1M: 0.59,
+    outputPer1M: 2.93,
+    cachedInputPer1M: 0.3,
+    tokens: 154,
+    costUSD: 0.00021,
+    latencyMs: 140,
+  },
+  {
+    id: 'claude-sonnet-5',
+    name: 'Claude Sonnet 5',
+    provider: 'Anthropic',
+    coreSdkPkg: '@anthropic-ai/sdk',
+    providerPkg: '@ai-sdk/anthropic',
+    providerFn: 'anthropic',
+    modelString: 'anthropic/claude-sonnet-5',
+    modelId: 'claude-sonnet-5',
+    badge: 'Sonnet 5',
+    iconName: 'claude-color',
+    inputPer1M: 2.0,
+    outputPer1M: 10.0,
+    cachedInputPer1M: 0.3,
+    tokens: 155,
+    costUSD: 0.0007,
+    latencyMs: 130,
+  },
+  {
+    id: 'claude-3-5-sonnet',
+    name: 'Claude 3.5 Sonnet',
+    provider: 'Anthropic',
+    coreSdkPkg: '@anthropic-ai/sdk',
+    providerPkg: '@ai-sdk/anthropic',
+    providerFn: 'anthropic',
+    modelString: 'anthropic/claude-3-5-sonnet',
+    modelId: 'claude-3-5-sonnet',
+    badge: 'Sonnet',
+    iconName: 'claude-color',
+    inputPer1M: 3.0,
+    outputPer1M: 15.0,
+    cachedInputPer1M: 0.3,
+    tokens: 150,
+    costUSD: 0.00105,
+    latencyMs: 135,
+  },
+  {
+    id: 'claude-3-5-haiku',
+    name: 'Claude 3.5 Haiku',
+    provider: 'Anthropic',
+    coreSdkPkg: '@anthropic-ai/sdk',
+    providerPkg: '@ai-sdk/anthropic',
+    providerFn: 'anthropic',
+    modelString: 'anthropic/claude-3-5-haiku',
+    modelId: 'claude-3-5-haiku',
+    badge: 'Haiku',
+    iconName: 'claude-color',
+    inputPer1M: 0.8,
+    outputPer1M: 4.0,
+    cachedInputPer1M: 0.08,
+    tokens: 130,
+    costUSD: 0.00024,
+    latencyMs: 65,
+  },
+  {
+    id: 'claude-opus-5',
+    name: 'Claude Opus 5',
+    provider: 'Anthropic',
+    coreSdkPkg: '@anthropic-ai/sdk',
+    providerPkg: '@ai-sdk/anthropic',
+    providerFn: 'anthropic',
+    modelString: 'anthropic/claude-opus-5',
+    modelId: 'claude-opus-5',
+    badge: 'Opus 5',
+    iconName: 'claude-color',
+    inputPer1M: 5.0,
+    outputPer1M: 25.0,
+    cachedInputPer1M: 1.5,
+    tokens: 165,
+    costUSD: 0.00175,
+    latencyMs: 160,
+  },
+  {
+    id: 'claude-3-opus',
+    name: 'Claude 3 Opus',
+    provider: 'Anthropic',
+    coreSdkPkg: '@anthropic-ai/sdk',
+    providerPkg: '@ai-sdk/anthropic',
+    providerFn: 'anthropic',
+    modelString: 'anthropic/claude-3-opus',
+    modelId: 'claude-3-opus',
+    badge: 'Opus',
+    iconName: 'claude-color',
+    inputPer1M: 15.0,
+    outputPer1M: 75.0,
+    cachedInputPer1M: 1.5,
+    tokens: 160,
+    costUSD: 0.00585,
+    latencyMs: 180,
+  },
+
+  // --- Google Gemini (Modern & Thoughts) ---
+  {
+    id: 'gemini-3.7-flash',
+    name: 'Gemini 3.7 Flash',
     provider: 'Google',
+    coreSdkPkg: '@google/genai',
+    providerPkg: '@ai-sdk/google',
+    providerFn: 'google',
+    modelString: 'google/gemini-3.7-flash',
+    modelId: 'gemini-3.7-flash',
+    badge: '3.7',
+    iconName: 'gemini-color',
+    inputPer1M: 0.75,
+    outputPer1M: 3.75,
+    cachedInputPer1M: 0.18,
+    tokens: 150,
+    costUSD: 0.00026,
+    latencyMs: 80,
+  },
+  {
+    id: 'gemini-3.5-flash',
+    name: 'Gemini 3.5 Flash',
+    provider: 'Google',
+    coreSdkPkg: '@google/genai',
+    providerPkg: '@ai-sdk/google',
+    providerFn: 'google',
+    modelString: 'google/gemini-3.5-flash',
+    modelId: 'gemini-3.5-flash',
+    badge: '3.5',
+    iconName: 'gemini-color',
+    inputPer1M: 1.5,
+    outputPer1M: 9.0,
+    cachedInputPer1M: 0.38,
+    tokens: 150,
+    costUSD: 0.0006,
+    latencyMs: 85,
+  },
+  {
+    id: 'gemini-2.5-flash',
+    name: 'Gemini 2.5 Flash',
+    provider: 'Google',
+    coreSdkPkg: '@google/genai',
     providerPkg: '@ai-sdk/google',
     providerFn: 'google',
     modelString: 'google/gemini-2.5-flash',
     modelId: 'gemini-2.5-flash',
-    badge: '✦',
+    badge: '2.5',
     iconName: 'gemini-color',
-    prompt: 'Explain the concept of quantum entanglement.',
-    output:
-      'Wave-particle duality describes how light exhibits wave interference patterns while simultaneously transferring energy in discrete quantum packets called photons.',
+    inputPer1M: 0.15,
+    outputPer1M: 0.6,
+    cachedInputPer1M: 0.0375,
     tokens: 148,
-    costUSD: 0.00032,
+    costUSD: 0.000045,
     latencyMs: 85,
+  },
+  {
+    id: 'gemini-2.0-flash',
+    name: 'Gemini 2.0 Flash',
+    provider: 'Google',
+    coreSdkPkg: '@google/genai',
+    providerPkg: '@ai-sdk/google',
+    providerFn: 'google',
+    modelString: 'google/gemini-2.0-flash',
+    modelId: 'gemini-2.0-flash',
+    badge: '2.0',
+    iconName: 'gemini-color',
+    inputPer1M: 0.1,
+    outputPer1M: 0.4,
+    cachedInputPer1M: 0.025,
+    tokens: 145,
+    costUSD: 0.000030,
+    latencyMs: 70,
+  },
+  {
+    id: 'gemini-1.5-pro',
+    name: 'Gemini 1.5 Pro',
+    provider: 'Google',
+    coreSdkPkg: '@google/genai',
+    providerPkg: '@ai-sdk/google',
+    providerFn: 'google',
+    modelString: 'google/gemini-1.5-pro',
+    modelId: 'gemini-1.5-pro',
+    badge: 'Pro',
+    iconName: 'gemini-color',
+    inputPer1M: 1.25,
+    outputPer1M: 5.0,
+    cachedInputPer1M: 0.3125,
+    tokens: 155,
+    costUSD: 0.00039,
+    latencyMs: 130,
+  },
+
+  // --- DeepSeek ---
+  {
+    id: 'deepseek-v4-pro',
+    name: 'DeepSeek V4 Pro',
+    provider: 'DeepSeek',
+    coreSdkPkg: 'openai',
+    providerPkg: '@ai-sdk/deepseek',
+    providerFn: 'deepseek',
+    modelString: 'deepseek/deepseek-v4-pro',
+    modelId: 'deepseek-v4-pro',
+    badge: 'V4 Pro',
+    iconName: 'deepseek-color',
+    inputPer1M: 0.66,
+    outputPer1M: 1.98,
+    cachedInputPer1M: 0.15,
+    tokens: 160,
+    costUSD: 0.00017,
+    latencyMs: 140,
+  },
+  {
+    id: 'deepseek-v4-flash',
+    name: 'DeepSeek V4 Flash',
+    provider: 'DeepSeek',
+    coreSdkPkg: 'openai',
+    providerPkg: '@ai-sdk/deepseek',
+    providerFn: 'deepseek',
+    modelString: 'deepseek/deepseek-v4-flash',
+    modelId: 'deepseek-v4-flash',
+    badge: 'V4 Flash',
+    iconName: 'deepseek-color',
+    inputPer1M: 0.22,
+    outputPer1M: 0.66,
+    cachedInputPer1M: 0.05,
+    tokens: 145,
+    costUSD: 0.000055,
+    latencyMs: 90,
   },
   {
     id: 'deepseek-r1',
     name: 'DeepSeek R1',
     provider: 'DeepSeek',
+    coreSdkPkg: 'openai',
     providerPkg: '@ai-sdk/deepseek',
     providerFn: 'deepseek',
     modelString: 'deepseek/deepseek-r1',
     modelId: 'deepseek-r1',
-    badge: 'DS',
+    badge: 'R1',
     iconName: 'deepseek-color',
-    prompt: 'Explain the concept of quantum entanglement.',
-    output:
-      'P contains problems whose solutions can be calculated in polynomial time, while NP contains problems whose solutions can be verified in polynomial time.',
+    inputPer1M: 0.55,
+    outputPer1M: 2.19,
+    cachedInputPer1M: 0.14,
     tokens: 182,
-    costUSD: 0.00045,
+    costUSD: 0.000165,
     latencyMs: 165,
   },
+  {
+    id: 'deepseek-v3',
+    name: 'DeepSeek V3',
+    provider: 'DeepSeek',
+    coreSdkPkg: 'openai',
+    providerPkg: '@ai-sdk/deepseek',
+    providerFn: 'deepseek',
+    modelString: 'deepseek/deepseek-v3',
+    modelId: 'deepseek-v3',
+    badge: 'V3',
+    iconName: 'deepseek-color',
+    inputPer1M: 0.14,
+    outputPer1M: 0.28,
+    cachedInputPer1M: 0.014,
+    tokens: 145,
+    costUSD: 0.000035,
+    latencyMs: 90,
+  },
+
+  // --- xAI Grok ---
+  {
+    id: 'grok-4.6',
+    name: 'xAI Grok 4.6',
+    provider: 'xAI',
+    coreSdkPkg: 'openai',
+    providerPkg: '@ai-sdk/xai',
+    providerFn: 'xai',
+    modelString: 'xai/grok-4.6',
+    modelId: 'grok-4.6',
+    badge: '4.6',
+    iconName: 'grok',
+    inputPer1M: 3.0,
+    outputPer1M: 15.0,
+    tokens: 155,
+    costUSD: 0.00105,
+    latencyMs: 110,
+  },
+  {
+    id: 'grok-3',
+    name: 'xAI Grok 3',
+    provider: 'xAI',
+    coreSdkPkg: 'openai',
+    providerPkg: '@ai-sdk/xai',
+    providerFn: 'xai',
+    modelString: 'xai/grok-3',
+    modelId: 'grok-3',
+    badge: '𝕏3',
+    iconName: 'grok',
+    inputPer1M: 3.0,
+    outputPer1M: 15.0,
+    tokens: 150,
+    costUSD: 0.00105,
+    latencyMs: 115,
+  },
+  {
+    id: 'grok-2',
+    name: 'xAI Grok 2',
+    provider: 'xAI',
+    coreSdkPkg: 'openai',
+    providerPkg: '@ai-sdk/xai',
+    providerFn: 'xai',
+    modelString: 'xai/grok-2',
+    modelId: 'grok-2',
+    badge: '𝕏2',
+    iconName: 'grok',
+    inputPer1M: 2.0,
+    outputPer1M: 10.0,
+    tokens: 142,
+    costUSD: 0.0007,
+    latencyMs: 98,
+  },
 ];
+
+export interface UseCaseData {
+  id: ShowcaseTab;
+  tabTitle: string;
+  chipLabel: string;
+  badge: string;
+  prompt: string;
+  getAiResponse: (
+    preset: ModelPreset,
+    vibezCheckEnabled: boolean,
+    marginMultiplier: string
+  ) => string;
+  interactiveTip: string;
+}
+
+export const USE_CASES: Record<ShowcaseTab, UseCaseData> = {
+  chatbot: {
+    id: 'chatbot',
+    tabTitle: 'Chatbot',
+    chipLabel: '⚡ 0ms Metering',
+    badge: 'Zero Latency (ZDR)',
+    prompt: 'How do I stream LLM tokens and get real-time cost telemetry without adding network latency?',
+    getAiResponse: (preset, enabled) =>
+      enabled
+        ? `VibezCheck meters every chunk offline using a local tokenizer index — 0ms added network latency! Notice the live receipt badge below showing exact wholesale cost ($${preset.costUSD.toFixed(5)}) and token count (${preset.tokens} tokens).`
+        : `⚠️ Warning: VibezCheck FinOps knob is OFF! The request is running completely unmetered with zero cost tracking, no token counting, and no budget safeguards.`,
+    interactiveTip: '💡 Try toggling the VibezCheck switch in the top-right header to see unmetered behavior.',
+  },
+  'tools-session': {
+    id: 'tools-session',
+    tabTitle: 'Tools & Sessions',
+    chipLabel: '🛠️ Tools & $2 Budget',
+    badge: 'sessionBudgetUSD: $2.00',
+    prompt: 'Run an autonomous research workflow with webSearch and calculator within my $2.00 budget.',
+    getAiResponse: (preset, enabled) =>
+      enabled
+        ? `Dispatched agent tools: webSearch ($0.01) and calculator ($0.005). Total session spend is $${(preset.costUSD + 0.015).toFixed(5)} / $2.00 limit. The session wrapper guarantees your multi-turn agent never overspends.`
+        : `⚠️ Unmetered agent execution: Tool calls and recursive loops are firing without a session budget ceiling. High risk of runaway token consumption!`,
+    interactiveTip: '💡 Inspect the Tool Call Latency card below to view per-tool pricing ($0.01 / $0.005) and cumulative spend.',
+  },
+  'spend-limit': {
+    id: 'spend-limit',
+    tabTitle: 'Spend Limit',
+    chipLabel: '🛡️ $0.50 Circuit Breaker',
+    badge: 'maxCostPerCallUSD: $0.50',
+    prompt: 'What stops this model from getting caught in an infinite loop or racking up a $50 bill?',
+    getAiResponse: (preset, enabled) =>
+      enabled
+        ? `Our maxCostPerCallUSD: 0.50 circuit breaker is armed. If recursive loops exceed $0.50 or 4,000 tokens, VibezCheck instantly aborts the stream with a CircuitBreakerError to protect your wallet.`
+        : `⚠️ Circuit breaker is disabled! In an infinite loop, this agent will continue running until provider rate limits or your credit card limit is hit.`,
+    interactiveTip: '💡 Click "Simulate Runaway Loop" below to watch the circuit breaker trip in real time!',
+  },
+  database: {
+    id: 'database',
+    tabTitle: 'Database',
+    chipLabel: '🗄️ Supabase Ledger',
+    badge: 'vibezcheck.supabase()',
+    prompt: 'Where does my customer usage data go without slowing down the hot streaming path?',
+    getAiResponse: (preset, enabled) =>
+      enabled
+        ? `Usage events are asynchronously flushed straight to your Supabase vibez_usage table. Your streaming responses remain lightning fast while your balance ledger stays perfectly synchronized.`
+        : `⚠️ Database ledger inactive: Usage is not logged to Supabase. Billing reconciliation cannot be performed.`,
+    interactiveTip: '💡 Click "Simulate Request" below to deduct wholesale cost from the live Supabase ledger.',
+  },
+  'stripe-metronome': {
+    id: 'stripe-metronome',
+    tabTitle: 'Stripe & Metronome',
+    chipLabel: '💳 Metronome Margin',
+    badge: 'pricing: { margin }',
+    prompt: 'How do I charge my customers with a profit margin and bill them through Metronome?',
+    getAiResponse: (preset, enabled, marginMultiplier) =>
+      enabled
+        ? `With pricing: { margin: ${marginMultiplier} }, wholesale cost ($${preset.costUSD.toFixed(5)}) is marked up to $${(preset.costUSD * Number(marginMultiplier)).toFixed(5)} retail and emitted directly to Metronome /v1/ingest.`
+        : `⚠️ Billing integration offline: No Metronome events emitted. Margins cannot be applied.`,
+    interactiveTip: '💡 Drag the profit margin slider below to see wholesale vs retail pricing adjust live.',
+  },
+  calculator: {
+    id: 'calculator',
+    tabTitle: 'Calculator',
+    chipLabel: '🧮 Cost Calculator',
+    badge: 'tokenCost() • Nano Math',
+    prompt: 'How do I calculate nano-dollar token costs and profit margins before deploying to production?',
+    getAiResponse: (preset, enabled, marginMultiplier) =>
+      enabled
+        ? `Using VibezCheck's exact BigInt nano-precision pricing engine, ${preset.name} costs $${preset.costUSD.toFixed(5)} wholesale. With a ${marginMultiplier}x customer margin, retail price is marked up and logged to Metronome.`
+        : `⚠️ FinOps calculation offline: Enable VibezCheck to calculate live wholesale vs retail pricing.`,
+    interactiveTip: '💡 Use the retro handheld calculator and sliders below to dial in instruction, prompt, and completion tokens.',
+  },
+};
+
+type TokenType = 'kw' | 'fn' | 'str' | 'var' | 'num' | 'comment' | 'plain';
+interface CodeToken {
+  type: TokenType;
+  text: string;
+}
+interface CodeLine {
+  num: number;
+  tokens: CodeToken[];
+}
+
+function tokenizeTypeScript(code: string): CodeLine[] {
+  const lines = code.trim().split('\n');
+  return lines.map((line, idx) => {
+    const tokens: CodeToken[] = [];
+    const tokenRegex =
+      /(\/\/.*$)|('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"|`(?:[^`\\]|\\.)*`)|(\b(?:import|export|from|const|let|var|async|await|function|return|new|if|else|typeof|as)\b)|(\b\d+(?:\.\d+)?\b)|([a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*\())|([a-zA-Z_$][a-zA-Z0-9_$]*)|(\s+|[^\s\w'"`]+)/g;
+
+    let match: RegExpExecArray | null;
+    let safety = 0;
+    while ((match = tokenRegex.exec(line)) !== null && safety++ < 1000) {
+      if (match[0].length === 0) {
+        tokenRegex.lastIndex++;
+        continue;
+      }
+      if (match[1]) {
+        tokens.push({ type: 'comment', text: match[1] });
+      } else if (match[2]) {
+        tokens.push({ type: 'str', text: match[2] });
+      } else if (match[3]) {
+        tokens.push({ type: 'kw', text: match[3] });
+      } else if (match[4]) {
+        tokens.push({ type: 'num', text: match[4] });
+      } else if (match[5]) {
+        tokens.push({ type: 'fn', text: match[5] });
+      } else if (match[6]) {
+        tokens.push({ type: 'var', text: match[6] });
+      } else if (match[7]) {
+        tokens.push({ type: 'plain', text: match[7] });
+      }
+    }
+
+    if (tokens.length === 0) {
+      tokens.push({ type: 'plain', text: line || '' });
+    }
+
+    return { num: idx + 1, tokens };
+  });
+}
 
 export function AiSdkShowcase({
   audienceTab = 'humans',
   onAudienceChange,
   onProviderPkgChange,
+  onCorePkgChange,
+  cmdTab = 'core',
 }: AiSdkShowcaseProps) {
-  const [activeTab, setActiveTab] = useState<CapabilityTab>('chatbot');
-  const [activeAgentTab, setActiveAgentTab] = useState<AgentRecipeTab>('stripe');
-  const [presetIndex, setPresetIndex] = useState<number>(0);
-  const [runtime, setRuntime] = useState<RuntimeEngine>('provider');
+  const [activeTab, setActiveTab] = useState<ShowcaseTab>('chatbot');
+  const [presetIndex, setPresetIndex] = useState<number>(0); // GPT-5.6 Sol default
   const [copied, setCopied] = useState<boolean>(false);
   const [vibezCheckEnabled, setVibezCheckEnabled] = useState<boolean>(true);
 
-  // Interactive demo states for agent recipes
-  const [stripeCredits, setStripeCredits] = useState<number>(15.0);
-  const [topUpSuccess, setTopUpSuccess] = useState<boolean>(false);
-  const [fuseTripped, setFuseTripped] = useState<boolean>(true);
+  // FinOps Interactive States
   const [marginPercent, setMarginPercent] = useState<number>(30);
-  const [abortSimulated, setAbortSimulated] = useState<boolean>(true);
+  const marginMultiplier = (1 + marginPercent / 100).toFixed(2);
+  const [metronomeEvents, setMetronomeEvents] = useState<number>(1);
+  const [metronomeSyncing, setMetronomeSyncing] = useState<boolean>(false);
+  const [lastTxnId, setLastTxnId] = useState<string>('txn_live_84920a');
+
+  // Supabase Interactive Ledger States
+  const [supabaseBalance, setSupabaseBalance] = useState<number>(25.0);
+  const [supabaseRows, setSupabaseRows] = useState<
+    Array<{ id: string; customerId: string; model: string; tokens: number; costUSD: number; time: string }>
+  >([
+    {
+      id: 'row_948a',
+      customerId: 'cust_supa_99',
+      model: 'gpt-5.6-sol',
+      tokens: 840,
+      costUSD: 0.00168,
+      time: 'Just now',
+    },
+  ]);
+  const [supabaseSyncing, setSupabaseSyncing] = useState<boolean>(false);
+
+  // Agent Session & Safety Fuse States
+  const [fuseTripped, setFuseTripped] = useState<boolean>(true);
   const [isSimulatingLoop, setIsSimulatingLoop] = useState<boolean>(false);
   const [simulatedCost, setSimulatedCost] = useState<number>(0.5002);
   const [simulatedStep, setSimulatedStep] = useState<number>(3);
+
+  // ✦ Pasted Prompt Evaluation States (Instructions, Input, Output)
+  const [evalInstructions, setEvalInstructions] = useState<string>(
+    'You are an expert AI software architect. Analyze requirements and implement modular, high-performance TypeScript components.'
+  );
+  const [evalInput, setEvalInput] = useState<string>(
+    'How do I implement real-time token metering and usage-based Stripe billing for my AI streaming route?'
+  );
+  const [evalOutput, setEvalOutput] = useState<string>(
+    'Use VibezCheck to wrap your AI SDK stream. It meters tokens with 0ms added latency, enforces cost fuses, and dispatches usage to Metronome or Supabase.'
+  );
+
+  const estimateTokens = (text: string): number => {
+    if (!text || text.trim().length === 0) return 0;
+    const chars = text.length;
+    const words = text.trim().split(/\s+/).filter(Boolean).length;
+    return Math.max(1, Math.round((chars / 4 + words * 1.33) / 2));
+  };
+
+  // ✦ Handheld Retro Calculator States (Synced with prompt textareas & sliders)
+  const [calcInstTokens, setCalcInstTokens] = useState<number>(350);
+  const [calcInTokens, setCalcInTokens] = useState<number>(1200);
+  const [calcOutTokens, setCalcOutTokens] = useState<number>(450);
+  const [calcDisplayMode, setCalcDisplayMode] = useState<'usd' | 'tokens'>('usd');
+  const [calcFocusedField, setCalcFocusedField] = useState<'inst' | 'in' | 'out'>('in');
+
+  const handleInstructionsChange = (val: string) => {
+    setEvalInstructions(val);
+    setCalcInstTokens(estimateTokens(val));
+  };
+
+  const handleInputChange = (val: string) => {
+    setEvalInput(val);
+    setCalcInTokens(estimateTokens(val));
+  };
+
+  const handleOutputChange = (val: string) => {
+    setEvalOutput(val);
+    setCalcOutTokens(estimateTokens(val));
+  };
+
+  const handleLoadSamplePrompt = () => {
+    const inst = 'You are an expert AI software architect. Analyze requirements and implement modular, high-performance TypeScript components.';
+    const input = 'How do I implement real-time token metering and usage-based Stripe billing for my AI streaming route?';
+    const output = 'Use VibezCheck to wrap your AI SDK stream. It meters tokens with 0ms added latency, enforces cost fuses, and dispatches usage to Metronome or Supabase.';
+    setEvalInstructions(inst);
+    setEvalInput(input);
+    setEvalOutput(output);
+    setCalcInstTokens(estimateTokens(inst));
+    setCalcInTokens(estimateTokens(input));
+    setCalcOutTokens(estimateTokens(output));
+  };
+
+  const handleClearPrompt = () => {
+    setEvalInstructions('');
+    setEvalInput('');
+    setEvalOutput('');
+    setCalcInstTokens(0);
+    setCalcInTokens(0);
+    setCalcOutTokens(0);
+  };
+
+  const currentPreset = PRESETS[presetIndex] || PRESETS[0];
+  const currentUseCase = USE_CASES[activeTab] || USE_CASES.chatbot;
+
+  // Company switching helpers
+  const handlePrevCompany = () => {
+    const currentCompIdx = COMPANIES.findIndex(
+      (c) => c.name.toLowerCase() === currentPreset.provider.toLowerCase()
+    );
+    const nextCompIdx = currentCompIdx <= 0 ? COMPANIES.length - 1 : currentCompIdx - 1;
+    const targetCompany = COMPANIES[nextCompIdx];
+    const modelIdx = PRESETS.findIndex((p) => p.id === targetCompany.defaultModelId);
+    if (modelIdx !== -1) {
+      setPresetIndex(modelIdx);
+    } else {
+      const fallbackIdx = PRESETS.findIndex(
+        (p) => p.provider.toLowerCase() === targetCompany.name.toLowerCase()
+      );
+      if (fallbackIdx !== -1) setPresetIndex(fallbackIdx);
+    }
+  };
+
+  const handleNextCompany = () => {
+    const currentCompIdx = COMPANIES.findIndex(
+      (c) => c.name.toLowerCase() === currentPreset.provider.toLowerCase()
+    );
+    const nextCompIdx = currentCompIdx >= COMPANIES.length - 1 ? 0 : currentCompIdx + 1;
+    const targetCompany = COMPANIES[nextCompIdx];
+    const modelIdx = PRESETS.findIndex((p) => p.id === targetCompany.defaultModelId);
+    if (modelIdx !== -1) {
+      setPresetIndex(modelIdx);
+    } else {
+      const fallbackIdx = PRESETS.findIndex(
+        (p) => p.provider.toLowerCase() === targetCompany.name.toLowerCase()
+      );
+      if (fallbackIdx !== -1) setPresetIndex(fallbackIdx);
+    }
+  };
+
+  const handleSelectCompany = (companyName: string) => {
+    const targetCompany = COMPANIES.find(
+      (c) => c.name.toLowerCase() === companyName.toLowerCase()
+    );
+    if (!targetCompany) return;
+    const modelIdx = PRESETS.findIndex((p) => p.id === targetCompany.defaultModelId);
+    if (modelIdx !== -1) {
+      setPresetIndex(modelIdx);
+    } else {
+      const fallbackIdx = PRESETS.findIndex(
+        (p) => p.provider.toLowerCase() === targetCompany.name.toLowerCase()
+      );
+      if (fallbackIdx !== -1) setPresetIndex(fallbackIdx);
+    }
+  };
+
+  const handlePrevModel = () => {
+    setPresetIndex((prev) => (prev === 0 ? PRESETS.length - 1 : prev - 1));
+  };
+
+  const handleNextModel = () => {
+    setPresetIndex((prev) => (prev === PRESETS.length - 1 ? 0 : prev + 1));
+  };
+
+  const handleSelectModelFromMarquee = (modelName: string) => {
+    const q = modelName.toLowerCase();
+    const foundIdx = PRESETS.findIndex(
+      (p) =>
+        p.name.toLowerCase().includes(q) ||
+        p.modelId.toLowerCase().includes(q) ||
+        q.includes(p.name.toLowerCase()) ||
+        q.includes(p.provider.toLowerCase())
+    );
+    if (foundIdx !== -1) {
+      setPresetIndex(foundIdx);
+    }
+  };
+
+  // Sync with parent audience selector knob
+  useEffect(() => {
+    if (audienceTab === 'calculator') {
+      setActiveTab('calculator');
+    } else if (audienceTab === 'humans') {
+      if (activeTab === 'calculator') {
+        setActiveTab('chatbot');
+      }
+    } else if (audienceTab === 'agents') {
+      if (activeTab === 'chatbot' || activeTab === 'calculator') {
+        setActiveTab('tools-session');
+      }
+    }
+  }, [audienceTab]);
+
+  // Sync provider and core packages to parent
+  useEffect(() => {
+    onProviderPkgChange?.(currentPreset.providerPkg);
+    onCorePkgChange?.(currentPreset.coreSdkPkg);
+  }, [currentPreset, onProviderPkgChange, onCorePkgChange]);
+
+  const handleTabChange = (tab: ShowcaseTab) => {
+    setActiveTab(tab);
+    if (tab === 'calculator') {
+      onAudienceChange?.('calculator');
+    } else if (tab === 'chatbot') {
+      onAudienceChange?.('humans');
+    } else {
+      onAudienceChange?.('agents');
+    }
+  };
+
+  const handleSimulateMetronome = () => {
+    if (metronomeSyncing) return;
+    setMetronomeSyncing(true);
+    const newTxn = `txn_live_${Math.random().toString(36).slice(2, 8)}`;
+    setTimeout(() => {
+      setLastTxnId(newTxn);
+      setMetronomeEvents((prev) => prev + 1);
+      setMetronomeSyncing(false);
+    }, 400);
+  };
+
+  const handleSimulateSupabase = () => {
+    if (supabaseSyncing) return;
+    setSupabaseSyncing(true);
+    const cost = currentPreset.costUSD;
+    setTimeout(() => {
+      setSupabaseBalance((prev) => Math.max(0, Number((prev - cost).toFixed(5))));
+      const newRow = {
+        id: `row_${Math.random().toString(36).slice(2, 6)}`,
+        customerId: 'cust_supa_99',
+        model: currentPreset.modelId,
+        tokens: currentPreset.tokens,
+        costUSD: cost,
+        time: 'Just now',
+      };
+      setSupabaseRows((prev) => [newRow, ...prev.slice(0, 2)]);
+      setSupabaseSyncing(false);
+    }, 350);
+  };
 
   const handleSimulateLoop = () => {
     if (isSimulatingLoop) return;
@@ -261,2028 +982,532 @@ export function AiSdkShowcase({
     }, 450);
   };
 
-  const handleTopUpCredits = () => {
-    setTopUpSuccess(true);
-    let target = stripeCredits + 10;
-    let step = 0;
-    const interval = setInterval(() => {
-      step++;
-      setStripeCredits((prev) => Math.min(target, Number((prev + 1).toFixed(2))));
-      if (step >= 10) {
-        clearInterval(interval);
-        setStripeCredits(target);
-      }
-    }, 35);
-    setTimeout(() => setTopUpSuccess(false), 2500);
-  };
+  // Exact BigInt Nano-Precision Financial Math for Calculator
+  const calcTotalTok = calcInstTokens + calcInTokens + calcOutTokens;
+  const { calcWholesaleUSD, calcRetailUSD, calcProfitUSD } = useMemo(() => {
+    const totalInputTok = BigInt(calcInstTokens + calcInTokens);
+    const totalOutputTok = BigInt(calcOutTokens);
 
-  const currentPreset = PRESETS[presetIndex];
+    const rateInputNano = BigInt(Math.round((currentPreset.inputPer1M ?? 1.0) * 1_000));
+    const rateOutputNano = BigInt(Math.round((currentPreset.outputPer1M ?? 5.0) * 1_000));
 
-  const handlePrev = () => {
-    setPresetIndex((prev) => (prev === 0 ? PRESETS.length - 1 : prev - 1));
-  };
+    const inputCostNano = totalInputTok * rateInputNano;
+    const outputCostNano = totalOutputTok * rateOutputNano;
+    const wholesaleNano = inputCostNano + outputCostNano;
 
-  const handleNext = () => {
-    setPresetIndex((prev) => (prev === PRESETS.length - 1 ? 0 : prev + 1));
-  };
+    const markupMultiplierNano = BigInt(Math.round((1 + marginPercent / 100) * 1_000));
+    const retailNano = (wholesaleNano * markupMultiplierNano) / 1_000n;
+    const profitNano = retailNano > wholesaleNano ? retailNano - wholesaleNano : 0n;
 
-  useEffect(() => {
-    onProviderPkgChange?.(currentPreset.providerPkg);
-  }, [currentPreset, onProviderPkgChange]);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      const vibez = params.get('vibez');
-      if (vibez === 'false' || vibez === '0') {
-        setVibezCheckEnabled(false);
-      }
-      const agentTab = params.get('agentTab');
-      if (agentTab && ['stripe', 'circuit-breaker', 'margin', 'abort', 'session'].includes(agentTab)) {
-        setActiveAgentTab(agentTab as AgentRecipeTab);
-      }
-      const modelIdx = params.get('modelIndex');
-      if (modelIdx !== null && !isNaN(Number(modelIdx))) {
-        setPresetIndex(Number(modelIdx));
-      }
-    }
-  }, []);
-
-  // Active Tab & Model Configuration: guarantees 100% synchronization across:
-  // 1. Export code in editor
-  // 2. Card at the bottom of the preview
-  // 3. "Run it with" dropdown and brand icon
-  const currentTabConfig = useMemo(() => {
-    if (audienceTab === 'agents') {
-      if (activeAgentTab === 'stripe') {
-        return {
-          provider: currentPreset.provider,
-          providerFn: currentPreset.providerFn,
-          providerPkg: currentPreset.providerPkg,
-          modelId: currentPreset.modelId,
-          modelString: currentPreset.modelString,
-          iconName: currentPreset.iconName,
-          latencyMs: currentPreset.latencyMs,
-          tokens: currentPreset.tokens,
-          costUSD: currentPreset.costUSD,
-          hasModelCycle: true,
-        };
-      }
-      if (activeAgentTab === 'circuit-breaker') {
-        return {
-          provider: currentPreset.provider,
-          providerFn: currentPreset.providerFn,
-          providerPkg: currentPreset.providerPkg,
-          modelId: currentPreset.modelId,
-          modelString: currentPreset.modelString,
-          iconName: currentPreset.iconName,
-          latencyMs: Math.round(currentPreset.latencyMs * 2.5),
-          tokens: 25000,
-          costUSD: 0.5,
-          hasModelCycle: true,
-        };
-      }
-      if (activeAgentTab === 'margin') {
-        return {
-          provider: currentPreset.provider,
-          providerFn: currentPreset.providerFn,
-          providerPkg: currentPreset.providerPkg,
-          modelId: currentPreset.modelId,
-          modelString: currentPreset.modelString,
-          iconName: currentPreset.iconName,
-          latencyMs: currentPreset.latencyMs,
-          tokens: currentPreset.tokens,
-          costUSD: currentPreset.costUSD * (1 + marginPercent / 100),
-          hasModelCycle: true,
-        };
-      }
-      if (activeAgentTab === 'abort') {
-        const partialTokens = 142;
-        const partialCost = (currentPreset.costUSD / Math.max(1, currentPreset.tokens)) * partialTokens;
-        return {
-          provider: currentPreset.provider,
-          providerFn: currentPreset.providerFn,
-          providerPkg: currentPreset.providerPkg,
-          modelId: currentPreset.modelId,
-          modelString: currentPreset.modelString,
-          iconName: currentPreset.iconName,
-          latencyMs: 95,
-          tokens: partialTokens,
-          costUSD: partialCost,
-          hasModelCycle: true,
-        };
-      }
-      // session
-      return {
-        provider: currentPreset.provider,
-        providerFn: currentPreset.providerFn,
-        providerPkg: currentPreset.providerPkg,
-        modelId: currentPreset.modelId,
-        modelString: currentPreset.modelString,
-        iconName: currentPreset.iconName,
-        latencyMs: currentPreset.latencyMs,
-        tokens: 2510,
-        costUSD: 0.00502,
-        hasModelCycle: true,
-      };
-    }
-
-    if (activeTab === 'chatbot' || activeTab === 'text') {
-      return {
-        provider: currentPreset.provider,
-        providerFn: currentPreset.providerFn,
-        providerPkg: currentPreset.providerPkg,
-        modelId: currentPreset.modelId,
-        modelString: currentPreset.modelString,
-        iconName: currentPreset.iconName,
-        latencyMs: currentPreset.latencyMs,
-        tokens: currentPreset.tokens,
-        costUSD: currentPreset.costUSD,
-        hasModelCycle: true,
-      };
-    }
-    if (activeTab === 'image') {
-      return {
-        provider: 'xAI',
-        providerFn: 'xai',
-        providerPkg: '@ai-sdk/xai',
-        modelId: 'grok-imagine-image',
-        modelString: 'xai/grok-imagine-image',
-        iconName: 'grok',
-        latencyMs: 850,
-        tokens: 1000,
-        costUSD: 0.04,
-        hasModelCycle: false,
-      };
-    }
-    if (activeTab === 'speech') {
-      return {
-        provider: 'ElevenLabs',
-        providerFn: 'elevenlabs',
-        providerPkg: '@ai-sdk/elevenlabs',
-        modelId: 'elevenlabs/multilingual-v2',
-        modelString: 'elevenlabs/multilingual-v2',
-        iconName: 'elevenlabs',
-        latencyMs: 320,
-        tokens: 56,
-        costUSD: 0.0035,
-        hasModelCycle: false,
-      };
-    }
-    if (activeTab === 'transcription') {
-      return {
-        provider: 'OpenAI',
-        providerFn: 'openai',
-        providerPkg: '@ai-sdk/openai',
-        modelId: 'whisper-1',
-        modelString: 'openai/whisper-1',
-        iconName: 'openai',
-        latencyMs: 410,
-        tokens: 240,
-        costUSD: 0.006,
-        hasModelCycle: false,
-      };
-    }
-    // video
     return {
-      provider: 'Luma AI',
-      providerFn: 'luma',
-      providerPkg: '@ai-sdk/luma',
-      modelId: 'ray-2',
-      modelString: 'luma/ray-2',
-      iconName: 'luma-color',
-      latencyMs: 2400,
-      tokens: 5000,
-      costUSD: 0.25,
-      hasModelCycle: false,
+      calcWholesaleUSD: Number(wholesaleNano) / 1_000_000_000,
+      calcRetailUSD: Number(retailNano) / 1_000_000_000,
+      calcProfitUSD: Number(profitNano) / 1_000_000_000,
     };
-  }, [audienceTab, activeTab, activeAgentTab, currentPreset, marginPercent]);
-
-  // Generate exact code lines with syntax highlight tags matching provider and custom examples
-  const codeLines = useMemo(() => {
-    type Token = { type: 'kw' | 'fn' | 'str' | 'var' | 'num' | 'comment' | 'plain'; text: string };
-    type Line = { num: number; tokens: Token[] };
-    const lines: Line[] = [];
-    let lineNum = 1;
-    const addLine = (tokens: Token[]) => {
-      lines.push({ num: lineNum++, tokens });
-    };
-
-    if (audienceTab === 'agents') {
-      if (activeAgentTab === 'stripe') {
-        addLine([
-          { type: 'kw', text: 'import' },
-          { type: 'plain', text: ' { ' },
-          { type: 'fn', text: 'streamText' },
-          { type: 'plain', text: ' } ' },
-          { type: 'kw', text: 'from' },
-          { type: 'str', text: " 'ai'" },
-          { type: 'plain', text: ';' },
-        ]);
-        if (runtime === 'provider') {
-          addLine([
-            { type: 'kw', text: 'import' },
-            { type: 'plain', text: ' { ' },
-            { type: 'fn', text: currentTabConfig.providerFn },
-            { type: 'plain', text: ' } ' },
-            { type: 'kw', text: 'from' },
-            { type: 'str', text: ` '${currentTabConfig.providerPkg}'` },
-            { type: 'plain', text: ';' },
-          ]);
-        } else if (runtime === 'custom') {
-          addLine([
-            { type: 'kw', text: 'import' },
-            { type: 'plain', text: ' { ' },
-            { type: 'fn', text: 'yourProvider' },
-            { type: 'plain', text: ' } ' },
-            { type: 'kw', text: 'from' },
-            { type: 'str', text: " 'your-custom-provider'" },
-            { type: 'plain', text: ';' },
-          ]);
-        }
-        if (vibezCheckEnabled) {
-          addLine([
-            { type: 'kw', text: 'import' },
-            { type: 'plain', text: ' { ' },
-            { type: 'fn', text: 'vibezcheck' },
-            { type: 'plain', text: ' } ' },
-            { type: 'kw', text: 'from' },
-            { type: 'str', text: " 'vibezcheck'" },
-            { type: 'plain', text: ';' },
-          ]);
-          addLine([
-            { type: 'kw', text: 'import' },
-            { type: 'plain', text: ' ' },
-            { type: 'var', text: 'Stripe' },
-            { type: 'plain', text: ' ' },
-            { type: 'kw', text: 'from' },
-            { type: 'str', text: " 'stripe'" },
-            { type: 'plain', text: ';' },
-          ]);
-          addLine([{ type: 'plain', text: '' }]);
-          addLine([
-            { type: 'kw', text: 'const' },
-            { type: 'plain', text: ' ' },
-            { type: 'var', text: 'stripe' },
-            { type: 'plain', text: ' = ' },
-            { type: 'kw', text: 'new' },
-            { type: 'plain', text: ' ' },
-            { type: 'fn', text: 'Stripe' },
-            { type: 'plain', text: '(' },
-            { type: 'var', text: 'process' },
-            { type: 'plain', text: '.' },
-            { type: 'var', text: 'env' },
-            { type: 'plain', text: '.' },
-            { type: 'var', text: 'STRIPE_SECRET_KEY' },
-            { type: 'plain', text: '!);' },
-          ]);
-        }
-        addLine([{ type: 'plain', text: '' }]);
-        addLine([
-          { type: 'comment', text: '// Deduct AI usage from Stripe Customer wallet in real-time' },
-        ]);
-        addLine([
-          { type: 'kw', text: 'export' },
-          { type: 'plain', text: ' ' },
-          { type: 'kw', text: 'async' },
-          { type: 'plain', text: ' ' },
-          { type: 'kw', text: 'function' },
-          { type: 'plain', text: ' ' },
-          { type: 'fn', text: 'POST' },
-          { type: 'plain', text: '(' },
-          { type: 'var', text: 'req' },
-          { type: 'plain', text: ': ' },
-          { type: 'var', text: 'Request' },
-          { type: 'plain', text: ') {' },
-        ]);
-        addLine([
-          { type: 'plain', text: '  ' },
-          { type: 'kw', text: 'const' },
-          { type: 'plain', text: ' { ' },
-          { type: 'var', text: 'customerId' },
-          { type: 'plain', text: ' } = ' },
-          { type: 'kw', text: 'await' },
-          { type: 'plain', text: ' ' },
-          { type: 'var', text: 'req' },
-          { type: 'plain', text: '.' },
-          { type: 'fn', text: 'json' },
-          { type: 'plain', text: '();' },
-        ]);
-        addLine([{ type: 'plain', text: '' }]);
-        addLine([
-          { type: 'plain', text: '  ' },
-          { type: 'kw', text: 'return' },
-          { type: 'plain', text: ' ' },
-          { type: 'fn', text: 'streamText' },
-          { type: 'plain', text: '({' },
-        ]);
-        if (vibezCheckEnabled) {
-          if (runtime === 'provider') {
-            addLine([
-              { type: 'plain', text: '    model: ' },
-              { type: 'fn', text: 'vibezcheck' },
-              { type: 'plain', text: '(' },
-              { type: 'fn', text: currentTabConfig.providerFn },
-              { type: 'plain', text: '(' },
-              { type: 'str', text: `'${currentTabConfig.modelId}'` },
-              { type: 'plain', text: '), {' },
-            ]);
-          } else if (runtime === 'custom') {
-            addLine([
-              { type: 'plain', text: '    model: ' },
-              { type: 'fn', text: 'vibezcheck' },
-              { type: 'plain', text: '(' },
-              { type: 'fn', text: 'yourProvider' },
-              { type: 'plain', text: '(' },
-              { type: 'str', text: "'your-model-id'" },
-              { type: 'plain', text: '), {' },
-            ]);
-          } else {
-            addLine([
-              { type: 'plain', text: '    model: ' },
-              { type: 'fn', text: 'vibezcheck' },
-              { type: 'plain', text: '(' },
-              { type: 'str', text: `'${currentTabConfig.modelString}'` },
-              { type: 'plain', text: ', {' },
-            ]);
-          }
-          addLine([
-            { type: 'plain', text: '      stripe: {' },
-          ]);
-          addLine([
-            { type: 'plain', text: '        client: ' },
-            { type: 'var', text: 'stripe' },
-            { type: 'plain', text: ',' },
-          ]);
-          addLine([
-            { type: 'plain', text: '        customerId,' },
-          ]);
-          addLine([
-            { type: 'plain', text: '        meterEvent: ' },
-            { type: 'str', text: "'ai_tokens_consumed'" },
-            { type: 'plain', text: ',' },
-          ]);
-          addLine([
-            { type: 'plain', text: '      },' },
-          ]);
-          addLine([
-            { type: 'plain', text: '    }),' },
-          ]);
-        } else {
-          if (runtime === 'provider') {
-            addLine([
-              { type: 'plain', text: '    model: ' },
-              { type: 'fn', text: currentTabConfig.providerFn },
-              { type: 'plain', text: '(' },
-              { type: 'str', text: `'${currentTabConfig.modelId}'` },
-              { type: 'plain', text: '),' },
-            ]);
-          } else if (runtime === 'custom') {
-            addLine([
-              { type: 'plain', text: '    model: ' },
-              { type: 'fn', text: 'yourProvider' },
-              { type: 'plain', text: '(' },
-              { type: 'str', text: "'your-model-id'" },
-              { type: 'plain', text: '),' },
-            ]);
-          } else {
-            addLine([
-              { type: 'plain', text: '    model: ' },
-              { type: 'str', text: `'${currentTabConfig.modelString}'` },
-              { type: 'plain', text: ',' },
-            ]);
-          }
-        }
-        addLine([
-          { type: 'plain', text: '    prompt: ' },
-          { type: 'str', text: `'${AGENT_RECIPES.stripe.prompt}'` },
-          { type: 'plain', text: ',' },
-        ]);
-        addLine([
-          { type: 'plain', text: '  }).' },
-          { type: 'fn', text: 'toDataStreamResponse' },
-          { type: 'plain', text: '();' },
-        ]);
-        addLine([
-          { type: 'plain', text: '}' },
-        ]);
-        return lines;
-      }
-
-      if (activeAgentTab === 'circuit-breaker') {
-        addLine([
-          { type: 'kw', text: 'import' },
-          { type: 'plain', text: ' { ' },
-          { type: 'fn', text: 'streamText' },
-          { type: 'plain', text: ' } ' },
-          { type: 'kw', text: 'from' },
-          { type: 'str', text: " 'ai'" },
-          { type: 'plain', text: ';' },
-        ]);
-        if (runtime === 'provider') {
-          addLine([
-            { type: 'kw', text: 'import' },
-            { type: 'plain', text: ' { ' },
-            { type: 'fn', text: currentTabConfig.providerFn },
-            { type: 'plain', text: ' } ' },
-            { type: 'kw', text: 'from' },
-            { type: 'str', text: ` '${currentTabConfig.providerPkg}'` },
-            { type: 'plain', text: ';' },
-          ]);
-        } else if (runtime === 'custom') {
-          addLine([
-            { type: 'kw', text: 'import' },
-            { type: 'plain', text: ' { ' },
-            { type: 'fn', text: 'yourProvider' },
-            { type: 'plain', text: ' } ' },
-            { type: 'kw', text: 'from' },
-            { type: 'str', text: " 'your-custom-provider'" },
-            { type: 'plain', text: ';' },
-          ]);
-        }
-        if (vibezCheckEnabled) {
-          addLine([
-            { type: 'kw', text: 'import' },
-            { type: 'plain', text: ' { ' },
-            { type: 'fn', text: 'vibezcheck' },
-            { type: 'plain', text: ' } ' },
-            { type: 'kw', text: 'from' },
-            { type: 'str', text: " 'vibezcheck'" },
-            { type: 'plain', text: ';' },
-          ]);
-        }
-        addLine([{ type: 'plain', text: '' }]);
-        addLine([
-          { type: 'comment', text: '// Safety Circuit Breaker: sever connection if call exceeds $0.50' },
-        ]);
-        addLine([
-          { type: 'kw', text: 'export' },
-          { type: 'plain', text: ' ' },
-          { type: 'kw', text: 'async' },
-          { type: 'plain', text: ' ' },
-          { type: 'kw', text: 'function' },
-          { type: 'plain', text: ' ' },
-          { type: 'fn', text: 'POST' },
-          { type: 'plain', text: '(' },
-          { type: 'var', text: 'req' },
-          { type: 'plain', text: ': ' },
-          { type: 'var', text: 'Request' },
-          { type: 'plain', text: ') {' },
-        ]);
-        addLine([
-          { type: 'plain', text: '  ' },
-          { type: 'kw', text: 'return' },
-          { type: 'plain', text: ' ' },
-          { type: 'fn', text: 'streamText' },
-          { type: 'plain', text: '({' },
-        ]);
-        if (vibezCheckEnabled) {
-          if (runtime === 'provider') {
-            addLine([
-              { type: 'plain', text: '    model: ' },
-              { type: 'fn', text: 'vibezcheck' },
-              { type: 'plain', text: '(' },
-              { type: 'fn', text: currentTabConfig.providerFn },
-              { type: 'plain', text: '(' },
-              { type: 'str', text: `'${currentTabConfig.modelId}'` },
-              { type: 'plain', text: '), {' },
-            ]);
-          } else if (runtime === 'custom') {
-            addLine([
-              { type: 'plain', text: '    model: ' },
-              { type: 'fn', text: 'vibezcheck' },
-              { type: 'plain', text: '(' },
-              { type: 'fn', text: 'yourProvider' },
-              { type: 'plain', text: '(' },
-              { type: 'str', text: "'your-model-id'" },
-              { type: 'plain', text: '), {' },
-            ]);
-          } else {
-            addLine([
-              { type: 'plain', text: '    model: ' },
-              { type: 'fn', text: 'vibezcheck' },
-              { type: 'plain', text: '(' },
-              { type: 'str', text: `'${currentTabConfig.modelString}'` },
-              { type: 'plain', text: ', {' },
-            ]);
-          }
-          addLine([
-            { type: 'plain', text: '      maxCostPerCallUSD: ' },
-            { type: 'num', text: '0.50' },
-            { type: 'plain', text: ',' },
-          ]);
-          addLine([
-            { type: 'plain', text: '      onLimitReached: ({ ' },
-            { type: 'var', text: 'totalCostUSD' },
-            { type: 'plain', text: ', ' },
-            { type: 'fn', text: 'abort' },
-            { type: 'plain', text: ' }) => {' },
-          ]);
-          addLine([
-            { type: 'plain', text: '        ' },
-            { type: 'var', text: 'console' },
-            { type: 'plain', text: '.' },
-            { type: 'fn', text: 'warn' },
-            { type: 'plain', text: '(' },
-            { type: 'str', text: '`[VibezCheck] Trip wire hit: $${totalCostUSD}`' },
-            { type: 'plain', text: ');' },
-          ]);
-          addLine([
-            { type: 'plain', text: '        ' },
-            { type: 'fn', text: 'abort' },
-            { type: 'plain', text: '(); ' },
-            { type: 'comment', text: '// Instantly aborts LLM execution' },
-          ]);
-          addLine([
-            { type: 'plain', text: '      },' },
-          ]);
-          addLine([
-            { type: 'plain', text: '    }),' },
-          ]);
-        } else {
-          if (runtime === 'provider') {
-            addLine([
-              { type: 'plain', text: '    model: ' },
-              { type: 'fn', text: currentTabConfig.providerFn },
-              { type: 'plain', text: '(' },
-              { type: 'str', text: `'${currentTabConfig.modelId}'` },
-              { type: 'plain', text: '),' },
-            ]);
-          } else if (runtime === 'custom') {
-            addLine([
-              { type: 'plain', text: '    model: ' },
-              { type: 'fn', text: 'yourProvider' },
-              { type: 'plain', text: '(' },
-              { type: 'str', text: "'your-model-id'" },
-              { type: 'plain', text: '),' },
-            ]);
-          } else {
-            addLine([
-              { type: 'plain', text: '    model: ' },
-              { type: 'str', text: `'${currentTabConfig.modelString}'` },
-              { type: 'plain', text: ',' },
-            ]);
-          }
-        }
-        addLine([
-          { type: 'plain', text: '    prompt: ' },
-          { type: 'str', text: `'${AGENT_RECIPES['circuit-breaker'].prompt}'` },
-          { type: 'plain', text: ',' },
-        ]);
-        addLine([
-          { type: 'plain', text: '  }).' },
-          { type: 'fn', text: 'toTextStreamResponse' },
-          { type: 'plain', text: '();' },
-        ]);
-        addLine([
-          { type: 'plain', text: '}' },
-        ]);
-        return lines;
-      }
-
-      if (activeAgentTab === 'margin') {
-        addLine([
-          { type: 'kw', text: 'import' },
-          { type: 'plain', text: ' { ' },
-          { type: 'fn', text: 'generateText' },
-          { type: 'plain', text: ' } ' },
-          { type: 'kw', text: 'from' },
-          { type: 'str', text: " 'ai'" },
-          { type: 'plain', text: ';' },
-        ]);
-        if (runtime === 'provider') {
-          addLine([
-            { type: 'kw', text: 'import' },
-            { type: 'plain', text: ' { ' },
-            { type: 'fn', text: currentTabConfig.providerFn },
-            { type: 'plain', text: ' } ' },
-            { type: 'kw', text: 'from' },
-            { type: 'str', text: ` '${currentTabConfig.providerPkg}'` },
-            { type: 'plain', text: ';' },
-          ]);
-        } else if (runtime === 'custom') {
-          addLine([
-            { type: 'kw', text: 'import' },
-            { type: 'plain', text: ' { ' },
-            { type: 'fn', text: 'yourProvider' },
-            { type: 'plain', text: ' } ' },
-            { type: 'kw', text: 'from' },
-            { type: 'str', text: " 'your-custom-provider'" },
-            { type: 'plain', text: ';' },
-          ]);
-        }
-        if (vibezCheckEnabled) {
-          addLine([
-            { type: 'kw', text: 'import' },
-            { type: 'plain', text: ' { ' },
-            { type: 'fn', text: 'vibezcheck' },
-            { type: 'plain', text: ' } ' },
-            { type: 'kw', text: 'from' },
-            { type: 'str', text: " 'vibezcheck'" },
-            { type: 'plain', text: ';' },
-          ]);
-        }
-        addLine([{ type: 'plain', text: '' }]);
-        addLine([
-          { type: 'comment', text: `// Automatically adds +${marginPercent}% gross margin to raw model wholesale cost` },
-        ]);
-        addLine([
-          { type: 'kw', text: 'const' },
-          { type: 'plain', text: ' { ' },
-          { type: 'var', text: 'text' },
-          { type: 'plain', text: ', ' },
-          { type: 'var', text: 'usage' },
-          { type: 'plain', text: ' } = ' },
-          { type: 'kw', text: 'await' },
-          { type: 'plain', text: ' ' },
-          { type: 'fn', text: 'generateText' },
-          { type: 'plain', text: '({' },
-        ]);
-        if (vibezCheckEnabled) {
-          if (runtime === 'provider') {
-            addLine([
-              { type: 'plain', text: '  model: ' },
-              { type: 'fn', text: 'vibezcheck' },
-              { type: 'plain', text: '(' },
-              { type: 'fn', text: currentTabConfig.providerFn },
-              { type: 'plain', text: '(' },
-              { type: 'str', text: `'${currentTabConfig.modelId}'` },
-              { type: 'plain', text: '), {' },
-            ]);
-          } else if (runtime === 'custom') {
-            addLine([
-              { type: 'plain', text: '  model: ' },
-              { type: 'fn', text: 'vibezcheck' },
-              { type: 'plain', text: '(' },
-              { type: 'fn', text: 'yourProvider' },
-              { type: 'plain', text: '(' },
-              { type: 'str', text: "'your-model-id'" },
-              { type: 'plain', text: '), {' },
-            ]);
-          } else {
-            addLine([
-              { type: 'plain', text: '  model: ' },
-              { type: 'fn', text: 'vibezcheck' },
-              { type: 'plain', text: '(' },
-              { type: 'str', text: `'${currentTabConfig.modelString}'` },
-              { type: 'plain', text: ', {' },
-            ]);
-          }
-          addLine([
-            { type: 'plain', text: '    pricing: {' },
-          ]);
-          addLine([
-            { type: 'plain', text: '      margin: ' },
-            { type: 'num', text: (1 + marginPercent / 100).toFixed(2) },
-            { type: 'plain', text: ', ' },
-            { type: 'comment', text: `// +${marginPercent}% markup` },
-          ]);
-          addLine([
-            { type: 'plain', text: '      roundTo: ' },
-            { type: 'num', text: '5' },
-            { type: 'plain', text: ',' },
-          ]);
-          addLine([
-            { type: 'plain', text: '    },' },
-          ]);
-          addLine([
-            { type: 'plain', text: '  }),' },
-          ]);
-        } else {
-          if (runtime === 'provider') {
-            addLine([
-              { type: 'plain', text: '  model: ' },
-              { type: 'fn', text: currentTabConfig.providerFn },
-              { type: 'plain', text: '(' },
-              { type: 'str', text: `'${currentTabConfig.modelId}'` },
-              { type: 'plain', text: '),' },
-            ]);
-          } else if (runtime === 'custom') {
-            addLine([
-              { type: 'plain', text: '  model: ' },
-              { type: 'fn', text: 'yourProvider' },
-              { type: 'plain', text: '(' },
-              { type: 'str', text: "'your-model-id'" },
-              { type: 'plain', text: '),' },
-            ]);
-          } else {
-            addLine([
-              { type: 'plain', text: '  model: ' },
-              { type: 'str', text: `'${currentTabConfig.modelString}'` },
-              { type: 'plain', text: ',' },
-            ]);
-          }
-        }
-        addLine([
-          { type: 'plain', text: '  prompt: ' },
-          { type: 'str', text: `'${AGENT_RECIPES.margin.prompt}'` },
-          { type: 'plain', text: ',' },
-        ]);
-        addLine([
-          { type: 'plain', text: '});' },
-        ]);
-        addLine([{ type: 'plain', text: '' }]);
-        addLine([
-          { type: 'comment', text: '// You pocket the spread between raw cost & billed amount' },
-        ]);
-        addLine([
-          { type: 'var', text: 'console' },
-          { type: 'plain', text: '.' },
-          { type: 'fn', text: 'log' },
-          { type: 'plain', text: '(' },
-          { type: 'str', text: '`Wholesale: $${usage.rawCostUSD} -> Billed: $${usage.billedCostUSD}`' },
-          { type: 'plain', text: ');' },
-        ]);
-        return lines;
-      }
-
-      if (activeAgentTab === 'abort') {
-        addLine([
-          { type: 'kw', text: 'import' },
-          { type: 'plain', text: ' { ' },
-          { type: 'fn', text: 'streamText' },
-          { type: 'plain', text: ' } ' },
-          { type: 'kw', text: 'from' },
-          { type: 'str', text: " 'ai'" },
-          { type: 'plain', text: ';' },
-        ]);
-        if (runtime === 'provider') {
-          addLine([
-            { type: 'kw', text: 'import' },
-            { type: 'plain', text: ' { ' },
-            { type: 'fn', text: currentTabConfig.providerFn },
-            { type: 'plain', text: ' } ' },
-            { type: 'kw', text: 'from' },
-            { type: 'str', text: ` '${currentTabConfig.providerPkg}'` },
-            { type: 'plain', text: ';' },
-          ]);
-        } else if (runtime === 'custom') {
-          addLine([
-            { type: 'kw', text: 'import' },
-            { type: 'plain', text: ' { ' },
-            { type: 'fn', text: 'yourProvider' },
-            { type: 'plain', text: ' } ' },
-            { type: 'kw', text: 'from' },
-            { type: 'str', text: " 'your-custom-provider'" },
-            { type: 'plain', text: ';' },
-          ]);
-        }
-        if (vibezCheckEnabled) {
-          addLine([
-            { type: 'kw', text: 'import' },
-            { type: 'plain', text: ' { ' },
-            { type: 'fn', text: 'vibezcheck' },
-            { type: 'plain', text: ' } ' },
-            { type: 'kw', text: 'from' },
-            { type: 'str', text: " 'vibezcheck'" },
-            { type: 'plain', text: ';' },
-          ]);
-        }
-        addLine([{ type: 'plain', text: '' }]);
-        addLine([
-          { type: 'comment', text: '// Captures partial tokens even if client drops connection' },
-        ]);
-        addLine([
-          { type: 'kw', text: 'export' },
-          { type: 'plain', text: ' ' },
-          { type: 'kw', text: 'async' },
-          { type: 'plain', text: ' ' },
-          { type: 'kw', text: 'function' },
-          { type: 'plain', text: ' ' },
-          { type: 'fn', text: 'POST' },
-          { type: 'plain', text: '(' },
-          { type: 'var', text: 'req' },
-          { type: 'plain', text: ': ' },
-          { type: 'var', text: 'Request' },
-          { type: 'plain', text: ') {' },
-        ]);
-        addLine([
-          { type: 'plain', text: '  ' },
-          { type: 'kw', text: 'const' },
-          { type: 'plain', text: ' ' },
-          { type: 'var', text: 'controller' },
-          { type: 'plain', text: ' = ' },
-          { type: 'kw', text: 'new' },
-          { type: 'plain', text: ' ' },
-          { type: 'fn', text: 'AbortController' },
-          { type: 'plain', text: '();' },
-        ]);
-        addLine([{ type: 'plain', text: '' }]);
-        addLine([
-          { type: 'plain', text: '  ' },
-          { type: 'kw', text: 'return' },
-          { type: 'plain', text: ' ' },
-          { type: 'fn', text: 'streamText' },
-          { type: 'plain', text: '({' },
-        ]);
-        if (vibezCheckEnabled) {
-          if (runtime === 'provider') {
-            addLine([
-              { type: 'plain', text: '    model: ' },
-              { type: 'fn', text: 'vibezcheck' },
-              { type: 'plain', text: '(' },
-              { type: 'fn', text: currentTabConfig.providerFn },
-              { type: 'plain', text: '(' },
-              { type: 'str', text: `'${currentTabConfig.modelId}'` },
-              { type: 'plain', text: '), {' },
-            ]);
-          } else if (runtime === 'custom') {
-            addLine([
-              { type: 'plain', text: '    model: ' },
-              { type: 'fn', text: 'vibezcheck' },
-              { type: 'plain', text: '(' },
-              { type: 'fn', text: 'yourProvider' },
-              { type: 'plain', text: '(' },
-              { type: 'str', text: "'your-model-id'" },
-              { type: 'plain', text: '), {' },
-            ]);
-          } else {
-            addLine([
-              { type: 'plain', text: '    model: ' },
-              { type: 'fn', text: 'vibezcheck' },
-              { type: 'plain', text: '(' },
-              { type: 'str', text: `'${currentTabConfig.modelString}'` },
-              { type: 'plain', text: ', {' },
-            ]);
-          }
-          addLine([
-            { type: 'plain', text: '      captureOnAbort: ' },
-            { type: 'kw', text: 'true' },
-            { type: 'plain', text: ',' },
-          ]);
-          addLine([
-            { type: 'plain', text: '      onAbort: ({ ' },
-            { type: 'var', text: 'partialTokens' },
-            { type: 'plain', text: ', ' },
-            { type: 'var', text: 'accruedCostUSD' },
-            { type: 'plain', text: ' }) => {' },
-          ]);
-          addLine([
-            { type: 'plain', text: '        ' },
-            { type: 'fn', text: 'recordUsage' },
-            { type: 'plain', text: '({ ' },
-            { type: 'var', text: 'partialTokens' },
-            { type: 'plain', text: ', ' },
-            { type: 'var', text: 'accruedCostUSD' },
-            { type: 'plain', text: ' });' },
-          ]);
-          addLine([
-            { type: 'plain', text: '      },' },
-          ]);
-          addLine([
-            { type: 'plain', text: '    }),' },
-          ]);
-        } else {
-          if (runtime === 'provider') {
-            addLine([
-              { type: 'plain', text: '    model: ' },
-              { type: 'fn', text: currentTabConfig.providerFn },
-              { type: 'plain', text: '(' },
-              { type: 'str', text: `'${currentTabConfig.modelId}'` },
-              { type: 'plain', text: '),' },
-            ]);
-          } else if (runtime === 'custom') {
-            addLine([
-              { type: 'plain', text: '    model: ' },
-              { type: 'fn', text: 'yourProvider' },
-              { type: 'plain', text: '(' },
-              { type: 'str', text: "'your-model-id'" },
-              { type: 'plain', text: '),' },
-            ]);
-          } else {
-            addLine([
-              { type: 'plain', text: '    model: ' },
-              { type: 'str', text: `'${currentTabConfig.modelString}'` },
-              { type: 'plain', text: ',' },
-            ]);
-          }
-        }
-        addLine([
-          { type: 'plain', text: '    abortSignal: ' },
-          { type: 'var', text: 'controller' },
-          { type: 'plain', text: '.' },
-          { type: 'var', text: 'signal' },
-          { type: 'plain', text: ',' },
-        ]);
-        addLine([
-          { type: 'plain', text: '    prompt: ' },
-          { type: 'str', text: `'${AGENT_RECIPES.abort.prompt}'` },
-          { type: 'plain', text: ',' },
-        ]);
-        addLine([
-          { type: 'plain', text: '  }).' },
-          { type: 'fn', text: 'toDataStreamResponse' },
-          { type: 'plain', text: '();' },
-        ]);
-        addLine([
-          { type: 'plain', text: '}' },
-        ]);
-        return lines;
-      }
-
-      if (activeAgentTab === 'session') {
-        addLine([
-          { type: 'kw', text: 'import' },
-          { type: 'plain', text: ' { ' },
-          { type: 'fn', text: 'VibezSession' },
-          { type: 'plain', text: ' } ' },
-          { type: 'kw', text: 'from' },
-          { type: 'str', text: " 'vibezcheck'" },
-          { type: 'plain', text: ';' },
-        ]);
-        if (runtime === 'provider') {
-          addLine([
-            { type: 'kw', text: 'import' },
-            { type: 'plain', text: ' { ' },
-            { type: 'fn', text: currentTabConfig.providerFn },
-            { type: 'plain', text: ' } ' },
-            { type: 'kw', text: 'from' },
-            { type: 'str', text: ` '${currentTabConfig.providerPkg}'` },
-            { type: 'plain', text: ';' },
-          ]);
-        } else if (runtime === 'custom') {
-          addLine([
-            { type: 'kw', text: 'import' },
-            { type: 'plain', text: ' { ' },
-            { type: 'fn', text: 'yourProvider' },
-            { type: 'plain', text: ' } ' },
-            { type: 'kw', text: 'from' },
-            { type: 'str', text: " 'your-custom-provider'" },
-            { type: 'plain', text: ';' },
-          ]);
-        }
-        addLine([{ type: 'plain', text: '' }]);
-        addLine([
-          { type: 'comment', text: '// Multi-turn agent session capped at $2.00 hard budget' },
-        ]);
-        addLine([
-          { type: 'kw', text: 'const' },
-          { type: 'plain', text: ' ' },
-          { type: 'var', text: 'session' },
-          { type: 'plain', text: ' = ' },
-          { type: 'kw', text: 'new' },
-          { type: 'plain', text: ' ' },
-          { type: 'fn', text: 'VibezSession' },
-          { type: 'plain', text: '({' },
-        ]);
-        addLine([
-          { type: 'plain', text: '  budgetUSD: ' },
-          { type: 'num', text: '2.00' },
-          { type: 'plain', text: ',' },
-        ]);
-        addLine([
-          { type: 'plain', text: '  onBudgetExceeded: ({ ' },
-          { type: 'var', text: 'sessionCostUSD' },
-          { type: 'plain', text: ' }) => {' },
-        ]);
-        addLine([
-          { type: 'plain', text: '    ' },
-          { type: 'kw', text: 'throw' },
-          { type: 'plain', text: ' ' },
-          { type: 'kw', text: 'new' },
-          { type: 'plain', text: ' ' },
-          { type: 'fn', text: 'Error' },
-          { type: 'plain', text: '(' },
-          { type: 'str', text: '`Agent depleted budget: $${sessionCostUSD}`' },
-          { type: 'plain', text: ');' },
-        ]);
-        addLine([
-          { type: 'plain', text: '  },' },
-        ]);
-        addLine([
-          { type: 'plain', text: '});' },
-        ]);
-        addLine([{ type: 'plain', text: '' }]);
-        addLine([
-          { type: 'comment', text: '// Multiple tool steps share the same unified spending pool' },
-        ]);
-        const modelExpr =
-          runtime === 'custom'
-            ? 'yourProvider("your-model-id")'
-            : runtime === 'gateway'
-            ? `"${currentTabConfig.modelString}"`
-            : `${currentTabConfig.providerFn}("${currentTabConfig.modelId}")`;
-        addLine([
-          { type: 'kw', text: 'const' },
-          { type: 'plain', text: ' ' },
-          { type: 'var', text: 'step1' },
-          { type: 'plain', text: ' = ' },
-          { type: 'kw', text: 'await' },
-          { type: 'plain', text: ' ' },
-          { type: 'var', text: 'session' },
-          { type: 'plain', text: '.' },
-          { type: 'fn', text: 'run' },
-          { type: 'plain', text: '(' },
-          { type: 'fn', text: modelExpr },
-          { type: 'plain', text: ', ' },
-          { type: 'var', text: 'webSearchTool' },
-          { type: 'plain', text: ');' },
-        ]);
-        addLine([
-          { type: 'kw', text: 'const' },
-          { type: 'plain', text: ' ' },
-          { type: 'var', text: 'step2' },
-          { type: 'plain', text: ' = ' },
-          { type: 'kw', text: 'await' },
-          { type: 'plain', text: ' ' },
-          { type: 'var', text: 'session' },
-          { type: 'plain', text: '.' },
-          { type: 'fn', text: 'run' },
-          { type: 'plain', text: '(' },
-          { type: 'fn', text: modelExpr },
-          { type: 'plain', text: ', ' },
-          { type: 'var', text: 'codeExecTool' },
-          { type: 'plain', text: ');' },
-        ]);
-        addLine([{ type: 'plain', text: '' }]);
-        addLine([
-          { type: 'var', text: 'console' },
-          { type: 'plain', text: '.' },
-          { type: 'fn', text: 'log' },
-          { type: 'plain', text: '(' },
-          { type: 'str', text: "'Remaining: $'" },
-          { type: 'plain', text: ' + ' },
-          { type: 'var', text: 'session' },
-          { type: 'plain', text: '.' },
-          { type: 'var', text: 'remainingUSD' },
-          { type: 'plain', text: ');' },
-        ]);
-        return lines;
-      }
-    }
-
-    if (activeTab === 'chatbot') {
-      // Condensed import to save lines & ensure static container sizing
-      addLine([
-        { type: 'kw', text: 'import' },
-        { type: 'plain', text: ' { ' },
-        { type: 'fn', text: 'streamText' },
-        { type: 'plain', text: ', ' },
-        { type: 'fn', text: 'toUIMessageStream' },
-        { type: 'plain', text: ', ' },
-        { type: 'fn', text: 'createUIMessageStreamResponse' },
-        { type: 'plain', text: ', ' },
-        { type: 'fn', text: 'convertToModelMessages' },
-        { type: 'plain', text: ', ' },
-        { type: 'var', text: 'UIMessage' },
-        { type: 'plain', text: ' } ' },
-        { type: 'kw', text: 'from' },
-        { type: 'str', text: " 'ai'" },
-        { type: 'plain', text: ';' },
-      ]);
-
-      // Provider import matching currentTabConfig
-      if (runtime === 'provider') {
-        addLine([
-          { type: 'kw', text: 'import' },
-          { type: 'plain', text: ' { ' },
-          { type: 'fn', text: currentTabConfig.providerFn },
-          { type: 'plain', text: ' } ' },
-          { type: 'kw', text: 'from' },
-          { type: 'str', text: ` "${currentTabConfig.providerPkg}"` },
-          { type: 'plain', text: ';' },
-        ]);
-      } else if (runtime === 'custom') {
-        addLine([
-          { type: 'kw', text: 'import' },
-          { type: 'plain', text: ' { ' },
-          { type: 'fn', text: 'yourProvider' },
-          { type: 'plain', text: ' } ' },
-          { type: 'kw', text: 'from' },
-          { type: 'str', text: ' "your-custom-provider"' },
-          { type: 'plain', text: ';' },
-        ]);
-      }
-
-      // VibezCheck import (if enabled)
-      if (vibezCheckEnabled) {
-        addLine([
-          { type: 'kw', text: 'import' },
-          { type: 'plain', text: ' { ' },
-          { type: 'fn', text: 'vibezcheck' },
-          { type: 'plain', text: ' } ' },
-          { type: 'kw', text: 'from' },
-          { type: 'str', text: " 'vibezcheck'" },
-          { type: 'plain', text: ';' },
-        ]);
-      }
-
-      addLine([{ type: 'plain', text: '' }]);
-
-      // Comment: // Allow streaming responses up to 30 seconds
-      addLine([
-        { type: 'comment', text: '// Allow streaming responses up to 30 seconds' },
-      ]);
-
-      // export const maxDuration = 30;
-      addLine([
-        { type: 'kw', text: 'export' },
-        { type: 'plain', text: ' ' },
-        { type: 'kw', text: 'const' },
-        { type: 'plain', text: ' ' },
-        { type: 'var', text: 'maxDuration' },
-        { type: 'plain', text: ' = ' },
-        { type: 'num', text: '30' },
-        { type: 'plain', text: ';' },
-      ]);
-
-      addLine([{ type: 'plain', text: '' }]);
-
-      // export async function POST(req: Request) {
-      addLine([
-        { type: 'kw', text: 'export' },
-        { type: 'plain', text: ' ' },
-        { type: 'kw', text: 'async' },
-        { type: 'plain', text: ' ' },
-        { type: 'kw', text: 'function' },
-        { type: 'plain', text: ' ' },
-        { type: 'fn', text: 'POST' },
-        { type: 'plain', text: '(' },
-        { type: 'var', text: 'req' },
-        { type: 'plain', text: ': ' },
-        { type: 'var', text: 'Request' },
-        { type: 'plain', text: ') {' },
-      ]);
-
-      //   const { messages }: { messages: UIMessage[] } = await req.json();
-      addLine([
-        { type: 'plain', text: '  ' },
-        { type: 'kw', text: 'const' },
-        { type: 'plain', text: ' { ' },
-        { type: 'var', text: 'messages' },
-        { type: 'plain', text: ' }: { ' },
-        { type: 'var', text: 'messages' },
-        { type: 'plain', text: ': ' },
-        { type: 'var', text: 'UIMessage' },
-        { type: 'plain', text: '[] } = ' },
-        { type: 'kw', text: 'await' },
-        { type: 'plain', text: ' ' },
-        { type: 'var', text: 'req' },
-        { type: 'plain', text: '.' },
-        { type: 'fn', text: 'json' },
-        { type: 'plain', text: '();' },
-      ]);
-
-      addLine([{ type: 'plain', text: '' }]);
-
-      //   const result = streamText({
-      addLine([
-        { type: 'plain', text: '  ' },
-        { type: 'kw', text: 'const' },
-        { type: 'plain', text: ' ' },
-        { type: 'var', text: 'result' },
-        { type: 'plain', text: ' = ' },
-        { type: 'fn', text: 'streamText' },
-        { type: 'plain', text: '({' },
-      ]);
-
-      // Model line matching currentTabConfig
-      if (vibezCheckEnabled) {
-        if (runtime === 'provider') {
-          addLine([
-            { type: 'plain', text: '    model: ' },
-            { type: 'fn', text: 'vibezcheck' },
-            { type: 'plain', text: '(' },
-            { type: 'fn', text: currentTabConfig.providerFn },
-            { type: 'plain', text: '(' },
-            { type: 'str', text: `"${currentTabConfig.modelId}"` },
-            { type: 'plain', text: '), { customer: ' },
-            { type: 'str', text: "'alex@example.com'" },
-            { type: 'plain', text: ', pricing: { margin: ' },
-            { type: 'num', text: '1.25' },
-            { type: 'plain', text: ' } }),' },
-          ]);
-        } else if (runtime === 'custom') {
-          addLine([
-            { type: 'plain', text: '    model: ' },
-            { type: 'fn', text: 'vibezcheck' },
-            { type: 'plain', text: '(' },
-            { type: 'fn', text: 'yourProvider' },
-            { type: 'plain', text: '(' },
-            { type: 'str', text: '"your-model-id"' },
-            { type: 'plain', text: '), { customer: ' },
-            { type: 'str', text: "'alex@example.com'" },
-            { type: 'plain', text: ', pricing: { margin: ' },
-            { type: 'num', text: '1.25' },
-            { type: 'plain', text: ' } }),' },
-          ]);
-        } else {
-          addLine([
-            { type: 'plain', text: '    model: ' },
-            { type: 'fn', text: 'vibezcheck' },
-            { type: 'plain', text: '(' },
-            { type: 'str', text: `"${currentTabConfig.modelString}"` },
-            { type: 'plain', text: ', { customer: ' },
-            { type: 'str', text: "'alex@example.com'" },
-            { type: 'plain', text: ', pricing: { margin: ' },
-            { type: 'num', text: '1.25' },
-            { type: 'plain', text: ' } }),' },
-          ]);
-        }
-      } else {
-        if (runtime === 'provider') {
-          addLine([
-            { type: 'plain', text: '    model: ' },
-            { type: 'fn', text: currentTabConfig.providerFn },
-            { type: 'plain', text: '(' },
-            { type: 'str', text: `"${currentTabConfig.modelId}"` },
-            { type: 'plain', text: '),' },
-          ]);
-        } else if (runtime === 'custom') {
-          addLine([
-            { type: 'plain', text: '    model: ' },
-            { type: 'fn', text: 'yourProvider' },
-            { type: 'plain', text: '(' },
-            { type: 'str', text: '"your-model-id"' },
-            { type: 'plain', text: '),' },
-          ]);
-        } else {
-          addLine([
-            { type: 'plain', text: '    model: ' },
-            { type: 'str', text: `"${currentTabConfig.modelString}"` },
-            { type: 'plain', text: ',' },
-          ]);
-        }
-      }
-
-      // instructions: 'You are a helpful assistant.',
-      addLine([
-        { type: 'plain', text: '    instructions: ' },
-        { type: 'str', text: "'You are a helpful assistant.'" },
-        { type: 'plain', text: ',' },
-      ]);
-
-      // messages: await convertToModelMessages(messages),
-      addLine([
-        { type: 'plain', text: '    messages: ' },
-        { type: 'kw', text: 'await' },
-        { type: 'plain', text: ' ' },
-        { type: 'fn', text: 'convertToModelMessages' },
-        { type: 'plain', text: '(' },
-        { type: 'var', text: 'messages' },
-        { type: 'plain', text: '), ' },
-      ]);
-
-      //   });
-      addLine([{ type: 'plain', text: '  });' }]);
-
-      addLine([{ type: 'plain', text: '' }]);
-
-      //   return createUIMessageStreamResponse({
-      addLine([
-        { type: 'plain', text: '  ' },
-        { type: 'kw', text: 'return' },
-        { type: 'plain', text: ' ' },
-        { type: 'fn', text: 'createUIMessageStreamResponse' },
-        { type: 'plain', text: '({' },
-      ]);
-
-      //     stream: toUIMessageStream({ stream: result.stream }),
-      addLine([
-        { type: 'plain', text: '    stream: ' },
-        { type: 'fn', text: 'toUIMessageStream' },
-        { type: 'plain', text: '({ stream: ' },
-        { type: 'var', text: 'result' },
-        { type: 'plain', text: '.' },
-        { type: 'var', text: 'stream' },
-        { type: 'plain', text: ' }),' },
-      ]);
-
-      //   });
-      addLine([{ type: 'plain', text: '  });' }]);
-
-      // }
-      addLine([{ type: 'plain', text: '}' }]);
-
-      return lines;
-    }
-
-    if (activeTab === 'text') {
-      // 1. AI import
-      addLine([
-        { type: 'kw', text: 'import' },
-        { type: 'plain', text: ' { ' },
-        { type: 'fn', text: 'generateText' },
-        { type: 'plain', text: ' } ' },
-        { type: 'kw', text: 'from' },
-        { type: 'str', text: " 'ai'" },
-        { type: 'plain', text: ';' },
-      ]);
-
-      // 2. Provider import (omitted if gateway)
-      if (runtime === 'provider') {
-        addLine([
-          { type: 'kw', text: 'import' },
-          { type: 'plain', text: ' { ' },
-          { type: 'fn', text: currentTabConfig.providerFn },
-          { type: 'plain', text: ' } ' },
-          { type: 'kw', text: 'from' },
-          { type: 'str', text: ` '${currentTabConfig.providerPkg}'` },
-          { type: 'plain', text: ';' },
-        ]);
-      } else if (runtime === 'custom') {
-        addLine([
-          { type: 'kw', text: 'import' },
-          { type: 'plain', text: ' { ' },
-          { type: 'fn', text: 'yourProvider' },
-          { type: 'plain', text: ' } ' },
-          { type: 'kw', text: 'from' },
-          { type: 'str', text: " 'your-custom-provider'" },
-          { type: 'plain', text: ';' },
-        ]);
-      }
-
-      // 3. Vibezcheck import (if enabled)
-      if (vibezCheckEnabled) {
-        addLine([
-          { type: 'kw', text: 'import' },
-          { type: 'plain', text: ' { ' },
-          { type: 'fn', text: 'vibezcheck' },
-          { type: 'plain', text: ' } ' },
-          { type: 'kw', text: 'from' },
-          { type: 'str', text: " 'vibezcheck'" },
-          { type: 'plain', text: ';' },
-        ]);
-      }
-
-      addLine([{ type: 'plain', text: '' }]);
-
-      // 4. Invocation
-      addLine([
-        { type: 'kw', text: 'const' },
-        { type: 'plain', text: ' { ' },
-        { type: 'var', text: 'text' },
-        { type: 'plain', text: ' } = ' },
-        { type: 'kw', text: 'await' },
-        { type: 'plain', text: ' ' },
-        { type: 'fn', text: 'generateText' },
-        { type: 'plain', text: '({' },
-      ]);
-
-      // 5. Model line matching currentTabConfig
-      if (vibezCheckEnabled) {
-        if (runtime === 'provider') {
-          addLine([
-            { type: 'plain', text: '  model: ' },
-            { type: 'fn', text: 'vibezcheck' },
-            { type: 'plain', text: '(' },
-            { type: 'fn', text: currentTabConfig.providerFn },
-            { type: 'plain', text: '(' },
-            { type: 'str', text: `'${currentTabConfig.modelId}'` },
-            { type: 'plain', text: '), { customer: ' },
-            { type: 'str', text: "'alex@example.com'" },
-            { type: 'plain', text: ', pricing: { margin: ' },
-            { type: 'num', text: '1.25' },
-            { type: 'plain', text: ' } }),' },
-          ]);
-        } else if (runtime === 'custom') {
-          addLine([
-            { type: 'plain', text: '  model: ' },
-            { type: 'fn', text: 'vibezcheck' },
-            { type: 'plain', text: '(' },
-            { type: 'fn', text: 'yourProvider' },
-            { type: 'plain', text: '(' },
-            { type: 'str', text: "'your-model-id'" },
-            { type: 'plain', text: '), { customer: ' },
-            { type: 'str', text: "'alex@example.com'" },
-            { type: 'plain', text: ', pricing: { margin: ' },
-            { type: 'num', text: '1.25' },
-            { type: 'plain', text: ' } }),' },
-          ]);
-        } else {
-          addLine([
-            { type: 'plain', text: '  model: ' },
-            { type: 'fn', text: 'vibezcheck' },
-            { type: 'plain', text: '(' },
-            { type: 'str', text: `"${currentTabConfig.modelString}"` },
-            { type: 'plain', text: ', { customer: ' },
-            { type: 'str', text: "'alex@example.com'" },
-            { type: 'plain', text: ', pricing: { margin: ' },
-            { type: 'num', text: '1.25' },
-            { type: 'plain', text: ' } }),' },
-          ]);
-        }
-      } else {
-        if (runtime === 'provider') {
-          addLine([
-            { type: 'plain', text: '  model: ' },
-            { type: 'fn', text: currentTabConfig.providerFn },
-            { type: 'plain', text: '(' },
-            { type: 'str', text: `'${currentTabConfig.modelId}'` },
-            { type: 'plain', text: '),' },
-          ]);
-        } else if (runtime === 'custom') {
-          addLine([
-            { type: 'plain', text: '  model: ' },
-            { type: 'fn', text: 'yourProvider' },
-            { type: 'plain', text: '(' },
-            { type: 'str', text: "'your-model-id'" },
-            { type: 'plain', text: '),' },
-          ]);
-        } else {
-          addLine([
-            { type: 'plain', text: '  model: ' },
-            { type: 'str', text: `"${currentTabConfig.modelString}"` },
-            { type: 'plain', text: ',' },
-          ]);
-        }
-      }
-
-      // 6. Prompt
-      addLine([
-        { type: 'plain', text: '  prompt: ' },
-        { type: 'str', text: `'${currentPreset.prompt}'` },
-        { type: 'plain', text: ',' },
-      ]);
-      addLine([{ type: 'plain', text: '});' }]);
-      addLine([{ type: 'plain', text: '' }]);
-
-      // 7. Console log
-      addLine([
-        { type: 'var', text: 'console' },
-        { type: 'plain', text: '.' },
-        { type: 'fn', text: 'log' },
-        { type: 'plain', text: '(' },
-        { type: 'var', text: 'text' },
-        { type: 'plain', text: ');' },
-      ]);
-
-      return lines;
-    }
-
-    if (activeTab === 'image') {
-      addLine([
-        { type: 'kw', text: 'import' },
-        { type: 'plain', text: ' { ' },
-        { type: 'fn', text: 'generateImage' },
-        { type: 'plain', text: ' } ' },
-        { type: 'kw', text: 'from' },
-        { type: 'str', text: " 'ai'" },
-        { type: 'plain', text: ';' },
-      ]);
-
-      if (runtime === 'provider') {
-        addLine([
-          { type: 'kw', text: 'import' },
-          { type: 'plain', text: ' { ' },
-          { type: 'fn', text: 'xai' },
-          { type: 'plain', text: ' } ' },
-          { type: 'kw', text: 'from' },
-          { type: 'str', text: " '@ai-sdk/xai'" },
-          { type: 'plain', text: ';' },
-        ]);
-      } else if (runtime === 'custom') {
-        addLine([
-          { type: 'kw', text: 'import' },
-          { type: 'plain', text: ' { ' },
-          { type: 'fn', text: 'yourProvider' },
-          { type: 'plain', text: ' } ' },
-          { type: 'kw', text: 'from' },
-          { type: 'str', text: " 'your-custom-provider'" },
-          { type: 'plain', text: ';' },
-        ]);
-      }
-
-      if (vibezCheckEnabled) {
-        addLine([
-          { type: 'kw', text: 'import' },
-          { type: 'plain', text: ' { ' },
-          { type: 'fn', text: 'vibezcheck' },
-          { type: 'plain', text: ' } ' },
-          { type: 'kw', text: 'from' },
-          { type: 'str', text: " 'vibezcheck'" },
-          { type: 'plain', text: ';' },
-        ]);
-      }
-
-      addLine([{ type: 'plain', text: '' }]);
-
-      addLine([
-        { type: 'kw', text: 'const' },
-        { type: 'plain', text: ' { ' },
-        { type: 'var', text: 'image' },
-        { type: 'plain', text: ' } = ' },
-        { type: 'kw', text: 'await' },
-        { type: 'plain', text: ' ' },
-        { type: 'fn', text: 'generateImage' },
-        { type: 'plain', text: '({' },
-      ]);
-
-      if (vibezCheckEnabled) {
-        if (runtime === 'provider') {
-          addLine([
-            { type: 'plain', text: '  model: ' },
-            { type: 'fn', text: 'vibezcheck' },
-            { type: 'plain', text: '(' },
-            { type: 'fn', text: 'xai' },
-            { type: 'plain', text: '.' },
-            { type: 'fn', text: 'image' },
-            { type: 'plain', text: '(' },
-            { type: 'str', text: "'grok-imagine-image'" },
-            { type: 'plain', text: '), { fixedPriceUSD: ' },
-            { type: 'num', text: '0.04' },
-            { type: 'plain', text: ' }),' },
-          ]);
-        } else if (runtime === 'custom') {
-          addLine([
-            { type: 'plain', text: '  model: ' },
-            { type: 'fn', text: 'vibezcheck' },
-            { type: 'plain', text: '(' },
-            { type: 'fn', text: 'yourProvider' },
-            { type: 'plain', text: '.' },
-            { type: 'fn', text: 'image' },
-            { type: 'plain', text: '(' },
-            { type: 'str', text: "'your-model-id'" },
-            { type: 'plain', text: '), { fixedPriceUSD: ' },
-            { type: 'num', text: '0.04' },
-            { type: 'plain', text: ' }),' },
-          ]);
-        } else {
-          addLine([
-            { type: 'plain', text: '  model: ' },
-            { type: 'fn', text: 'vibezcheck' },
-            { type: 'plain', text: '(' },
-            { type: 'str', text: '"xai/grok-imagine-image"' },
-            { type: 'plain', text: ', { fixedPriceUSD: ' },
-            { type: 'num', text: '0.04' },
-            { type: 'plain', text: ' }),' },
-          ]);
-        }
-      } else {
-        if (runtime === 'provider') {
-          addLine([
-            { type: 'plain', text: '  model: ' },
-            { type: 'fn', text: 'xai' },
-            { type: 'plain', text: '.' },
-            { type: 'fn', text: 'image' },
-            { type: 'plain', text: '(' },
-            { type: 'str', text: "'grok-imagine-image'" },
-            { type: 'plain', text: '), ' },
-          ]);
-        } else if (runtime === 'custom') {
-          addLine([
-            { type: 'plain', text: '  model: ' },
-            { type: 'fn', text: 'yourProvider' },
-            { type: 'plain', text: '.' },
-            { type: 'fn', text: 'image' },
-            { type: 'plain', text: '(' },
-            { type: 'str', text: "'your-model-id'" },
-            { type: 'plain', text: '), ' },
-          ]);
-        } else {
-          addLine([
-            { type: 'plain', text: '  model: ' },
-            { type: 'str', text: '"xai/grok-imagine-image"' },
-            { type: 'plain', text: ',' },
-          ]);
-        }
-      }
-
-      addLine([
-        { type: 'plain', text: '  prompt: ' },
-        { type: 'str', text: "'A teddy bear wearing a black hat hiking in the mountains'" },
-        { type: 'plain', text: ',' },
-      ]);
-      addLine([{ type: 'plain', text: '});' }]);
-      addLine([{ type: 'plain', text: '' }]);
-      addLine([
-        { type: 'var', text: 'console' },
-        { type: 'plain', text: '.' },
-        { type: 'fn', text: 'log' },
-        { type: 'plain', text: '(' },
-        { type: 'var', text: 'image' },
-        { type: 'plain', text: '.' },
-        { type: 'var', text: 'base64' },
-        { type: 'plain', text: ');' },
-      ]);
-
-      return lines;
-    }
-
-    if (activeTab === 'speech') {
-      addLine([
-        { type: 'kw', text: 'import' },
-        { type: 'plain', text: ' { ' },
-        { type: 'fn', text: 'generateSpeech' },
-        { type: 'plain', text: ' } ' },
-        { type: 'kw', text: 'from' },
-        { type: 'str', text: " 'ai'" },
-        { type: 'plain', text: ';' },
-      ]);
-
-      if (runtime === 'provider') {
-        addLine([
-          { type: 'kw', text: 'import' },
-          { type: 'plain', text: ' { ' },
-          { type: 'fn', text: 'elevenlabs' },
-          { type: 'plain', text: ' } ' },
-          { type: 'kw', text: 'from' },
-          { type: 'str', text: " '@ai-sdk/elevenlabs'" },
-          { type: 'plain', text: ';' },
-        ]);
-      } else if (runtime === 'custom') {
-        addLine([
-          { type: 'kw', text: 'import' },
-          { type: 'plain', text: ' { ' },
-          { type: 'fn', text: 'yourProvider' },
-          { type: 'plain', text: ' } ' },
-          { type: 'kw', text: 'from' },
-          { type: 'str', text: " 'your-custom-provider'" },
-          { type: 'plain', text: ';' },
-        ]);
-      }
-
-      if (vibezCheckEnabled) {
-        addLine([
-          { type: 'kw', text: 'import' },
-          { type: 'plain', text: ' { ' },
-          { type: 'fn', text: 'vibezcheck' },
-          { type: 'plain', text: ' } ' },
-          { type: 'kw', text: 'from' },
-          { type: 'str', text: " 'vibezcheck'" },
-          { type: 'plain', text: ';' },
-        ]);
-      }
-
-      addLine([{ type: 'plain', text: '' }]);
-
-      addLine([
-        { type: 'kw', text: 'const' },
-        { type: 'plain', text: ' { ' },
-        { type: 'var', text: 'audio' },
-        { type: 'plain', text: ' } = ' },
-        { type: 'kw', text: 'await' },
-        { type: 'plain', text: ' ' },
-        { type: 'fn', text: 'generateSpeech' },
-        { type: 'plain', text: '({' },
-      ]);
-
-      if (vibezCheckEnabled) {
-        if (runtime === 'provider') {
-          addLine([
-            { type: 'plain', text: '  model: ' },
-            { type: 'fn', text: 'vibezcheck' },
-            { type: 'plain', text: '(' },
-            { type: 'fn', text: 'elevenlabs' },
-            { type: 'plain', text: '(' },
-            { type: 'str', text: '"elevenlabs/multilingual-v2"' },
-            { type: 'plain', text: '), { fixedPriceUSD: ' },
-            { type: 'num', text: '0.0035' },
-            { type: 'plain', text: ' }),' },
-          ]);
-        } else if (runtime === 'custom') {
-          addLine([
-            { type: 'plain', text: '  model: ' },
-            { type: 'fn', text: 'vibezcheck' },
-            { type: 'plain', text: '(' },
-            { type: 'fn', text: 'yourProvider' },
-            { type: 'plain', text: '(' },
-            { type: 'str', text: "'your-model-id'" },
-            { type: 'plain', text: '), { fixedPriceUSD: ' },
-            { type: 'num', text: '0.0035' },
-            { type: 'plain', text: ' }),' },
-          ]);
-        } else {
-          addLine([
-            { type: 'plain', text: '  model: ' },
-            { type: 'fn', text: 'vibezcheck' },
-            { type: 'plain', text: '(' },
-            { type: 'str', text: '"elevenlabs/multilingual-v2"' },
-            { type: 'plain', text: ', { fixedPriceUSD: ' },
-            { type: 'num', text: '0.0035' },
-            { type: 'plain', text: ' }),' },
-          ]);
-        }
-      } else {
-        if (runtime === 'provider') {
-          addLine([
-            { type: 'plain', text: '  model: ' },
-            { type: 'fn', text: 'elevenlabs' },
-            { type: 'plain', text: '(' },
-            { type: 'str', text: '"elevenlabs/multilingual-v2"' },
-            { type: 'plain', text: '), ' },
-          ]);
-        } else if (runtime === 'custom') {
-          addLine([
-            { type: 'plain', text: '  model: ' },
-            { type: 'fn', text: 'yourProvider' },
-            { type: 'plain', text: '(' },
-            { type: 'str', text: "'your-model-id'" },
-            { type: 'plain', text: '), ' },
-          ]);
-        } else {
-          addLine([
-            { type: 'plain', text: '  model: ' },
-            { type: 'str', text: '"elevenlabs/multilingual-v2"' },
-            { type: 'plain', text: ',' },
-          ]);
-        }
-      }
-
-      addLine([
-        { type: 'plain', text: '  text: ' },
-        { type: 'str', text: "'Welcome to the Next.js AI SDK.'" },
-        { type: 'plain', text: ',' },
-      ]);
-      addLine([{ type: 'plain', text: '});' }]);
-      addLine([{ type: 'plain', text: '' }]);
-      addLine([
-        { type: 'var', text: 'console' },
-        { type: 'plain', text: '.' },
-        { type: 'fn', text: 'log' },
-        { type: 'plain', text: '(' },
-        { type: 'var', text: 'audio' },
-        { type: 'plain', text: ');' },
-      ]);
-
-      return lines;
-    }
-
-    if (activeTab === 'transcription') {
-      addLine([
-        { type: 'kw', text: 'import' },
-        { type: 'plain', text: ' { ' },
-        { type: 'fn', text: 'transcribe' },
-        { type: 'plain', text: ' } ' },
-        { type: 'kw', text: 'from' },
-        { type: 'str', text: " 'ai'" },
-        { type: 'plain', text: ';' },
-      ]);
-
-      if (runtime === 'provider') {
-        addLine([
-          { type: 'kw', text: 'import' },
-          { type: 'plain', text: ' { ' },
-          { type: 'fn', text: 'openai' },
-          { type: 'plain', text: ' } ' },
-          { type: 'kw', text: 'from' },
-          { type: 'str', text: " '@ai-sdk/openai'" },
-          { type: 'plain', text: ';' },
-        ]);
-      } else if (runtime === 'custom') {
-        addLine([
-          { type: 'kw', text: 'import' },
-          { type: 'plain', text: ' { ' },
-          { type: 'fn', text: 'yourProvider' },
-          { type: 'plain', text: ' } ' },
-          { type: 'kw', text: 'from' },
-          { type: 'str', text: " 'your-custom-provider'" },
-          { type: 'plain', text: ';' },
-        ]);
-      }
-
-      if (vibezCheckEnabled) {
-        addLine([
-          { type: 'kw', text: 'import' },
-          { type: 'plain', text: ' { ' },
-          { type: 'fn', text: 'vibezcheck' },
-          { type: 'plain', text: ' } ' },
-          { type: 'kw', text: 'from' },
-          { type: 'str', text: " 'vibezcheck'" },
-          { type: 'plain', text: ';' },
-        ]);
-      }
-
-      addLine([{ type: 'plain', text: '' }]);
-
-      addLine([
-        { type: 'kw', text: 'const' },
-        { type: 'plain', text: ' { ' },
-        { type: 'var', text: 'text' },
-        { type: 'plain', text: ' } = ' },
-        { type: 'kw', text: 'await' },
-        { type: 'plain', text: ' ' },
-        { type: 'fn', text: 'transcribe' },
-        { type: 'plain', text: '({' },
-      ]);
-
-      if (vibezCheckEnabled) {
-        if (runtime === 'provider') {
-          addLine([
-            { type: 'plain', text: '  model: ' },
-            { type: 'fn', text: 'vibezcheck' },
-            { type: 'plain', text: '(' },
-            { type: 'fn', text: 'openai' },
-            { type: 'plain', text: '(' },
-            { type: 'str', text: '"openai/whisper-1"' },
-            { type: 'plain', text: '), { fixedPriceUSD: ' },
-            { type: 'num', text: '0.006' },
-            { type: 'plain', text: ' }),' },
-          ]);
-        } else if (runtime === 'custom') {
-          addLine([
-            { type: 'plain', text: '  model: ' },
-            { type: 'fn', text: 'vibezcheck' },
-            { type: 'plain', text: '(' },
-            { type: 'fn', text: 'yourProvider' },
-            { type: 'plain', text: '(' },
-            { type: 'str', text: "'your-model-id'" },
-            { type: 'plain', text: '), { fixedPriceUSD: ' },
-            { type: 'num', text: '0.006' },
-            { type: 'plain', text: ' }),' },
-          ]);
-        } else {
-          addLine([
-            { type: 'plain', text: '  model: ' },
-            { type: 'fn', text: 'vibezcheck' },
-            { type: 'plain', text: '(' },
-            { type: 'str', text: '"openai/whisper-1"' },
-            { type: 'plain', text: ', { fixedPriceUSD: ' },
-            { type: 'num', text: '0.006' },
-            { type: 'plain', text: ' }),' },
-          ]);
-        }
-      } else {
-        if (runtime === 'provider') {
-          addLine([
-            { type: 'plain', text: '  model: ' },
-            { type: 'fn', text: 'openai' },
-            { type: 'plain', text: '(' },
-            { type: 'str', text: '"openai/whisper-1"' },
-            { type: 'plain', text: '), ' },
-          ]);
-        } else if (runtime === 'custom') {
-          addLine([
-            { type: 'plain', text: '  model: ' },
-            { type: 'fn', text: 'yourProvider' },
-            { type: 'plain', text: '(' },
-            { type: 'str', text: "'your-model-id'" },
-            { type: 'plain', text: '), ' },
-          ]);
-        } else {
-          addLine([
-            { type: 'plain', text: '  model: ' },
-            { type: 'str', text: '"openai/whisper-1"' },
-            { type: 'plain', text: ',' },
-          ]);
-        }
-      }
-
-      addLine([
-        { type: 'plain', text: '  audio: ' },
-        { type: 'var', text: 'audioBuffer' },
-        { type: 'plain', text: ',' },
-      ]);
-      addLine([{ type: 'plain', text: '});' }]);
-      addLine([{ type: 'plain', text: '' }]);
-      addLine([
-        { type: 'var', text: 'console' },
-        { type: 'plain', text: '.' },
-        { type: 'fn', text: 'log' },
-        { type: 'plain', text: '(' },
-        { type: 'var', text: 'text' },
-        { type: 'plain', text: ');' },
-      ]);
-
-      return lines;
-    }
-
-    // Video
-    addLine([
-      { type: 'kw', text: 'import' },
-      { type: 'plain', text: ' { ' },
-      { type: 'fn', text: 'generateVideo' },
-      { type: 'plain', text: ' } ' },
-      { type: 'kw', text: 'from' },
-      { type: 'str', text: " 'ai'" },
-      { type: 'plain', text: ';' },
-    ]);
-
-    if (runtime === 'provider') {
-      addLine([
-        { type: 'kw', text: 'import' },
-        { type: 'plain', text: ' { ' },
-        { type: 'fn', text: 'luma' },
-        { type: 'plain', text: ' } ' },
-        { type: 'kw', text: 'from' },
-        { type: 'str', text: " '@ai-sdk/luma'" },
-        { type: 'plain', text: ';' },
-      ]);
-    } else if (runtime === 'custom') {
-      addLine([
-        { type: 'kw', text: 'import' },
-        { type: 'plain', text: ' { ' },
-        { type: 'fn', text: 'yourProvider' },
-        { type: 'plain', text: ' } ' },
-        { type: 'kw', text: 'from' },
-        { type: 'str', text: " 'your-custom-provider'" },
-        { type: 'plain', text: ';' },
-      ]);
-    }
-
-    if (vibezCheckEnabled) {
-      addLine([
-        { type: 'kw', text: 'import' },
-        { type: 'plain', text: ' { ' },
-        { type: 'fn', text: 'vibezcheck' },
-        { type: 'plain', text: ' } ' },
-        { type: 'kw', text: 'from' },
-        { type: 'str', text: " 'vibezcheck'" },
-        { type: 'plain', text: ';' },
-      ]);
-    }
-
-    addLine([{ type: 'plain', text: '' }]);
-
-    addLine([
-      { type: 'kw', text: 'const' },
-      { type: 'plain', text: ' { ' },
-      { type: 'var', text: 'video' },
-      { type: 'plain', text: ' } = ' },
-      { type: 'kw', text: 'await' },
-      { type: 'plain', text: ' ' },
-      { type: 'fn', text: 'generateVideo' },
-      { type: 'plain', text: '({' },
-    ]);
-
-    if (vibezCheckEnabled) {
-      if (runtime === 'provider') {
-        addLine([
-          { type: 'plain', text: '  model: ' },
-          { type: 'fn', text: 'vibezcheck' },
-          { type: 'plain', text: '(' },
-          { type: 'fn', text: 'luma' },
-          { type: 'plain', text: '(' },
-          { type: 'str', text: '"luma/ray-2"' },
-          { type: 'plain', text: '), { fixedPriceUSD: ' },
-          { type: 'num', text: '0.25' },
-          { type: 'plain', text: ' }),' },
-        ]);
-      } else if (runtime === 'custom') {
-        addLine([
-          { type: 'plain', text: '  model: ' },
-          { type: 'fn', text: 'vibezcheck' },
-          { type: 'plain', text: '(' },
-          { type: 'fn', text: 'yourProvider' },
-          { type: 'plain', text: '(' },
-          { type: 'str', text: "'your-model-id'" },
-          { type: 'plain', text: '), { fixedPriceUSD: ' },
-          { type: 'num', text: '0.25' },
-          { type: 'plain', text: ' }),' },
-        ]);
-      } else {
-        addLine([
-          { type: 'plain', text: '  model: ' },
-          { type: 'fn', text: 'vibezcheck' },
-          { type: 'plain', text: '(' },
-          { type: 'str', text: '"luma/ray-2"' },
-          { type: 'plain', text: ', { fixedPriceUSD: ' },
-          { type: 'num', text: '0.25' },
-          { type: 'plain', text: ' }),' },
-        ]);
-      }
+  }, [calcInstTokens, calcInTokens, calcOutTokens, currentPreset, marginPercent]);
+
+  // Keypad click handlers
+  const handleKeypadDigit = (digit: string) => {
+    if (calcFocusedField === 'inst') {
+      const cur = calcInstTokens.toString();
+      const next = cur === '0' ? digit : cur + digit;
+      setCalcInstTokens(Math.min(10000, parseInt(next, 10) || 0));
+    } else if (calcFocusedField === 'in') {
+      const cur = calcInTokens.toString();
+      const next = cur === '0' ? digit : cur + digit;
+      setCalcInTokens(Math.min(50000, parseInt(next, 10) || 0));
     } else {
-      if (runtime === 'provider') {
-        addLine([
-          { type: 'plain', text: '  model: ' },
-          { type: 'fn', text: 'luma' },
-          { type: 'plain', text: '(' },
-          { type: 'str', text: '"luma/ray-2"' },
-          { type: 'plain', text: '), ' },
-        ]);
-      } else if (runtime === 'custom') {
-        addLine([
-          { type: 'plain', text: '  model: ' },
-          { type: 'fn', text: 'yourProvider' },
-          { type: 'plain', text: '(' },
-          { type: 'str', text: "'your-model-id'" },
-          { type: 'plain', text: '), ' },
-        ]);
-      } else {
-        addLine([
-          { type: 'plain', text: '  model: ' },
-          { type: 'str', text: '"luma/ray-2"' },
-          { type: 'plain', text: ',' },
-        ]);
+      const cur = calcOutTokens.toString();
+      const next = cur === '0' ? digit : cur + digit;
+      setCalcOutTokens(Math.min(10000, parseInt(next, 10) || 0));
+    }
+  };
+
+  const handleKeypadClear = () => {
+    handleClearPrompt();
+  };
+
+  const handleKeypadReset = () => {
+    handleLoadSamplePrompt();
+  };
+
+  // Generate harmonized code snippet using official vibezcheck library signatures
+  const rawCodeString = useMemo(() => {
+    const { provider, modelId, providerPkg, providerFn } = currentPreset;
+
+    if (!vibezCheckEnabled) {
+      if (cmdTab === 'core') {
+        if (provider === 'Anthropic') {
+          return `import Anthropic from '@anthropic-ai/sdk';
+
+const anthropic = new Anthropic();
+
+// WARNING: Running unmetered! No token counting or safety fuse enabled.
+export async function POST(req: Request) {
+  const { prompt } = await req.json();
+
+  const stream = await anthropic.messages.create({
+    model: '${modelId}',
+    max_tokens: 1024,
+    messages: [{ role: 'user', content: prompt }],
+    stream: true,
+  });
+
+  return new Response(stream);
+}`;
+        }
+        if (provider === 'Google') {
+          return `import { GoogleGenAI } from '@google/genai';
+
+const ai = new GoogleGenAI();
+
+// WARNING: Running unmetered! No token counting or safety fuse enabled.
+export async function POST(req: Request) {
+  const { prompt } = await req.json();
+
+  const stream = await ai.models.generateContentStream({
+    model: '${modelId}',
+    contents: prompt,
+  });
+
+  return new Response(stream);
+}`;
+        }
+        return `import OpenAI from 'openai';
+
+const openai = new OpenAI();
+
+// WARNING: Running unmetered! No token counting or safety fuse enabled.
+export async function POST(req: Request) {
+  const { messages } = await req.json();
+
+  const stream = await openai.chat.completions.create({
+    model: '${modelId}',
+    stream: true,
+    messages,
+  });
+
+  return new Response(stream);
+}`;
       }
+      return `import { streamText } from 'ai';
+import { ${providerFn} } from '${providerPkg}';
+
+// WARNING: Running unmetered! No token counting or safety fuse enabled.
+export async function POST(req: Request) {
+  const { messages } = await req.json();
+
+  const result = streamText({
+    model: ${providerFn}('${modelId}'),
+    messages,
+  });
+
+  return result.toDataStreamResponse();
+}`;
     }
 
-    addLine([
-      { type: 'plain', text: '  prompt: ' },
-      { type: 'str', text: "'Drone shot of futuristic solar-powered cyberpunk city at dusk'" },
-      { type: 'plain', text: ',' },
-    ]);
-    addLine([{ type: 'plain', text: '});' }]);
-    addLine([{ type: 'plain', text: '' }]);
-    addLine([
-      { type: 'var', text: 'console' },
-      { type: 'plain', text: '.' },
-      { type: 'fn', text: 'log' },
-      { type: 'plain', text: '(' },
-      { type: 'var', text: 'video' },
-      { type: 'plain', text: '.' },
-      { type: 'var', text: 'url' },
-      { type: 'plain', text: ');' },
-    ]);
+    // ✦ Harmonized Core SDK Code: Multi-provider support (Anthropic, Google, OpenAI, xAI, DeepSeek)
+    if (cmdTab === 'core') {
+      const toolCommentBlock = `// 1. Define custom tool with execution logic
+const searchTool = {
+  description: 'Search documentation or live web',
+  execute: async (query: string) => fetchResults(query),
+};
 
-    return lines;
-  }, [audienceTab, activeAgentTab, activeTab, vibezCheckEnabled, runtime, currentPreset, marginPercent, currentTabConfig]);
+`;
 
-  const rawCodeString = useMemo(() => {
-    return codeLines
-      .map((line) => line.tokens.map((t) => t.text).join(''))
-      .join('\n');
-  }, [codeLines]);
+      // Anthropic
+      if (provider === 'Anthropic') {
+        let imports = `import Anthropic from '@anthropic-ai/sdk';
+import { vibez } from 'vibezcheck';
+
+const anthropic = new Anthropic();
+`;
+        if (activeTab === 'tools-session') imports += `\n${toolCommentBlock}`;
+        if (activeTab === 'database') {
+          imports = `import Anthropic from '@anthropic-ai/sdk';
+import { createClient } from '@supabase/supabase-js';
+import { vibez, vibezcheck } from 'vibezcheck';
+
+const anthropic = new Anthropic();
+const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_KEY!);
+`;
+        }
+        if (activeTab === 'stripe-metronome' || activeTab === 'calculator') {
+          imports = `import Anthropic from '@anthropic-ai/sdk';
+import { vibez, vibezcheck } from 'vibezcheck';
+
+const anthropic = new Anthropic();
+`;
+        }
+
+        let body = `export async function POST(req: Request) {
+  const { prompt, customerId } = await req.json();
+
+  const stream = await anthropic.messages.create({
+    model: '${modelId}',
+    max_tokens: 1024,
+    messages: [{ role: 'user', content: prompt }],
+    stream: true,
+  });\n\n`;
+
+        if (activeTab === 'chatbot') {
+          body += `  // Meter stream in real time with 0ms added latency
+  const meteredStream = vibez.wrapStream(stream, {
+    model: '${modelId}',
+    customer: customerId,
+  });`;
+        } else if (activeTab === 'tools-session') {
+          body += `  // Enforce session budget ceiling ($2.00) over multi-turn workflow
+  const session = vibez.session({
+    customer: customerId,
+    sessionBudgetUSD: 2.00, // Hard ceiling across all turns & tool calls
+  });
+
+  const meteredStream = vibez.wrapStream(stream, {
+    model: '${modelId}',
+    customer: customerId,
+    session,
+    // Meter tool invocation ($0.01) and trace execution latency
+    tools: {
+      webSearch: vibez.tool(searchTool, 0.01),
+    },
+  });`;
+        } else if (activeTab === 'spend-limit') {
+          body += `  // Pre-flight and in-flight circuit breakers
+  const meteredStream = vibez.wrapStream(stream, {
+    model: '${modelId}',
+    customer: customerId,
+    maxCostPerCallUSD: 0.50, // Auto-terminates runaway calls at $0.50
+    maxTokensPerCall: 4000,  // Safety ceiling on tokens
+  });`;
+        } else if (activeTab === 'database') {
+          body += `  // Persist usage records directly to Supabase in background
+  const meteredStream = vibez.wrapStream(stream, {
+    model: '${modelId}',
+    customer: customerId,
+    database: vibezcheck.supabase(supabase),
+  });`;
+        } else {
+          // stripe-metronome & calculator
+          body += `  // Retail pricing markup (+${marginPercent}%) and Metronome /v1/ingest dispatch
+  const meteredStream = vibez.wrapStream(stream, {
+    model: '${modelId}',
+    customer: customerId,
+    pricing: { margin: ${marginMultiplier} }, // +${marginPercent}% developer profit margin
+    database: vibezcheck.metronome({
+      apiKey: process.env.METRONOME_API_KEY!,
+    }),
+  });`;
+        }
+
+        body += `\n\n  return new Response(meteredStream);\n}`;
+        return imports + '\n' + body;
+      }
+
+      // Google Gemini
+      if (provider === 'Google') {
+        let imports = `import { GoogleGenAI } from '@google/genai';
+import { vibez } from 'vibezcheck';
+
+const ai = new GoogleGenAI();
+`;
+        if (activeTab === 'tools-session') imports += `\n${toolCommentBlock}`;
+        if (activeTab === 'database') {
+          imports = `import { GoogleGenAI } from '@google/genai';
+import { createClient } from '@supabase/supabase-js';
+import { vibez, vibezcheck } from 'vibezcheck';
+
+const ai = new GoogleGenAI();
+const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_KEY!);
+`;
+        }
+        if (activeTab === 'stripe-metronome' || activeTab === 'calculator') {
+          imports = `import { GoogleGenAI } from '@google/genai';
+import { vibez, vibezcheck } from 'vibezcheck';
+
+const ai = new GoogleGenAI();
+`;
+        }
+
+        let body = `export async function POST(req: Request) {
+  const { prompt, customerId } = await req.json();
+
+  const stream = await ai.models.generateContentStream({
+    model: '${modelId}',
+    contents: prompt,
+  });\n\n`;
+
+        if (activeTab === 'chatbot') {
+          body += `  // Meter stream in real time with 0ms added latency
+  const meteredStream = vibez.wrapStream(stream, {
+    model: '${modelId}',
+    customer: customerId,
+  });`;
+        } else if (activeTab === 'tools-session') {
+          body += `  // Enforce session budget ceiling ($2.00) over multi-turn workflow
+  const session = vibez.session({
+    customer: customerId,
+    sessionBudgetUSD: 2.00,
+  });
+
+  const meteredStream = vibez.wrapStream(stream, {
+    model: '${modelId}',
+    customer: customerId,
+    session,
+    tools: {
+      webSearch: vibez.tool(searchTool, 0.01),
+    },
+  });`;
+        } else if (activeTab === 'spend-limit') {
+          body += `  // Pre-flight and in-flight circuit breakers
+  const meteredStream = vibez.wrapStream(stream, {
+    model: '${modelId}',
+    customer: customerId,
+    maxCostPerCallUSD: 0.50,
+    maxTokensPerCall: 4000,
+  });`;
+        } else if (activeTab === 'database') {
+          body += `  // Persist usage records directly to Supabase in background
+  const meteredStream = vibez.wrapStream(stream, {
+    model: '${modelId}',
+    customer: customerId,
+    database: vibezcheck.supabase(supabase),
+  });`;
+        } else {
+          body += `  // Retail pricing markup (+${marginPercent}%) and Metronome /v1/ingest dispatch
+  const meteredStream = vibez.wrapStream(stream, {
+    model: '${modelId}',
+    customer: customerId,
+    pricing: { margin: ${marginMultiplier} },
+    database: vibezcheck.metronome({
+      apiKey: process.env.METRONOME_API_KEY!,
+    }),
+  });`;
+        }
+
+        body += `\n\n  return new Response(meteredStream);\n}`;
+        return imports + '\n' + body;
+      }
+
+      // OpenAI, xAI, DeepSeek
+      let imports = `import OpenAI from 'openai';
+import { vibez } from 'vibezcheck';
+
+const openai = new OpenAI();
+`;
+      if (activeTab === 'tools-session') imports += `\n${toolCommentBlock}`;
+      if (activeTab === 'database') {
+        imports = `import OpenAI from 'openai';
+import { createClient } from '@supabase/supabase-js';
+import { vibez, vibezcheck } from 'vibezcheck';
+
+const openai = new OpenAI();
+const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_KEY!);
+`;
+      }
+      if (activeTab === 'stripe-metronome' || activeTab === 'calculator') {
+        imports = `import OpenAI from 'openai';
+import { vibez, vibezcheck } from 'vibezcheck';
+
+const openai = new OpenAI();
+`;
+      }
+
+      let body = `export async function POST(req: Request) {
+  const { messages, customerId } = await req.json();
+
+  const stream = await openai.chat.completions.create({
+    model: '${modelId}',
+    stream: true,
+    messages,
+  });\n\n`;
+
+      if (activeTab === 'chatbot') {
+        body += `  // Meter stream in real time with 0ms added latency
+  const meteredStream = vibez.wrapStream(stream, {
+    model: '${modelId}',
+    customer: customerId,
+  });`;
+      } else if (activeTab === 'tools-session') {
+        body += `  // Enforce session budget ceiling ($2.00) over multi-turn workflow
+  const session = vibez.session({
+    customer: customerId,
+    sessionBudgetUSD: 2.00,
+  });
+
+  const meteredStream = vibez.wrapStream(stream, {
+    model: '${modelId}',
+    customer: customerId,
+    session,
+    tools: {
+      webSearch: vibez.tool(searchTool, 0.01),
+    },
+  });`;
+      } else if (activeTab === 'spend-limit') {
+        body += `  // Pre-flight and in-flight circuit breakers
+  const meteredStream = vibez.wrapStream(stream, {
+    model: '${modelId}',
+    customer: customerId,
+    maxCostPerCallUSD: 0.50,
+    maxTokensPerCall: 4000,
+  });`;
+      } else if (activeTab === 'database') {
+        body += `  // Persist usage records directly to Supabase in background
+  const meteredStream = vibez.wrapStream(stream, {
+    model: '${modelId}',
+    customer: customerId,
+    database: vibezcheck.supabase(supabase),
+  });`;
+      } else {
+        body += `  // Retail pricing markup (+${marginPercent}%) and Metronome /v1/ingest dispatch
+  const meteredStream = vibez.wrapStream(stream, {
+    model: '${modelId}',
+    customer: customerId,
+    pricing: { margin: ${marginMultiplier} }, // +${marginPercent}% developer profit margin
+    database: vibezcheck.metronome({
+      apiKey: process.env.METRONOME_API_KEY!,
+    }),
+  });`;
+      }
+
+      body += `\n\n  return new Response(meteredStream);\n}`;
+      return imports + '\n' + body;
+    }
+
+    // ✦ Harmonized AI SDK Code
+    if (activeTab === 'chatbot') {
+      return `import { streamText } from 'ai';
+import { ${providerFn} } from '${providerPkg}';
+import { vibezcheck } from 'vibezcheck';
+
+export async function POST(req: Request) {
+  const { messages, customerId } = await req.json();
+
+  const result = streamText({
+    model: vibezcheck(${providerFn}('${modelId}'), {
+      customer: customerId,
+    }),
+    messages,
+  });
+
+  return vibezcheck.toResponse(result);
+}`;
+    }
+
+    if (activeTab === 'tools-session') {
+      return `import { streamText } from 'ai';
+import { ${providerFn} } from '${providerPkg}';
+import { vibezcheck } from 'vibezcheck';
+
+// 1. Define custom tools with execution logic
+const searchTool = {
+  description: 'Search documentation or live web',
+  parameters: { query: 'string' },
+  execute: async ({ query }: { query: string }) => fetchWebResults(query),
+};
+
+const calcTool = {
+  description: 'Calculate financial metrics & ratios',
+  parameters: { expression: 'string' },
+  execute: async ({ expression }: { expression: string }) => evalMath(expression),
+};
+
+export async function POST(req: Request) {
+  const { messages, customerId } = await req.json();
+
+  // 2. Enforce session budget ceiling ($2.00) over multi-turn workflow
+  const session = vibezcheck.session({
+    customer: customerId,
+    sessionBudgetUSD: 2.00, // Hard ceiling across all turns & tool calls
+  });
+
+  const result = streamText({
+    model: session.model(${providerFn}('${modelId}')),
+    messages,
+    // 3. Wrap tools with vibezcheck.tool() to meter invocation costs & trace latency
+    tools: {
+      webSearch: vibezcheck.tool(searchTool, 0.01),
+      calculator: vibezcheck.tool(calcTool, 0.005),
+    },
+  });
+
+  return vibezcheck.toResponse(result);
+}`;
+    }
+
+    if (activeTab === 'spend-limit') {
+      return `import { streamText } from 'ai';
+import { ${providerFn} } from '${providerPkg}';
+import { vibezcheck } from 'vibezcheck';
+
+export async function POST(req: Request) {
+  const { messages, customerId } = await req.json();
+
+  const result = streamText({
+    model: vibezcheck(${providerFn}('${modelId}'), {
+      customer: customerId,
+      maxCostPerCallUSD: 0.50, // Auto-terminates runaway calls at $0.50
+      maxTokensPerCall: 4000,  // Safety ceiling on tokens
+    }),
+    messages,
+  });
+
+  return vibezcheck.toResponse(result);
+}`;
+    }
+
+    if (activeTab === 'database') {
+      return `import { streamText } from 'ai';
+import { ${providerFn} } from '${providerPkg}';
+import { createClient } from '@supabase/supabase-js';
+import { vibezcheck } from 'vibezcheck';
+
+const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_KEY!);
+
+export async function POST(req: Request) {
+  const { messages, customerId } = await req.json();
+
+  const result = streamText({
+    model: vibezcheck(${providerFn}('${modelId}'), {
+      customer: customerId,
+      database: vibezcheck.supabase(supabase), // Inserts to default 'vibez_usage' table
+    }),
+    messages,
+  });
+
+  return vibezcheck.toResponse(result);
+}`;
+    }
+
+    // stripe-metronome & calculator
+    return `import { streamText } from 'ai';
+import { ${providerFn} } from '${providerPkg}';
+import { vibezcheck } from 'vibezcheck';
+
+export async function POST(req: Request) {
+  const { messages, customerId } = await req.json();
+
+  // Meter stream with dynamic retail margin & nano-precision calculations
+  const result = streamText({
+    model: vibezcheck(${providerFn}('${modelId}'), {
+      customer: customerId,
+      pricing: { margin: ${marginMultiplier} }, // +${marginPercent}% profit margin
+      maxCostPerCallUSD: 0.50, // Safety circuit breaker
+      database: vibezcheck.metronome({
+        apiKey: process.env.METRONOME_API_KEY!,
+      }),
+    }),
+    messages,
+  });
+
+  return vibezcheck.toResponse(result);
+}`;
+  }, [cmdTab, currentPreset, vibezCheckEnabled, activeTab, marginPercent, marginMultiplier]);
+
+  const codeLines = useMemo(() => {
+    return tokenizeTypeScript(rawCodeString);
+  }, [rawCodeString]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(rawCodeString);
@@ -2290,185 +1515,163 @@ export function AiSdkShowcase({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const billedAmount = (currentPreset.costUSD * 1.25).toFixed(5);
+  const calculatedCostUSD =
+    activeTab === 'stripe-metronome' || activeTab === 'calculator'
+      ? currentPreset.costUSD * (1 + marginPercent / 100)
+      : currentPreset.costUSD;
+
+  const currentCompanyIcon = getCompanyIcon(currentPreset.provider);
 
   return (
-    <section className="w-full max-w-4xl mx-auto px-4 py-4 select-none">
-      {/* ✦ Top Tab Controls Row Matching Screenshot */}
-      <div className="flex items-center justify-between gap-4 mb-5 flex-wrap">
-        {/* Capability Tabs */}
-        <div className="flex items-center gap-1 p-1 bg-slate-200/70 dark:bg-zinc-900/90 border border-slate-300/80 dark:border-zinc-800 rounded-xl overflow-x-auto no-scrollbar shadow-xs">
-          {audienceTab === 'agents' ? (
-            <>
-              <button
-                onClick={() => setActiveAgentTab('stripe')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer flex items-center gap-1.5 ${
-                  activeAgentTab === 'stripe'
-                    ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-xs font-semibold'
-                    : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'
-                }`}
-              >
-                <CreditCard className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
-                <span>Customer Wallet</span>
-              </button>
-
-              <button
-                onClick={() => setActiveAgentTab('circuit-breaker')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer flex items-center gap-1.5 ${
-                  activeAgentTab === 'circuit-breaker'
-                    ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-xs font-semibold'
-                    : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'
-                }`}
-              >
-                <ShieldAlert className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
-                <span>Safety Switch</span>
-              </button>
-
-              <button
-                onClick={() => setActiveAgentTab('margin')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer flex items-center gap-1.5 ${
-                  activeAgentTab === 'margin'
-                    ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-xs font-semibold'
-                    : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'
-                }`}
-              >
-                <Percent className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
-                <span>Profit Markup</span>
-              </button>
-
-              <button
-                onClick={() => setActiveAgentTab('abort')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer flex items-center gap-1.5 ${
-                  activeAgentTab === 'abort'
-                    ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-xs font-semibold'
-                    : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'
-                }`}
-              >
-                <LifeBuoy className="w-3.5 h-3.5 text-sky-500 dark:text-sky-400" />
-                <span>Disconnect Shield</span>
-              </button>
-
-              <button
-                onClick={() => setActiveAgentTab('session')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer flex items-center gap-1.5 ${
-                  activeAgentTab === 'session'
-                    ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-xs font-semibold'
-                    : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'
-                }`}
-              >
-                <Bot className="w-3.5 h-3.5 text-purple-500 dark:text-purple-400" />
-                <span>Spending Limit</span>
-              </button>
-            </>
-          ) : (
-            <>
-              <button
-                onClick={() => setActiveTab('chatbot')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer flex items-center gap-1.5 ${
-                  activeTab === 'chatbot'
-                    ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-xs font-semibold'
-                    : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'
-                }`}
-              >
-                <LobeIcon name="openai" size={13} />
-                <span>Chatbot</span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab('text')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer flex items-center gap-1.5 ${
-                  activeTab === 'text'
-                    ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-xs font-semibold'
-                    : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'
-                }`}
-              >
-                <LobeIcon name="claude-color" size={13} />
-                <span>Text Generation</span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab('image')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer flex items-center gap-1.5 ${
-                  activeTab === 'image'
-                    ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-xs font-semibold'
-                    : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'
-                }`}
-              >
-                <LobeIcon name="grok" size={13} />
-                <span>Image Generation</span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab('speech')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer flex items-center gap-1.5 ${
-                  activeTab === 'speech'
-                    ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-xs font-semibold'
-                    : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'
-                }`}
-              >
-                <LobeIcon name="elevenlabs" size={13} />
-                <span>Speech</span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab('transcription')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer flex items-center gap-1.5 ${
-                  activeTab === 'transcription'
-                    ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-xs font-semibold'
-                    : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'
-                }`}
-              >
-                <LobeIcon name="openai" size={13} />
-                <span>Transcription</span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab('video')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer flex items-center gap-1.5 ${
-                  activeTab === 'video'
-                    ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-xs font-semibold'
-                    : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'
-                }`}
-              >
-                <LobeIcon name="luma-color" size={13} />
-                <span>Video Generation</span>
-              </button>
-            </>
-          )}
-        </div>
-
-        {/* ✦ Left / Right Model Cycle Controls: < [ Brand Icon ] > Matching Screenshot */}
-        <div className="flex items-center gap-1.5 bg-slate-200/70 dark:bg-zinc-900/90 border border-slate-300/80 dark:border-zinc-800 rounded-xl p-1 shadow-xs">
-          {/* Previous Button */}
+    <section className="w-full max-w-4xl mx-auto px-4 py-4">
+      {/* ✦ Capability Bar: Chatbot + Model Company Logo next to it + Tools + Spend + DB + Stripe */}
+      <div className="flex items-center justify-between gap-3 mb-5 flex-wrap">
+        <div className="flex items-center gap-1.5 p-1 bg-slate-200/70 dark:bg-zinc-900/90 border border-slate-300/80 dark:border-zinc-800 rounded-xl overflow-x-auto no-scrollbar shadow-xs">
+          {/* 1. Chatbot Tab */}
           <button
-            onClick={handlePrev}
-            aria-label="Previous model"
-            className="p-1.5 rounded-lg text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-white dark:hover:bg-zinc-800 transition cursor-pointer"
+            onClick={() => handleTabChange('chatbot')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer flex items-center gap-1.5 ${
+              activeTab === 'chatbot'
+                ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-xs font-semibold'
+                : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'
+            }`}
           >
-            <ChevronLeft className="w-4 h-4" />
+            <Bot className="w-3.5 h-3.5 text-sky-500" />
+            <span>Chatbot</span>
           </button>
 
-          {/* Model Icon / Badge Indicator with official LobeIcon logo */}
-          <div
-            title={`${currentTabConfig.provider} (${currentTabConfig.modelString})`}
-            className="flex items-center justify-center w-7 h-7 rounded-full bg-white dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700 shadow-xs cursor-pointer overflow-hidden p-1 hover:scale-105 transition"
-          >
-            <LobeIcon name={currentTabConfig.iconName} size={15} alt={currentTabConfig.provider} />
+          {/* Model Company Selector next to Chatbot (OpenAI, Anthropic, Google, DeepSeek, xAI) */}
+          <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-lg bg-white/70 dark:bg-zinc-800/80 border border-slate-300/60 dark:border-zinc-700/60 shadow-2xs">
+            <button
+              onClick={handlePrevCompany}
+              aria-label="Previous provider"
+              className="p-1 rounded text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-zinc-700/60 transition cursor-pointer"
+              title="Previous provider company"
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+            </button>
+
+            <div className="relative flex items-center">
+              <div className="flex items-center gap-1.5 px-1 py-0.5 cursor-pointer select-none">
+                <LobeIcon name={currentCompanyIcon} size={15} alt={currentPreset.provider} />
+                <select
+                  value={currentPreset.provider}
+                  onChange={(e) => handleSelectCompany(e.target.value)}
+                  className="appearance-none bg-transparent text-slate-800 dark:text-zinc-200 text-[11px] font-semibold cursor-pointer focus:outline-none pr-3.5 py-0.5"
+                  title="Switch AI Company"
+                >
+                  {COMPANIES.map((c) => (
+                    <option
+                      key={c.id}
+                      value={c.name}
+                      className="bg-white dark:bg-[#18181f] text-slate-900 dark:text-white text-xs font-normal"
+                    >
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="w-3 h-3 text-slate-400 dark:text-zinc-400 absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none" />
+              </div>
+            </div>
+
+            <button
+              onClick={handleNextCompany}
+              aria-label="Next provider"
+              className="p-1 rounded text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-zinc-700/60 transition cursor-pointer"
+              title="Next provider company"
+            >
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
           </div>
 
-          {/* Next Button */}
+          {/* Harmonized Divider */}
+          <div className="w-[1px] h-4 bg-slate-300 dark:bg-zinc-700 mx-0.5" />
+
+          {/* 2. Tools & Sessions */}
           <button
-            onClick={handleNext}
-            aria-label="Next model"
-            className="p-1.5 rounded-lg text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-white dark:hover:bg-zinc-800 transition cursor-pointer"
+            onClick={() => handleTabChange('tools-session')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer flex items-center gap-1.5 ${
+              activeTab === 'tools-session'
+                ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-xs font-semibold'
+                : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'
+            }`}
           >
-            <ChevronRight className="w-4 h-4" />
+            <Terminal className="w-3.5 h-3.5 text-purple-500" />
+            <span>Tools & Sessions</span>
+          </button>
+
+          {/* 3. Spend Limit */}
+          <button
+            onClick={() => handleTabChange('spend-limit')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer flex items-center gap-1.5 ${
+              activeTab === 'spend-limit'
+                ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-xs font-semibold'
+                : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'
+            }`}
+          >
+            <ShieldAlert className="w-3.5 h-3.5 text-amber-500" />
+            <span>Spend Limit</span>
+          </button>
+
+          {/* 4. Database */}
+          <button
+            onClick={() => handleTabChange('database')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer flex items-center gap-1.5 ${
+              activeTab === 'database'
+                ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-xs font-semibold'
+                : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'
+            }`}
+          >
+            <Database className="w-3.5 h-3.5 text-emerald-500" />
+            <span>Database</span>
+          </button>
+
+          {/* 5. Stripe & Metronome */}
+          <button
+            onClick={() => handleTabChange('stripe-metronome')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer flex items-center gap-1.5 ${
+              activeTab === 'stripe-metronome'
+                ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-xs font-semibold'
+                : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'
+            }`}
+          >
+            <CreditCard className="w-3.5 h-3.5 text-indigo-500" />
+            <span>Stripe & Metronome</span>
           </button>
         </div>
       </div>
 
-      {/* ✦ AI Elements <Sandbox /> Container */}
-      <Sandbox>
+      {/* ✦ AI Elements <Sandbox /> Container with Warning Blink if Knob isn't green */}
+      <Sandbox
+        className={`transition-all duration-300 ${
+          !vibezCheckEnabled
+            ? 'ring-2 ring-amber-500/90 border-amber-500 shadow-[0_0_35px_rgba(245,158,11,0.35)] animate-pulse'
+            : 'border-slate-200/90 dark:border-zinc-800/90'
+        }`}
+      >
+        {/* Blinking Warning Strip when knob isn't green */}
+        {!vibezCheckEnabled && (
+          <div className="bg-amber-500/15 dark:bg-amber-950/50 border-b border-amber-500/40 px-4 py-2 flex items-center justify-between text-xs text-amber-900 dark:text-amber-200 font-medium animate-pulse">
+            <div className="flex items-center gap-2">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
+              </span>
+              <span>
+                <strong>Warning:</strong> VibezCheck FinOps knob is <strong>OFF</strong> (not green). AI requests are running unmetered with zero cost safety fuses!
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setVibezCheckEnabled(true)}
+              className="px-2.5 py-0.5 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold transition cursor-pointer flex items-center gap-1 shadow-xs"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
+              <span>Turn ON (Green)</span>
+            </button>
+          </div>
+        )}
+
         {/* Sandbox Header */}
         <SandboxHeader>
           {/* Traffic Light Window Dots + Dev Mode Pill */}
@@ -2477,7 +1680,7 @@ export function AiSdkShowcase({
             <span className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]" />
             <span className="w-2.5 h-2.5 rounded-full bg-[#27c93f]" />
 
-            {/* ✦ Dev Mode Pill */}
+            {/* Dev Mode Pill */}
             <div className="ml-2 flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-200/70 dark:bg-zinc-800/80 border border-slate-300/80 dark:border-zinc-700/80 text-[11px] font-mono text-slate-700 dark:text-zinc-300 select-none shadow-2xs">
               <span className="relative flex h-1.5 w-1.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -2490,28 +1693,30 @@ export function AiSdkShowcase({
             </div>
           </div>
 
-          {/* Header Controls: Improved VibezCheck Badge + Run It With Dropdown + Copy */}
+          {/* Header Controls: VibezCheck Badge + Run It With Model Dropdown + Copy */}
           <div className="flex items-center gap-2.5 sm:gap-3">
-            {/* ✦ Improved VibezCheck Badge with Smooth Toggle Switch */}
+            {/* VibezCheck Toggle Switch */}
             <button
               type="button"
               onClick={() => setVibezCheckEnabled(!vibezCheckEnabled)}
               className={`group flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-medium border transition-all duration-200 cursor-pointer select-none ${
                 vibezCheckEnabled
-                  ? 'bg-emerald-500/10 dark:bg-emerald-950/40 border-emerald-500/40 text-emerald-800 dark:text-emerald-300 shadow-2xs hover:bg-emerald-500/15'
-                  : 'bg-slate-100/90 dark:bg-zinc-900/90 border-slate-200 dark:border-zinc-800 text-slate-600 dark:text-zinc-400 hover:border-slate-300 dark:hover:border-zinc-700 hover:text-slate-800 dark:hover:text-zinc-200'
+                  ? 'bg-slate-100/90 dark:bg-zinc-900/90 border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-300 hover:border-slate-300 dark:hover:border-zinc-700'
+                  : 'bg-amber-500/15 dark:bg-amber-950/30 border-amber-500/50 text-amber-800 dark:text-amber-300 animate-pulse'
               }`}
               title="Toggle VibezCheck token & cost metering"
             >
               <div className="flex items-center gap-1.5">
                 <Sparkles
-                  className={`w-3 h-3 transition-transform ${
+                  className={`w-3.5 h-3.5 transition-transform ${
                     vibezCheckEnabled
-                      ? 'text-emerald-500 dark:text-emerald-400 rotate-12 scale-110'
-                      : 'text-slate-400 dark:text-zinc-500'
+                      ? 'text-slate-500 dark:text-zinc-400'
+                      : 'text-amber-500 dark:text-amber-400'
                   }`}
                 />
-                <span className="text-[11px] font-semibold tracking-tight">VibezCheck</span>
+                <span className="text-[11px] font-semibold tracking-tight text-slate-800 dark:text-zinc-200">
+                  VibezCheck
+                </span>
               </div>
 
               {/* Micro switch pill */}
@@ -2528,32 +1733,43 @@ export function AiSdkShowcase({
               </div>
             </button>
 
-            {/* Run it with [ Provider ∨ ] Dropdown with Brand Logo */}
+            {/* Run it with [ Model Version ▾ ] Dropdown with Model Icon */}
             <div className="flex items-center gap-1.5">
               <span className="text-[11px] text-slate-500 dark:text-zinc-400 font-sans hidden sm:inline">
                 Run it with
               </span>
               <div className="relative flex items-center">
                 <div className="absolute left-2.5 pointer-events-none flex items-center">
-                  <LobeIcon
-                    name={
-                      runtime === 'custom'
-                        ? 'lobehub'
-                        : runtime === 'gateway'
-                        ? 'vercel'
-                        : currentTabConfig.iconName
-                    }
-                    size={14}
-                  />
+                  <LobeIcon name={currentPreset.iconName} size={14} />
                 </div>
                 <select
-                  value={runtime}
-                  onChange={(e) => setRuntime(e.target.value as RuntimeEngine)}
-                  className="appearance-none bg-white dark:bg-[#1c1c22] border border-slate-300 dark:border-zinc-700 hover:border-slate-500 dark:hover:border-zinc-500 text-slate-800 dark:text-white text-xs font-sans py-1 pl-7 pr-6 rounded-lg cursor-pointer focus:outline-none focus:ring-1 focus:ring-zinc-400 transition"
+                  value={presetIndex}
+                  onChange={(e) => setPresetIndex(parseInt(e.target.value, 10))}
+                  className="appearance-none bg-white dark:bg-[#1c1c22] border border-slate-300 dark:border-zinc-700 hover:border-slate-500 dark:hover:border-zinc-500 text-slate-800 dark:text-white text-xs font-sans py-1 pl-7 pr-6 rounded-lg cursor-pointer focus:outline-none focus:ring-1 focus:ring-zinc-400 transition max-w-[210px] truncate"
                 >
-                  <option value="provider">{currentTabConfig.provider}</option>
-                  <option value="custom">Custom Provider</option>
-                  <option value="gateway">AI Gateway</option>
+                  {COMPANIES.map((comp) => {
+                    const compModels = PRESETS.map((p, idx) => ({ ...p, originalIdx: idx })).filter(
+                      (p) => p.provider.toLowerCase() === comp.name.toLowerCase()
+                    );
+                    if (compModels.length === 0) return null;
+                    return (
+                      <optgroup
+                        key={comp.id}
+                        label={comp.name}
+                        className="bg-white dark:bg-[#18181f] text-slate-900 dark:text-white font-semibold"
+                      >
+                        {compModels.map((m) => (
+                          <option
+                            key={m.id}
+                            value={m.originalIdx}
+                            className="font-normal font-sans bg-white dark:bg-[#18181f] text-slate-900 dark:text-white"
+                          >
+                            {m.name} (${m.inputPer1M.toFixed(2)}/1M in · ${m.outputPer1M.toFixed(2)}/1M out)
+                          </option>
+                        ))}
+                      </optgroup>
+                    );
+                  })}
                 </select>
                 <ChevronDown className="w-3.5 h-3.5 text-slate-400 dark:text-zinc-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
               </div>
@@ -2570,11 +1786,18 @@ export function AiSdkShowcase({
           </div>
         </SandboxHeader>
 
-        {/* Sandbox Body: Code Editor + Live Preview (Console Drawer Removed) */}
+        {/* Sandbox Body: Code Editor + Live Preview */}
         <SandboxBody>
-          {/* Left: Code Editor Window (No bottom console bar) */}
-          <SandboxEditor>
-            <div className="p-5 font-mono text-[13px] leading-relaxed overflow-x-auto no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden text-zinc-200 flex-1 bg-[#0e0e11]">
+          {/* Left: Code Editor Window */}
+          <SandboxEditor className="relative h-full overflow-hidden">
+            {/* The underlying code editor - blurred when in calculator mode */}
+            <div
+              className={`p-5 font-mono text-[13px] leading-relaxed overflow-x-auto no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden text-zinc-200 flex-1 bg-[#0e0e11] transition-all duration-300 ${
+                activeTab === 'calculator'
+                  ? 'filter blur-[7px] opacity-20 select-none pointer-events-none'
+                  : ''
+              }`}
+            >
               <pre className="space-y-1">
                 {codeLines.map((line) => (
                   <div key={line.num} className="flex items-start">
@@ -2636,993 +1859,794 @@ export function AiSdkShowcase({
                 ))}
               </pre>
             </div>
+
+            {/* Blurred Code Overlay: Prompt Text Evaluator + Sliders + Breakdown Cards */}
+            {activeTab === 'calculator' && (
+              <div className="absolute inset-0 z-10 p-4 sm:p-5 overflow-y-auto no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden bg-zinc-950/85 backdrop-blur-md flex flex-col justify-between gap-3 text-zinc-100 animate-in fade-in duration-200">
+                {/* Header with Title & Action Buttons */}
+                <div className="flex items-center justify-between border-b border-zinc-800/80 pb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="p-1.5 rounded-lg bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
+                      <CalcIcon className="w-4 h-4" />
+                    </span>
+                    <div>
+                      <h4 className="text-xs font-bold text-white tracking-tight flex items-center gap-1.5">
+                        Prompt & Token Evaluator
+                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-indigo-900/60 text-indigo-300 border border-indigo-700/50">
+                          Live Costing
+                        </span>
+                      </h4>
+                      <p className="text-[10px] text-zinc-400">
+                        Paste instructions, input & output to evaluate exact tokens and costs.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={handleLoadSamplePrompt}
+                      className="px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 hover:text-white text-[10px] font-medium transition cursor-pointer"
+                      title="Load sample prompt"
+                    >
+                      Sample
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleClearPrompt}
+                      className="px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-400 hover:text-white text-[10px] font-medium transition cursor-pointer"
+                      title="Clear prompt fields"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                </div>
+
+                {/* 3 Textareas: Instructions, Input, Output */}
+                <div className="space-y-2.5">
+                  {/* 1. Instructions / System Prompt */}
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="font-semibold text-indigo-300 flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
+                        Instructions (System Prompt)
+                      </span>
+                      <div className="flex items-center gap-2 font-mono text-[10px]">
+                        <span className="text-zinc-500">{evalInstructions.length} chars</span>
+                        <span className="px-1.5 py-0.2 rounded bg-indigo-950/80 border border-indigo-800/60 text-indigo-300 font-bold">
+                          {calcInstTokens.toLocaleString()} tokens
+                        </span>
+                      </div>
+                    </div>
+                    <textarea
+                      rows={2}
+                      value={evalInstructions}
+                      onChange={(e) => handleInstructionsChange(e.target.value)}
+                      placeholder="Paste system instructions or system prompt..."
+                      className="w-full bg-zinc-900/90 border border-zinc-800 hover:border-zinc-700 focus:border-indigo-500 rounded-lg p-2 text-xs text-zinc-200 placeholder-zinc-500 font-sans focus:outline-none focus:ring-1 focus:ring-indigo-500 transition resize-none"
+                    />
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="range"
+                        min={0}
+                        max={4000}
+                        step={50}
+                        value={calcInstTokens}
+                        onChange={(e) => setCalcInstTokens(parseInt(e.target.value, 10))}
+                        className="w-full h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                        title="Fine-tune instruction tokens"
+                      />
+                    </div>
+                  </div>
+
+                  {/* 2. User Input / Prompt */}
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="font-semibold text-sky-300 flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-sky-400" />
+                        Input (User Prompt / Messages)
+                      </span>
+                      <div className="flex items-center gap-2 font-mono text-[10px]">
+                        <span className="text-zinc-500">{evalInput.length} chars</span>
+                        <span className="px-1.5 py-0.2 rounded bg-sky-950/80 border border-sky-800/60 text-sky-300 font-bold">
+                          {calcInTokens.toLocaleString()} tokens
+                        </span>
+                      </div>
+                    </div>
+                    <textarea
+                      rows={2}
+                      value={evalInput}
+                      onChange={(e) => handleInputChange(e.target.value)}
+                      placeholder="Paste user prompt or messages..."
+                      className="w-full bg-zinc-900/90 border border-zinc-800 hover:border-zinc-700 focus:border-sky-500 rounded-lg p-2 text-xs text-zinc-200 placeholder-zinc-500 font-sans focus:outline-none focus:ring-1 focus:ring-sky-500 transition resize-none"
+                    />
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="range"
+                        min={0}
+                        max={16000}
+                        step={100}
+                        value={calcInTokens}
+                        onChange={(e) => setCalcInTokens(parseInt(e.target.value, 10))}
+                        className="w-full h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-sky-500"
+                        title="Fine-tune input tokens"
+                      />
+                    </div>
+                  </div>
+
+                  {/* 3. Model Output / Completion */}
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="font-semibold text-emerald-300 flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                        Output (Model Completion)
+                      </span>
+                      <div className="flex items-center gap-2 font-mono text-[10px]">
+                        <span className="text-zinc-500">{evalOutput.length} chars</span>
+                        <span className="px-1.5 py-0.2 rounded bg-emerald-950/80 border border-emerald-800/60 text-emerald-300 font-bold">
+                          {calcOutTokens.toLocaleString()} tokens
+                        </span>
+                      </div>
+                    </div>
+                    <textarea
+                      rows={2}
+                      value={evalOutput}
+                      onChange={(e) => handleOutputChange(e.target.value)}
+                      placeholder="Paste model output or completion..."
+                      className="w-full bg-zinc-900/90 border border-zinc-800 hover:border-zinc-700 focus:border-emerald-500 rounded-lg p-2 text-xs text-zinc-200 placeholder-zinc-500 font-sans focus:outline-none focus:ring-1 focus:ring-emerald-500 transition resize-none"
+                    />
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="range"
+                        min={0}
+                        max={4000}
+                        step={50}
+                        value={calcOutTokens}
+                        onChange={(e) => setCalcOutTokens(parseInt(e.target.value, 10))}
+                        className="w-full h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+                        title="Fine-tune output tokens"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Metronome Customer Margin Slider (Moved to blurred code area) */}
+                <div className="p-2.5 rounded-xl bg-zinc-900/90 border border-zinc-800/90 space-y-1.5 shadow-xs">
+                  <div className="flex items-center justify-between font-mono text-[11px]">
+                    <span className="text-zinc-300 flex items-center gap-1">
+                      <TrendingUp className="w-3.5 h-3.5 text-indigo-400" />
+                      <span>Metronome Customer Margin:</span>
+                    </span>
+                    <span className="font-bold text-indigo-400">
+                      +{marginPercent}% ({marginMultiplier}x)
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min={0}
+                    max={100}
+                    step={5}
+                    value={marginPercent}
+                    onChange={(e) => setMarginPercent(parseInt(e.target.value, 10))}
+                    className="w-full h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                  />
+                  <div className="flex justify-between text-[9px] font-mono text-zinc-500">
+                    <span>0% (Wholesale)</span>
+                    <span>+30% (Standard)</span>
+                    <span>+100% (2x)</span>
+                  </div>
+                </div>
+
+                {/* Wholesale vs Retail Breakdown Cards (Moved to blurred code area) */}
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="p-2.5 rounded-xl bg-zinc-900/80 border border-zinc-800/80 space-y-0.5">
+                    <span className="text-[10px] text-zinc-400 block">Wholesale Cost</span>
+                    <p className="font-mono text-xs font-bold text-white truncate">
+                      ${calcWholesaleUSD.toFixed(5)}
+                    </p>
+                    <span className="text-[9px] text-zinc-500 block">Paid to Provider</span>
+                  </div>
+
+                  <div className="p-2.5 rounded-xl bg-indigo-950/30 border border-indigo-800/50 space-y-0.5">
+                    <span className="text-[10px] text-indigo-400 block font-medium">Billed Retail</span>
+                    <p className="font-mono text-xs font-bold text-indigo-200 truncate">
+                      ${calcRetailUSD.toFixed(5)}
+                    </p>
+                    <span className="text-[9px] text-indigo-400/80 block">Metronome Ingest</span>
+                  </div>
+
+                  <div className="p-2.5 rounded-xl bg-emerald-950/30 border border-emerald-800/50 space-y-0.5">
+                    <span className="text-[10px] text-emerald-400 block font-medium">Gross Profit</span>
+                    <p className="font-mono text-xs font-bold text-emerald-300 truncate">
+                      +${calcProfitUSD.toFixed(5)}
+                    </p>
+                    <span className="text-[9px] text-emerald-400/80 block">+{marginPercent}% Spread</span>
+                  </div>
+                </div>
+              </div>
+            )}
           </SandboxEditor>
 
           {/* Right: Sandbox Live Execution Preview */}
           <SandboxPreview>
-            <div className="space-y-3">
-              {/* User Prompt Bubble (White bubble with tail) */}
-              <div className="flex justify-end">
-                <div className="relative bg-white text-zinc-950 rounded-2xl rounded-br-xs px-4 py-3 text-xs font-medium max-w-[95%] shadow-sm leading-relaxed">
-                  {audienceTab === 'agents'
-                    ? AGENT_RECIPES[activeAgentTab].prompt
-                    : activeTab === 'image'
-                    ? 'A teddy bear wearing a black hat hiking in the mountains'
-                    : activeTab === 'chatbot'
-                    ? 'How do I stream multi-turn chatbot messages with the AI SDK?'
-                    : currentPreset.prompt}
+            {activeTab === 'calculator' ? (
+              /* ✦ Dedicated Retro Calculator in Sandbox Preview */
+              <div className="flex flex-col justify-between h-full space-y-3 font-sans animate-in fade-in duration-200">
+                {/* Handheld Retro Calculator (Braun ET66 Aesthetic) */}
+                <div className="my-auto">
+                  <div className="bg-[#18181b] border-2 border-zinc-700/80 rounded-[26px] p-3.5 shadow-xl select-none mx-auto max-w-[270px]">
+                    {/* Bezel Title */}
+                    <div className="flex items-center justify-between px-1 mb-2 text-[9px] font-mono font-bold tracking-widest text-zinc-400 uppercase">
+                      <span>VIBEZ-88 NANO</span>
+                      <span className="text-emerald-400 font-bold flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        0ms LATENCY
+                      </span>
+                    </div>
+
+                    {/* Warm Beige Vintage LCD Screen */}
+                    <div className="bg-[#ded8c4] border-2 border-[#b5ad98] rounded-[14px] p-2.5 mb-3 shadow-inner text-[#1a201a]">
+                      <div className="flex items-center justify-between text-[9px] font-mono text-[#525a52] uppercase font-bold tracking-wider mb-0.5">
+                        <span>{currentPreset.provider}</span>
+                        <span>{calcDisplayMode === 'usd' ? 'USD RATE' : 'TOTAL TOK'}</span>
+                      </div>
+
+                      {/* Main Amount */}
+                      <div className="font-mono font-black text-2xl text-right tracking-tight text-[#161a16] truncate py-0.5">
+                        {calcDisplayMode === 'usd' ? (
+                          calcWholesaleUSD < 0.01 ? (
+                            `$${calcWholesaleUSD.toFixed(6)}`
+                          ) : (
+                            `$${calcWholesaleUSD.toFixed(4)}`
+                          )
+                        ) : (
+                          calcTotalTok.toLocaleString()
+                        )}
+                      </div>
+
+                      {/* Formula Subline */}
+                      <div className="text-[10px] font-mono text-[#4b554b] text-right font-semibold truncate border-t border-[#c5beaa] pt-1">
+                        {calcInstTokens} ins + {calcInTokens} in + {calcOutTokens} out = {calcTotalTok} tok
+                      </div>
+                    </div>
+
+                    {/* Tactile Circular Buttons */}
+                    <div className="grid grid-cols-4 gap-1.5">
+                      {/* Row 1: Function Keys (Grey) */}
+                      <button
+                        type="button"
+                        onClick={handleKeypadClear}
+                        className="w-9 h-9 rounded-full bg-[#52525b] hover:bg-[#5f5f69] active:scale-95 text-white font-mono text-xs font-bold flex items-center justify-center transition shadow-sm cursor-pointer"
+                        title="All Clear"
+                      >
+                        AC
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setCalcDisplayMode(calcDisplayMode === 'usd' ? 'tokens' : 'usd')}
+                        className="w-9 h-9 rounded-full bg-[#52525b] hover:bg-[#5f5f69] active:scale-95 text-white font-mono text-xs font-bold flex items-center justify-center transition shadow-sm cursor-pointer"
+                        title="Toggle USD / Tokens"
+                      >
+                        +/-
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setMarginPercent((prev) => (prev === 30 ? 50 : prev === 50 ? 0 : 30))}
+                        className="w-9 h-9 rounded-full bg-[#52525b] hover:bg-[#5f5f69] active:scale-95 text-white font-mono text-xs font-bold flex items-center justify-center transition shadow-sm cursor-pointer"
+                        title="Cycle Margin (0%, 30%, 50%)"
+                      >
+                        %
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setCalcFocusedField('inst')}
+                        className={`w-9 h-9 rounded-full text-white font-mono text-[10px] font-bold flex items-center justify-center transition shadow-sm cursor-pointer ${
+                          calcFocusedField === 'inst'
+                            ? 'bg-indigo-600 ring-2 ring-white'
+                            : 'bg-[#4b6b94] hover:bg-[#5578a3] active:scale-95'
+                        }`}
+                        title="Focus Instruction Tokens"
+                      >
+                        INS
+                      </button>
+
+                      {/* Row 2: 7, 8, 9 + IN */}
+                      {['7', '8', '9'].map((d) => (
+                        <button
+                          key={d}
+                          type="button"
+                          onClick={() => handleKeypadDigit(d)}
+                          className="w-9 h-9 rounded-full bg-[#dc4c45] hover:bg-[#e65750] active:scale-95 text-white font-mono text-xs font-bold flex items-center justify-center transition shadow-sm cursor-pointer"
+                        >
+                          {d}
+                        </button>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => setCalcFocusedField('in')}
+                        className={`w-9 h-9 rounded-full text-white font-mono text-[10px] font-bold flex items-center justify-center transition shadow-sm cursor-pointer ${
+                          calcFocusedField === 'in'
+                            ? 'bg-indigo-600 ring-2 ring-white'
+                            : 'bg-[#4b6b94] hover:bg-[#5578a3] active:scale-95'
+                        }`}
+                        title="Focus Input Tokens"
+                      >
+                        IN
+                      </button>
+
+                      {/* Row 3: 4, 5, 6 + OUT */}
+                      {['4', '5', '6'].map((d) => (
+                        <button
+                          key={d}
+                          type="button"
+                          onClick={() => handleKeypadDigit(d)}
+                          className="w-9 h-9 rounded-full bg-[#dc4c45] hover:bg-[#e65750] active:scale-95 text-white font-mono text-xs font-bold flex items-center justify-center transition shadow-sm cursor-pointer"
+                        >
+                          {d}
+                        </button>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => setCalcFocusedField('out')}
+                        className={`w-9 h-9 rounded-full text-white font-mono text-[10px] font-bold flex items-center justify-center transition shadow-sm cursor-pointer ${
+                          calcFocusedField === 'out'
+                            ? 'bg-indigo-600 ring-2 ring-white'
+                            : 'bg-[#4b6b94] hover:bg-[#5578a3] active:scale-95'
+                        }`}
+                        title="Focus Output Tokens"
+                      >
+                        OUT
+                      </button>
+
+                      {/* Row 4: 1, 2, 3 + CLR */}
+                      {['1', '2', '3'].map((d) => (
+                        <button
+                          key={d}
+                          type="button"
+                          onClick={() => handleKeypadDigit(d)}
+                          className="w-9 h-9 rounded-full bg-[#dc4c45] hover:bg-[#e65750] active:scale-95 text-white font-mono text-xs font-bold flex items-center justify-center transition shadow-sm cursor-pointer"
+                        >
+                          {d}
+                        </button>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (calcFocusedField === 'inst') setCalcInstTokens(0);
+                          if (calcFocusedField === 'in') setCalcInTokens(0);
+                          if (calcFocusedField === 'out') setCalcOutTokens(0);
+                        }}
+                        className="w-9 h-9 rounded-full bg-[#4b6b94] hover:bg-[#5578a3] active:scale-95 text-white font-mono text-[10px] font-bold flex items-center justify-center transition shadow-sm cursor-pointer"
+                        title="Zero focused field"
+                      >
+                        CLR
+                      </button>
+
+                      {/* Row 5: 0, RST, NEXT */}
+                      <button
+                        type="button"
+                        onClick={() => handleKeypadDigit('0')}
+                        className="w-9 h-9 rounded-full bg-[#dc4c45] hover:bg-[#e65750] active:scale-95 text-white font-mono text-xs font-bold flex items-center justify-center transition shadow-sm cursor-pointer"
+                      >
+                        0
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleKeypadReset}
+                        className="w-9 h-9 rounded-full bg-[#52525b] hover:bg-[#5f5f69] active:scale-95 text-white font-mono text-[9px] font-bold flex items-center justify-center transition shadow-sm cursor-pointer"
+                        title="Reset standard values"
+                      >
+                        RST
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (calcFocusedField === 'inst') setCalcFocusedField('in');
+                          else if (calcFocusedField === 'in') setCalcFocusedField('out');
+                          else setCalcFocusedField('inst');
+                        }}
+                        className="col-span-2 h-9 rounded-full bg-[#4b6b94] hover:bg-[#5578a3] active:scale-95 text-white font-mono text-[10px] font-bold flex items-center justify-center transition shadow-sm cursor-pointer gap-1"
+                        title="Cycle focus (Instruction ➔ Input ➔ Output)"
+                      >
+                        <span>NEXT ➔</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bottom Model & Latency indicator */}
+                <div className="pt-2 border-t border-slate-200 dark:border-zinc-800/80 flex items-center justify-between text-[11px] text-slate-500 dark:text-zinc-500 font-mono">
+                  <span className="inline-flex items-center gap-1.5">
+                    <LobeIcon name={currentPreset.iconName} size={14} />
+                    <span>Rate: ${currentPreset.inputPer1M.toFixed(2)}/1M in · ${currentPreset.outputPer1M.toFixed(2)}/1M out</span>
+                  </span>
+                  <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">0ms latency</span>
                 </div>
               </div>
+            ) : (
+              /* All other tabs: Chatbot, Tools & Sessions, Spend Limit, Database, Stripe & Metronome */
+              <div className="space-y-3.5">
+                {/* Quick Scenario Use Case Chips */}
+                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+                  <span className="text-[10px] font-mono text-slate-400 dark:text-zinc-500 uppercase tracking-wider shrink-0 mr-0.5">
+                    Scenario:
+                  </span>
+                  {(Object.keys(USE_CASES) as ShowcaseTab[]).map((tabKey) => {
+                    const uc = USE_CASES[tabKey];
+                    const isActive = activeTab === tabKey;
+                    return (
+                      <button
+                        key={tabKey}
+                        type="button"
+                        onClick={() => handleTabChange(tabKey)}
+                        className={`px-2 py-0.5 rounded-full text-[11px] font-medium transition cursor-pointer flex items-center gap-1 shrink-0 ${
+                          isActive
+                            ? 'bg-slate-900 text-white dark:bg-white dark:text-zinc-950 font-semibold shadow-2xs'
+                            : 'bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
+                        }`}
+                      >
+                        <span>{uc.chipLabel}</span>
+                      </button>
+                    );
+                  })}
+                </div>
 
-              {/* ✦ Agent Developer Recipe Previews (Visible when audienceTab === 'agents') */}
-              {audienceTab === 'agents' && (
-                <>
-                  {/* Stripe Billing Preview */}
-                  {activeAgentTab === 'stripe' && (
-                    <div className="bg-white dark:bg-[#18181f] border border-slate-200/90 dark:border-zinc-800 rounded-2xl rounded-tl-xs p-4 text-xs text-slate-800 dark:text-zinc-200 leading-relaxed space-y-3 shadow-xs animate-in fade-in duration-200">
-                      {/* Provider & Recipe Header */}
-                      <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-zinc-800">
-                        <div className="flex items-center gap-2">
-                          <LobeIcon name={currentTabConfig.iconName} className="w-3.5 h-3.5" />
-                          <span className="font-semibold text-slate-900 dark:text-white text-xs">
-                            {currentTabConfig.provider}
-                          </span>
-                          <span className="text-[10px] text-slate-400 dark:text-zinc-500 font-mono">
-                            {runtime === 'custom' ? 'custom-model' : currentTabConfig.modelId}
-                          </span>
-                        </div>
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-mono font-medium flex items-center gap-1">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                          cus_live_94x19K
-                        </span>
-                      </div>
-
-                      {/* AI Assistant Response Output */}
-                      <p className="leading-relaxed">
-                        {AGENT_RECIPES.stripe.getOutput(currentTabConfig.provider, currentTabConfig.modelId)}
-                      </p>
-
-                      {/* VibezCheck Telemetry & Prepaid Wallet (Only when enabled) */}
-                      {vibezCheckEnabled ? (
-                        <div className="space-y-3 pt-2 border-t border-slate-200 dark:border-zinc-800/80 animate-in fade-in duration-200">
-                          {/* Prepaid Wallet Balance */}
-                          <div className="p-3 rounded-xl bg-slate-50 dark:bg-zinc-900/80 border border-slate-200/80 dark:border-zinc-800 flex items-center justify-between">
-                            <div>
-                              <div className="text-[10px] uppercase font-mono tracking-wider text-slate-500 dark:text-zinc-400">
-                                Customer Prepaid Balance
-                              </div>
-                              <div className="text-xl font-bold font-mono text-slate-900 dark:text-white mt-0.5 transition-all">
-                                ${stripeCredits.toFixed(2)}{' '}
-                                <span className="text-xs font-normal text-slate-500">USD</span>
-                              </div>
-                            </div>
-                            <button
-                              onClick={handleTopUpCredits}
-                              className="px-2.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-[11px] transition shadow-xs cursor-pointer flex items-center gap-1"
-                            >
-                              <span>+ Add $10</span>
-                            </button>
-                          </div>
-
-                          {topUpSuccess && (
-                            <div className="text-[11px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg flex items-center gap-1.5 animate-in fade-in duration-200">
-                              <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                              <span>Customer balance credited (+10.00 USD)</span>
-                            </div>
-                          )}
-
-                          {/* Meter Event Telemetry */}
-                          <div className="space-y-1.5 font-mono text-[11px] pt-1">
-                            <div className="flex items-center justify-between">
-                              <span className="text-slate-500 dark:text-zinc-400">Meter Event:</span>
-                              <span className="text-slate-800 dark:text-zinc-200">ai_tokens_consumed</span>
-                            </div>
-                            <div className="flex items-center justify-between">
-                              <span className="text-slate-500 dark:text-zinc-400">Reported Usage:</span>
-                              <span className="text-slate-800 dark:text-zinc-200">
-                                {currentPreset.tokens} tokens (-${currentPreset.costUSD.toFixed(5)} USD)
-                              </span>
-                            </div>
-                            <div className="flex items-center justify-between">
-                              <span className="text-slate-500 dark:text-zinc-400">Sync Status:</span>
-                              <span className="text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                                Auto-synced (200 OK)
-                              </span>
-                            </div>
-                          </div>
-
-                          <div className="pt-2 border-t border-slate-200 dark:border-zinc-800/80">
-                            <VibezReceipt
-                              model={
-                                runtime === 'custom'
-                                  ? 'your-model-id'
-                                  : runtime === 'provider'
-                                  ? currentTabConfig.modelId
-                                  : currentTabConfig.modelString
-                              }
-                              tokens={currentPreset.tokens}
-                              costUSD={currentPreset.costUSD}
-                              latencyMs={currentTabConfig.latencyMs}
-                              variant="pill"
-                            />
-                          </div>
-                        </div>
-                      ) : (
-                        /* Unmonitored State when VibezCheck is OFF */
-                        <div className="space-y-2.5 pt-2 border-t border-slate-200 dark:border-zinc-800/80 animate-in fade-in duration-200">
-                          <div className="p-3 rounded-xl bg-rose-500/5 dark:bg-rose-950/20 border border-rose-500/20 text-slate-800 dark:text-zinc-200 space-y-2 font-mono text-[11px]">
-                            <div className="flex items-center justify-between pb-1 border-b border-rose-500/10">
-                              <div className="flex items-center gap-1.5 text-rose-600 dark:text-rose-400 font-semibold">
-                                <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-                                <span>Unmetered Stream Pipeline</span>
-                              </div>
-                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-600 dark:text-rose-400 font-medium">
-                                Unmonitored
-                              </span>
-                            </div>
-                            <div className="space-y-1 text-slate-600 dark:text-zinc-400">
-                              <div className="flex items-center justify-between">
-                                <span>Customer Ledger:</span>
-                                <span className="text-rose-600 dark:text-rose-400 font-semibold">Not Linked</span>
-                              </div>
-                              <div className="flex items-center justify-between">
-                                <span>Stripe Usage Events:</span>
-                                <span className="text-rose-600 dark:text-rose-400 font-semibold">0 emitted</span>
-                              </div>
-                              <div className="flex items-center justify-between">
-                                <span>Net Gross Margin:</span>
-                                <span className="text-slate-500 dark:text-zinc-500">+0.0% (Wholesale Cost)</span>
-                              </div>
-                            </div>
-                          </div>
-                          <button
-                            onClick={() => setVibezCheckEnabled(true)}
-                            className="w-full py-1.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-white font-medium text-[11px] transition cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
-                          >
-                            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                            <span>Arm VibezCheck (Link Stripe & +30% Margin)</span>
-                          </button>
-                        </div>
-                      )}
+                {/* User Prompt Bubble with Contextual Question */}
+                <div className="flex justify-end">
+                  <div className="relative bg-slate-100/90 dark:bg-zinc-800/90 text-slate-900 dark:text-zinc-100 rounded-2xl rounded-br-xs px-4 py-2.5 text-xs font-medium max-w-[95%] shadow-xs leading-relaxed border border-slate-200/90 dark:border-zinc-700/80">
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-mono font-semibold uppercase tracking-wider flex items-center gap-1">
+                        <Sparkles className="w-2.5 h-2.5" />
+                        <span>Use Case • {currentUseCase.tabTitle}</span>
+                      </span>
+                      <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-white dark:bg-zinc-900 text-slate-600 dark:text-zinc-400 font-mono border border-slate-200/60 dark:border-zinc-800">
+                        {currentUseCase.badge}
+                      </span>
                     </div>
-                  )}
+                    <p className="text-slate-900 dark:text-zinc-100">
+                      {currentUseCase.prompt}
+                    </p>
+                  </div>
+                </div>
 
-                  {/* Circuit Breaker Preview */}
-                  {activeAgentTab === 'circuit-breaker' && (
-                    <div className="bg-white dark:bg-[#18181f] border border-slate-200/90 dark:border-zinc-800 rounded-2xl rounded-tl-xs p-4 text-xs text-slate-800 dark:text-zinc-200 leading-relaxed space-y-3 shadow-xs animate-in fade-in duration-200">
-                      {/* Provider & Recipe Header */}
-                      <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-zinc-800">
-                        <div className="flex items-center gap-2">
-                          <LobeIcon name={currentTabConfig.iconName} className="w-3.5 h-3.5" />
-                          <span className="font-semibold text-slate-900 dark:text-white text-xs">
-                            {currentTabConfig.provider}
-                          </span>
-                          <span className="text-[10px] text-slate-400 dark:text-zinc-500 font-mono">
-                            {runtime === 'custom' ? 'custom-model' : currentTabConfig.modelId}
-                          </span>
-                        </div>
-                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-medium flex items-center gap-1 ${
-                          vibezCheckEnabled
-                            ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
-                            : 'bg-rose-500/10 text-rose-600 dark:text-rose-400'
-                        }`}>
-                          <ShieldAlert className="w-3 h-3" />
-                          {vibezCheckEnabled ? 'Trip Limit: $0.50 USD' : 'Failsafe: Disabled'}
-                        </span>
-                      </div>
-
-                      {/* AI Assistant Response Output */}
-                      <p className="leading-relaxed">
-                        {AGENT_RECIPES['circuit-breaker'].getOutput(currentTabConfig.provider, currentTabConfig.modelId)}
-                      </p>
-
-                      {/* Circuit Breaker Telemetry & Interactive Simulation */}
-                      {vibezCheckEnabled ? (
-                        <div className="space-y-3 pt-2 border-t border-slate-200 dark:border-zinc-800/80 animate-in fade-in duration-200">
-                          {/* Execution Trace */}
-                          <div className="p-3 rounded-xl bg-slate-50 dark:bg-zinc-900/80 border border-slate-200/80 dark:border-zinc-800 space-y-2 font-mono text-[11px]">
-                            <div className="text-[10px] uppercase tracking-wider text-slate-500 dark:text-zinc-400 font-semibold">
-                              Recursive Execution Trace
-                            </div>
-
-                            {/* Animated Limit Gauge */}
-                            <div className="w-full bg-slate-200 dark:bg-zinc-800 h-1.5 rounded-full overflow-hidden">
-                              <div
-                                className="bg-amber-500 h-1.5 rounded-full transition-all duration-300"
-                                style={{
-                                  width: `${Math.min(100, Math.max(5, (simulatedCost / 0.50) * 100))}%`,
-                                }}
-                              />
-                            </div>
-
-                            <div className="space-y-1 pt-0.5">
-                              <div className="flex items-center justify-between text-slate-600 dark:text-zinc-400">
-                                <span>Loop #1: Plan & schemas</span>
-                                <span className="text-emerald-600 dark:text-emerald-400 font-medium">✓ $0.0008</span>
-                              </div>
-                              <div className="flex items-center justify-between text-slate-600 dark:text-zinc-400">
-                                <span>Loop #2: Tool invoke retry</span>
-                                <span className="text-emerald-600 dark:text-emerald-400 font-medium">✓ $0.0034</span>
-                              </div>
-                              <div className="flex items-center justify-between text-amber-600 dark:text-amber-400 font-semibold">
-                                <span>{isSimulatingLoop ? `Loop #${simulatedStep}: Reasoning step` : 'Loop #3: Trip threshold hit'}</span>
-                                <span>${simulatedCost.toFixed(4)} [Capped]</span>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Trip Alert Banner */}
-                          <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-800 dark:text-amber-300 space-y-1">
-                            <div className="flex items-center justify-between font-mono font-semibold text-[11px]">
-                              <span className="flex items-center gap-1.5">
-                                <ShieldAlert className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                                Circuit Breaker Engaged
-                              </span>
-                              <span className="text-xs font-mono">${simulatedCost.toFixed(4)} USD</span>
-                            </div>
-                            <p className="text-[11px] leading-normal text-amber-700 dark:text-amber-400">
-                              Stream terminated automatically at threshold. $45.00+ runaway bill prevented.
-                            </p>
-                          </div>
-
-                          {/* Controls */}
-                          <div className="flex items-center justify-between pt-1">
-                            <button
-                              onClick={handleSimulateLoop}
-                              disabled={isSimulatingLoop}
-                              className="px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-zinc-700 hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300 font-medium text-[11px] transition cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
-                            >
-                              <RotateCcw className={`w-3 h-3 ${isSimulatingLoop ? 'animate-spin' : ''}`} />
-                              <span>{isSimulatingLoop ? 'Simulating Trace...' : 'Simulate Runaway Loop'}</span>
-                            </button>
-
-                            <VibezReceipt
-                              model={
-                                runtime === 'custom'
-                                  ? 'your-model-id'
-                                  : runtime === 'provider'
-                                  ? currentTabConfig.modelId
-                                  : currentTabConfig.modelString
-                              }
-                              tokens={25000}
-                              costUSD={0.50}
-                              latencyMs={currentTabConfig.latencyMs}
-                              variant="pill"
-                            />
-                          </div>
-                        </div>
-                      ) : (
-                        /* Circuit Breaker Disabled State */
-                        <div className="space-y-2.5 pt-2 border-t border-slate-200 dark:border-zinc-800/80 animate-in fade-in duration-200 font-mono text-[11px]">
-                          <div className="p-3 rounded-xl bg-rose-500/5 dark:bg-rose-950/20 border border-rose-500/20 text-slate-800 dark:text-zinc-200 space-y-2">
-                            <div className="flex items-center justify-between pb-1 border-b border-rose-500/10">
-                              <div className="flex items-center gap-1.5 text-rose-600 dark:text-rose-400 font-semibold">
-                                <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-                                <span>No Runaway Failsafe Armed</span>
-                              </div>
-                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-600 dark:text-rose-400 font-medium">
-                                Uncapped
-                              </span>
-                            </div>
-
-                            {/* Simulated Uncapped Gauge */}
-                            <div className="w-full bg-slate-200 dark:bg-zinc-800 h-1.5 rounded-full overflow-hidden">
-                              <div
-                                className="bg-rose-500 h-1.5 rounded-full transition-all duration-300"
-                                style={{
-                                  width: isSimulatingLoop ? `${Math.min(100, (simulatedCost / 50) * 100)}%` : '75%',
-                                }}
-                              />
-                            </div>
-
-                            <div className="space-y-1 text-slate-600 dark:text-zinc-400">
-                              <div className="flex items-center justify-between">
-                                <span>Simulated Exposure:</span>
-                                <span className="text-rose-600 dark:text-rose-400 font-semibold">
-                                  {isSimulatingLoop ? `$${simulatedCost.toFixed(2)} USD` : '$48.50+ surprise bill'}
-                                </span>
-                              </div>
-                              <div className="flex items-center justify-between">
-                                <span>Loop Severity:</span>
-                                <span className="text-rose-600 dark:text-rose-400 font-semibold">
-                                  {isSimulatingLoop ? `Loop #${simulatedStep} (Spinning)` : 'Unbounded recursion'}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={handleSimulateLoop}
-                              disabled={isSimulatingLoop}
-                              className="px-2.5 py-1.5 rounded-lg border border-rose-300 dark:border-rose-900/50 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-rose-700 dark:text-rose-300 font-medium text-[11px] transition cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
-                            >
-                              <RotateCcw className={`w-3 h-3 ${isSimulatingLoop ? 'animate-spin' : ''}`} />
-                              <span>{isSimulatingLoop ? 'Spurting Tokens...' : 'Test Runaway'}</span>
-                            </button>
-                            <button
-                              onClick={() => setVibezCheckEnabled(true)}
-                              className="flex-1 py-1.5 px-2.5 rounded-lg bg-slate-900 hover:bg-slate-800 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-white font-medium text-[11px] transition cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
-                            >
-                              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                              <span>Arm Failsafe ($0.50 Limit)</span>
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Profit Margins Preview */}
-                  {activeAgentTab === 'margin' && (
-                    <div className="bg-white dark:bg-[#18181f] border border-slate-200/90 dark:border-zinc-800 rounded-2xl rounded-tl-xs p-4 text-xs text-slate-800 dark:text-zinc-200 leading-relaxed space-y-3 shadow-xs animate-in fade-in duration-200">
-                      {/* Provider & Recipe Header */}
-                      <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-zinc-800">
-                        <div className="flex items-center gap-2">
-                          <LobeIcon name={currentTabConfig.iconName} className="w-3.5 h-3.5" />
-                          <span className="font-semibold text-slate-900 dark:text-white text-xs">
-                            {currentTabConfig.provider}
-                          </span>
-                          <span className="text-[10px] text-slate-400 dark:text-zinc-500 font-mono">
-                            {runtime === 'custom' ? 'custom-model' : currentTabConfig.modelId}
-                          </span>
-                        </div>
-                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-medium flex items-center gap-1 ${
-                          vibezCheckEnabled
-                            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-                            : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500'
-                        }`}>
-                          <Percent className="w-3 h-3" />
-                          {vibezCheckEnabled ? `+${marginPercent}% Net Markup` : '+0% Margin (Raw Cost)'}
-                        </span>
-                      </div>
-
-                      {/* AI Assistant Response Output */}
-                      <p className="leading-relaxed">
-                        {AGENT_RECIPES.margin.getOutput(currentTabConfig.provider, currentTabConfig.modelId)}
-                      </p>
-
-                      {/* Profit Margins Controls & Breakdown */}
-                      {vibezCheckEnabled ? (
-                        <div className="space-y-3 pt-2 border-t border-slate-200 dark:border-zinc-800/80 animate-in fade-in duration-200">
-                          {/* Interactive Margin Slider */}
-                          <div className="p-3 rounded-xl bg-slate-50 dark:bg-zinc-900/80 border border-slate-200/80 dark:border-zinc-800 space-y-2">
-                            <div className="flex items-center justify-between font-mono text-[11px]">
-                              <span className="text-slate-600 dark:text-zinc-400">Adjust Net Profit Margin:</span>
-                              <span className="font-bold text-emerald-600 dark:text-emerald-400 text-xs">
-                                +{marginPercent}%
-                              </span>
-                            </div>
-                            <input
-                              type="range"
-                              min={10}
-                              max={100}
-                              step={5}
-                              value={marginPercent}
-                              onChange={(e) => setMarginPercent(Number(e.target.value))}
-                              className="w-full h-1.5 bg-slate-200 dark:bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-emerald-500"
-                            />
-                            <div className="flex justify-between text-[10px] font-mono text-slate-400 dark:text-zinc-500">
-                              <span>+10% (High Volume)</span>
-                              <span>+50% (Standard)</span>
-                              <span>+100% (Premium)</span>
-                            </div>
-                          </div>
-
-                          {/* Financial Split with Animated Visual Proportion Bar */}
-                          <div className="space-y-2 font-mono text-[11px] pt-1">
-                            <div className="w-full bg-slate-200 dark:bg-zinc-800 h-2 rounded-full overflow-hidden flex">
-                              <div
-                                className="bg-slate-400 dark:bg-zinc-500 h-2 transition-all duration-200"
-                                style={{ width: `${Math.round((100 / (100 + marginPercent)) * 100)}%` }}
-                              />
-                              <div
-                                className="bg-emerald-500 h-2 transition-all duration-200"
-                                style={{ width: `${Math.round((marginPercent / (100 + marginPercent)) * 100)}%` }}
-                              />
-                            </div>
-                            <div className="flex justify-between text-[10px] text-slate-500 dark:text-zinc-400">
-                              <span className="flex items-center gap-1">
-                                <span className="w-1.5 h-1.5 rounded-full bg-slate-400 dark:bg-zinc-500" />
-                                Wholesale Cost: ${currentPreset.costUSD.toFixed(5)}
-                              </span>
-                              <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-medium">
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                                Your Profit: +${((currentPreset.costUSD * marginPercent) / 100).toFixed(5)}
-                              </span>
-                            </div>
-
-                            <div className="space-y-1 pt-1 border-t border-slate-100 dark:border-zinc-800/80">
-                              <div className="flex items-center justify-between">
-                                <span className="text-slate-500 dark:text-zinc-400">Wholesale Expense:</span>
-                                <span className="text-slate-700 dark:text-zinc-300">
-                                  ${currentPreset.costUSD.toFixed(5)} USD ({currentPreset.tokens} tok)
-                                </span>
-                              </div>
-                              <div className="flex items-center justify-between">
-                                <span className="text-slate-500 dark:text-zinc-400">Developer Profit:</span>
-                                <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
-                                  +${((currentPreset.costUSD * marginPercent) / 100).toFixed(5)} USD
-                                </span>
-                              </div>
-                              <div className="flex items-center justify-between border-t border-dashed border-slate-200 dark:border-zinc-800 pt-1.5 font-bold">
-                                <span className="text-slate-900 dark:text-white">Customer Invoiced:</span>
-                                <span className="text-emerald-600 dark:text-emerald-400 text-xs">
-                                  ${(currentPreset.costUSD * (1 + marginPercent / 100)).toFixed(5)} USD
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="pt-2 border-t border-slate-200 dark:border-zinc-800/80">
-                            <VibezReceipt
-                              model={
-                                runtime === 'custom'
-                                  ? 'your-model-id'
-                                  : runtime === 'provider'
-                                  ? currentTabConfig.modelId
-                                  : currentTabConfig.modelString
-                              }
-                              tokens={currentPreset.tokens}
-                              costUSD={currentPreset.costUSD * (1 + marginPercent / 100)}
-                              latencyMs={currentTabConfig.latencyMs}
-                              variant="pill"
-                            />
-                          </div>
-                        </div>
-                      ) : (
-                        /* Zero Margin Unmonitored State */
-                        <div className="space-y-2.5 pt-2 border-t border-slate-200 dark:border-zinc-800/80 animate-in fade-in duration-200 font-mono text-[11px]">
-                          <div className="p-3 rounded-xl bg-slate-100 dark:bg-zinc-900/80 border border-slate-200 dark:border-zinc-800 space-y-1.5 text-slate-600 dark:text-zinc-400">
-                            <div className="flex items-center justify-between text-slate-800 dark:text-zinc-200 font-semibold pb-1 border-b border-slate-200 dark:border-zinc-800">
-                              <span>Pricing Model: Pass-Through</span>
-                              <span className="text-slate-400">0% Margin</span>
-                            </div>
-                            <div className="flex items-center justify-between">
-                              <span>Raw Wholesale:</span>
-                              <span>${currentPreset.costUSD.toFixed(5)} USD</span>
-                            </div>
-                            <div className="flex items-center justify-between">
-                              <span>Developer Markup:</span>
-                              <span className="text-rose-500">+$0.00000 (No markup)</span>
-                            </div>
-                            <div className="flex items-center justify-between border-t border-slate-200 dark:border-zinc-800 pt-1 font-semibold text-slate-800 dark:text-zinc-200">
-                              <span>Customer Charged:</span>
-                              <span>${currentPreset.costUSD.toFixed(5)} USD</span>
-                            </div>
-                          </div>
-                          <button
-                            onClick={() => setVibezCheckEnabled(true)}
-                            className="w-full py-1.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-white font-medium text-[11px] transition cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
-                          >
-                            <Percent className="w-3.5 h-3.5 text-emerald-400" />
-                            <span>Configure Developer Profit Margin (+30%)</span>
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Abort Protection Preview */}
-                  {activeAgentTab === 'abort' && (
-                    <div className="bg-white dark:bg-[#18181f] border border-slate-200/90 dark:border-zinc-800 rounded-2xl rounded-tl-xs p-4 text-xs text-slate-800 dark:text-zinc-200 leading-relaxed space-y-3 shadow-xs animate-in fade-in duration-200">
-                      {/* Provider & Recipe Header */}
-                      <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-zinc-800">
-                        <div className="flex items-center gap-2">
-                          <LobeIcon name={currentTabConfig.iconName} className="w-3.5 h-3.5" />
-                          <span className="font-semibold text-slate-900 dark:text-white text-xs">
-                            {currentTabConfig.provider}
-                          </span>
-                          <span className="text-[10px] text-slate-400 dark:text-zinc-500 font-mono">
-                            {runtime === 'custom' ? 'custom-model' : currentTabConfig.modelId}
-                          </span>
-                        </div>
-                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-medium flex items-center gap-1 ${
-                          vibezCheckEnabled
-                            ? 'bg-sky-500/10 text-sky-600 dark:text-sky-400'
-                            : 'bg-rose-500/10 text-rose-600 dark:text-rose-400'
-                        }`}>
-                          <LifeBuoy className="w-3 h-3" />
-                          {vibezCheckEnabled ? 'captureOnAbort: active' : 'captureOnAbort: disabled'}
-                        </span>
-                      </div>
-
-                      {/* AI Assistant Response Output */}
-                      <p className="leading-relaxed">
-                        {AGENT_RECIPES.abort.getOutput(currentTabConfig.provider, currentTabConfig.modelId)}
-                      </p>
-
-                      {/* Abort Protection Scenario & Telemetry */}
-                      {vibezCheckEnabled ? (
-                        <div className="space-y-3 pt-2 border-t border-slate-200 dark:border-zinc-800/80 animate-in fade-in duration-200">
-                          {/* Scenario Box */}
-                          <div className="p-3 rounded-xl bg-slate-50 dark:bg-zinc-900/80 border border-slate-200/80 dark:border-zinc-800 space-y-2">
-                            <div className="text-[10px] uppercase font-mono tracking-wider text-slate-500 dark:text-zinc-400 font-semibold">
-                              Stream Interruption Simulation
-                            </div>
-                            <p className="text-[11px] text-slate-600 dark:text-zinc-300 leading-normal">
-                              Client disconnected {currentPreset.tokens} tokens into a 4,000 token stream. VibezCheck flushed metrics synchronously before socket close.
-                            </p>
-                            <div className="space-y-1 font-mono text-[11px] pt-1">
-                              <div className="flex items-center justify-between">
-                                <span className="text-slate-500 dark:text-zinc-400">Tokens Streamed:</span>
-                                <span className="font-semibold text-slate-800 dark:text-zinc-200">
-                                  {currentPreset.tokens} tokens
-                                </span>
-                              </div>
-                              <div className="flex items-center justify-between">
-                                <span className="text-slate-500 dark:text-zinc-400">Unbilled Waste:</span>
-                                <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
-                                  0 tokens (100% saved)
-                                </span>
-                              </div>
-                              <div className="flex items-center justify-between">
-                                <span className="text-slate-500 dark:text-zinc-400">Accrued Cost Captured:</span>
-                                <span className="text-slate-800 dark:text-zinc-200">
-                                  ${currentPreset.costUSD.toFixed(5)} USD
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="p-2.5 rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-800 dark:text-sky-300 flex items-center gap-2 text-[11px] font-mono">
-                            <CheckCircle2 className="w-4 h-4 text-sky-500 shrink-0" />
-                            <span>Partial tokens recorded to DB before socket closure</span>
-                          </div>
-
-                          <div className="pt-2 border-t border-slate-200 dark:border-zinc-800/80">
-                            <VibezReceipt
-                              model={
-                                runtime === 'custom'
-                                  ? 'your-model-id'
-                                  : runtime === 'provider'
-                                  ? currentTabConfig.modelId
-                                  : currentTabConfig.modelString
-                              }
-                              tokens={currentPreset.tokens}
-                              costUSD={currentPreset.costUSD}
-                              latencyMs={Math.round(currentTabConfig.latencyMs * 0.6)}
-                              variant="pill"
-                            />
-                          </div>
-                        </div>
-                      ) : (
-                        /* Unprotected Abort State */
-                        <div className="space-y-2.5 pt-2 border-t border-slate-200 dark:border-zinc-800/80 animate-in fade-in duration-200 font-mono text-[11px]">
-                          <div className="p-3 rounded-xl bg-rose-500/5 dark:bg-rose-950/20 border border-rose-500/20 text-slate-800 dark:text-zinc-200 space-y-1.5">
-                            <div className="flex items-center justify-between text-rose-600 dark:text-rose-400 font-semibold pb-1 border-b border-rose-500/10">
-                              <span>In-Flight Disconnect Result</span>
-                              <span>Compute Lost</span>
-                            </div>
-                            <div className="flex items-center justify-between text-slate-600 dark:text-zinc-400">
-                              <span>Tokens Emitted:</span>
-                              <span>{currentPreset.tokens} tokens</span>
-                            </div>
-                            <div className="flex items-center justify-between text-slate-600 dark:text-zinc-400">
-                              <span>Provider Invoiced:</span>
-                              <span>${currentPreset.costUSD.toFixed(5)} USD</span>
-                            </div>
-                            <div className="flex items-center justify-between text-rose-600 dark:text-rose-400 font-semibold border-t border-rose-500/10 pt-1">
-                              <span>Customer Billed:</span>
-                              <span>$0.00000 USD (100% loss)</span>
-                            </div>
-                          </div>
-                          <button
-                            onClick={() => setVibezCheckEnabled(true)}
-                            className="w-full py-1.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-white font-medium text-[11px] transition cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
-                          >
-                            <LifeBuoy className="w-3.5 h-3.5 text-sky-400" />
-                            <span>Enable Abort Capture (0% Waste)</span>
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Multi-Tool Session Budget Preview */}
-                  {activeAgentTab === 'session' && (
-                    <div className="bg-white dark:bg-[#18181f] border border-slate-200/90 dark:border-zinc-800 rounded-2xl rounded-tl-xs p-4 text-xs text-slate-800 dark:text-zinc-200 leading-relaxed space-y-3 shadow-xs animate-in fade-in duration-200">
-                      {/* Provider & Recipe Header */}
-                      <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-zinc-800">
-                        <div className="flex items-center gap-2">
-                          <LobeIcon name={currentTabConfig.iconName} className="w-3.5 h-3.5" />
-                          <span className="font-semibold text-slate-900 dark:text-white text-xs">
-                            {currentTabConfig.provider}
-                          </span>
-                          <span className="text-[10px] text-slate-400 dark:text-zinc-500 font-mono">
-                            {runtime === 'custom' ? 'custom-model' : currentTabConfig.modelId}
-                          </span>
-                        </div>
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 font-mono font-medium flex items-center gap-1">
-                          <Bot className="w-3 h-3 text-purple-500" />
-                          Budget: $2.000 USD
-                        </span>
-                      </div>
-
-                      {/* AI Assistant Response Output */}
-                      <p className="leading-relaxed">
-                        {AGENT_RECIPES.session.getOutput(currentTabConfig.provider, currentTabConfig.modelId)}
-                      </p>
-
-                      {/* Multi-Tool Session Budget Breakdown & Telemetry */}
-                      {vibezCheckEnabled ? (
-                        <div className="space-y-3 pt-2 border-t border-slate-200 dark:border-zinc-800/80 animate-in fade-in duration-200">
-                          {/* Spending Progress */}
-                          <div className="p-3 rounded-xl bg-slate-50 dark:bg-zinc-900/80 border border-slate-200/80 dark:border-zinc-800 space-y-2">
-                            <div className="flex items-center justify-between font-mono text-[11px]">
-                              <span className="text-slate-500 dark:text-zinc-400">Total Spent:</span>
-                              <span className="font-bold text-slate-900 dark:text-white">
-                                ${(currentPreset.costUSD * 3.4).toFixed(5)}{' '}
-                                <span className="font-normal text-slate-400">/ $2.00000 USD</span>
-                              </span>
-                            </div>
-                            <div className="w-full bg-slate-200 dark:bg-zinc-700 h-2 rounded-full overflow-hidden">
-                              <div
-                                className="bg-purple-500 h-2 rounded-full transition-all duration-300"
-                                style={{
-                                  width: `${Math.min(100, Math.max(3, ((currentPreset.costUSD * 3.4) / 2) * 100)).toFixed(1)}%`,
-                                }}
-                              />
-                            </div>
-                            <div className="flex justify-between text-[10px] font-mono text-slate-400 dark:text-zinc-500">
-                              <span>
-                                {(((currentPreset.costUSD * 3.4) / 2) * 100).toFixed(2)}% used
-                              </span>
-                              <span className="text-emerald-600 dark:text-emerald-400 font-medium">
-                                {(100 - ((currentPreset.costUSD * 3.4) / 2) * 100).toFixed(2)}% remaining
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* Tool Breakdown */}
-                          <div className="space-y-1.5 font-mono text-[11px] pt-1">
-                            <div className="flex items-center justify-between text-slate-600 dark:text-zinc-400">
-                              <span className="flex items-center gap-1.5">
-                                <Search className="w-3 h-3 text-purple-400" /> webSearchTool
-                              </span>
-                              <span>
-                                {Math.round(currentPreset.tokens * 0.8)} tok • ${(currentPreset.costUSD * 0.8).toFixed(5)}
-                              </span>
-                            </div>
-                            <div className="flex items-center justify-between text-slate-600 dark:text-zinc-400">
-                              <span className="flex items-center gap-1.5">
-                                <BarChart2 className="w-3 h-3 text-purple-400" /> dataAnalysisTool
-                              </span>
-                              <span>
-                                {Math.round(currentPreset.tokens * 1.1)} tok • ${(currentPreset.costUSD * 1.1).toFixed(5)}
-                              </span>
-                            </div>
-                            <div className="flex items-center justify-between text-slate-600 dark:text-zinc-400">
-                              <span className="flex items-center gap-1.5">
-                                <Terminal className="w-3 h-3 text-purple-400" /> codeExecutionTool
-                              </span>
-                              <span>
-                                {Math.round(currentPreset.tokens * 1.5)} tok • ${(currentPreset.costUSD * 1.5).toFixed(5)}
-                              </span>
-                            </div>
-                          </div>
-
-                          <div className="pt-2 border-t border-slate-200 dark:border-zinc-800/80">
-                            <VibezReceipt
-                              model={
-                                runtime === 'custom'
-                                  ? 'your-model-id'
-                                  : runtime === 'provider'
-                                  ? currentTabConfig.modelId
-                                  : currentTabConfig.modelString
-                              }
-                              tokens={Math.round(currentPreset.tokens * 3.4)}
-                              costUSD={currentPreset.costUSD * 3.4}
-                              latencyMs={currentTabConfig.latencyMs}
-                              variant="pill"
-                            />
-                          </div>
-                        </div>
-                      ) : (
-                        /* Unbudgeted State */
-                        <div className="space-y-2.5 pt-2 border-t border-slate-200 dark:border-zinc-800/80 animate-in fade-in duration-200 font-mono text-[11px]">
-                          <div className="p-3 rounded-xl bg-slate-100 dark:bg-zinc-900/80 border border-slate-200 dark:border-zinc-800 space-y-1.5 text-slate-600 dark:text-zinc-400">
-                            <div className="flex items-center justify-between text-slate-800 dark:text-zinc-200 font-semibold pb-1 border-b border-slate-200 dark:border-zinc-800">
-                              <span>Session Budgeting</span>
-                              <span className="text-rose-500">Unrestricted</span>
-                            </div>
-                            <div className="flex items-center justify-between">
-                              <span>Tool Invocation Cap:</span>
-                              <span className="text-rose-500 font-semibold">None (Autonomous)</span>
-                            </div>
-                            <div className="flex items-center justify-between">
-                              <span>Aggregated Session Spend:</span>
-                              <span className="text-slate-500 dark:text-zinc-500">Unmetered across tools</span>
-                            </div>
-                          </div>
-                          <button
-                            onClick={() => setVibezCheckEnabled(true)}
-                            className="w-full py-1.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-white font-medium text-[11px] transition cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
-                          >
-                            <Bot className="w-3.5 h-3.5 text-purple-400" />
-                            <span>Set Unified Session Budget ($2.00)</span>
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </>
-              )}
-
-              {/* ✦ Human Consumer Previews (Visible when audienceTab === 'humans') */}
-              {audienceTab !== 'agents' && (
-                <>
-                  {/* Chatbot Output Preview */}
-                  {activeTab === 'chatbot' && (
+                {/* Chatbot Output Card (ALWAYS VISIBLE across other tabs) */}
                 <div className="bg-white dark:bg-[#18181f] border border-slate-200/90 dark:border-zinc-800 rounded-2xl rounded-tl-xs p-4 text-xs text-slate-800 dark:text-zinc-200 leading-relaxed space-y-3 shadow-xs">
                   <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-zinc-800">
-                    <div className="flex items-center gap-1.5 text-[11px] font-mono text-slate-500 dark:text-zinc-400">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                      <span>instructions: "You are a helpful assistant."</span>
+                    <div className="flex items-center gap-2">
+                      <LobeIcon name={currentPreset.iconName} className="w-3.5 h-3.5" />
+                      <span className="font-semibold text-slate-900 dark:text-white text-xs">
+                        {currentPreset.provider}
+                      </span>
+                      <span className="text-[10px] text-slate-400 dark:text-zinc-500 font-mono">
+                        {currentPreset.modelId}
+                      </span>
                     </div>
-          
+                    <div className="flex items-center gap-1.5 text-[11px] font-mono text-emerald-600 dark:text-emerald-400">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      <span>Metered locally · Reported async</span>
+                    </div>
                   </div>
 
-                  <p>
-                    Streaming uses UI message streams (<code className="text-pink-500 dark:text-pink-400 font-mono text-[11px]">toUIMessageStream</code>) to send text chunks as they are generated by the model directly into your React client with zero lag.
+                  {/* Streaming Guided Output */}
+                  <p className="leading-relaxed">
+                    {currentUseCase.getAiResponse(currentPreset, vibezCheckEnabled, marginMultiplier)}
                   </p>
 
-                  {/* ✦ VibezCheck Stats & Amount Section (Visible ONLY when VibezCheck is toggled ON) */}
-                  {vibezCheckEnabled && (
-                    <div className="pt-3 border-t border-slate-200 dark:border-zinc-800/80 space-y-2 animate-in fade-in duration-200">
-                      <div className="flex items-center justify-between text-[11px] font-mono">
-                        <span className="text-slate-500 dark:text-zinc-400">Tokens Measured:</span>
-                        <span className="font-semibold text-slate-800 dark:text-zinc-200">
-                          185 tokens
-                        </span>
-                      </div>
-
-                      <div className="flex items-center justify-between text-[11px] font-mono">
-                        <span className="text-slate-500 dark:text-zinc-400">Wholesale Cost:</span>
-                        <span className="text-slate-700 dark:text-zinc-300 font-medium">
-                          $0.00028 USD
-                        </span>
-                      </div>
-
-                      <div className="flex items-center justify-between text-[11px] font-mono">
-                        <span className="text-slate-500 dark:text-zinc-400">Developer Margin:</span>
-                        <span className="text-lime-600 dark:text-lime-400 font-semibold">
-                          +25% (+$0.00007)
-                        </span>
-                      </div>
-
-                      <div className="flex items-center justify-between text-[11px] font-mono border-t border-dashed border-slate-200 dark:border-zinc-800 pt-1.5 font-bold">
-                        <span className="text-slate-900 dark:text-white">Billed Amount:</span>
-                        <span className="text-lime-600 dark:text-lime-400 text-xs">
-                          $0.00035 USD
-                        </span>
-                      </div>
-
-                      <div className="pt-1">
-                        <VibezReceipt
-                          model={
-                            runtime === 'custom'
-                              ? 'your-model-id'
-                              : runtime === 'provider'
-                              ? currentTabConfig.modelId
-                              : currentTabConfig.modelString
-                          }
-                          tokens={185}
-                          costUSD={0.00035}
-                          latencyMs={currentTabConfig.latencyMs}
-                          variant="pill"
-                        />
-                      </div>
+                  {/* Unit Economics Breakdown per Spec v2 Section 23 */}
+                  <div className="grid grid-cols-3 gap-2 p-2.5 rounded-xl bg-slate-50 dark:bg-zinc-900/90 border border-slate-200/80 dark:border-zinc-800/80 font-mono text-[11px]">
+                    <div className="space-y-0.5">
+                      <span className="text-[9px] uppercase tracking-wider text-slate-400 dark:text-zinc-500 font-sans font-semibold block">
+                        AI Cost
+                      </span>
+                      <span className="font-bold text-slate-900 dark:text-white">
+                        \${calculatedCostUSD.toFixed(4)}
+                      </span>
                     </div>
-                  )}
-                </div>
-              )}
-
-              {/* Assistant Output Content */}
-              {activeTab === 'text' && (
-                <div className="bg-white dark:bg-[#18181f] border border-slate-200/90 dark:border-zinc-800 rounded-2xl rounded-tl-xs p-4 text-xs text-slate-800 dark:text-zinc-200 leading-relaxed space-y-3 shadow-xs">
-                  <p>{currentPreset.output}</p>
-
-                  {/* ✦ VibezCheck Stats & Amount Section (Visible ONLY when VibezCheck is toggled ON) */}
-                  {vibezCheckEnabled && (
-                    <div className="pt-3 border-t border-slate-200 dark:border-zinc-800/80 space-y-2 animate-in fade-in duration-200">
-                      <div className="flex items-center justify-between text-[11px] font-mono">
-                        <span className="text-slate-500 dark:text-zinc-400">Tokens Measured:</span>
-                        <span className="font-semibold text-slate-800 dark:text-zinc-200">
-                          {currentPreset.tokens} tokens
-                        </span>
-                      </div>
-
-                      <div className="flex items-center justify-between text-[11px] font-mono">
-                        <span className="text-slate-500 dark:text-zinc-400">Wholesale Cost:</span>
-                        <span className="text-slate-700 dark:text-zinc-300 font-medium">
-                          ${currentPreset.costUSD.toFixed(5)} USD
-                        </span>
-                      </div>
-
-                      <div className="flex items-center justify-between text-[11px] font-mono">
-                        <span className="text-slate-500 dark:text-zinc-400">Developer Margin:</span>
-                        <span className="text-lime-600 dark:text-lime-400 font-semibold">
-                          +25% (+${(currentPreset.costUSD * 0.25).toFixed(5)})
-                        </span>
-                      </div>
-
-                      <div className="flex items-center justify-between text-[11px] font-mono border-t border-dashed border-slate-200 dark:border-zinc-800 pt-1.5 font-bold">
-                        <span className="text-slate-900 dark:text-white">Billed Amount:</span>
-                        <span className="text-lime-600 dark:text-lime-400 text-xs">
-                          ${billedAmount} USD
-                        </span>
-                      </div>
-
-                      <div className="pt-1">
-                        <VibezReceipt
-                          model={
-                            runtime === 'custom'
-                              ? 'your-model-id'
-                              : runtime === 'provider'
-                              ? currentTabConfig.modelId
-                              : currentTabConfig.modelString
-                          }
-                          tokens={currentTabConfig.tokens}
-                          costUSD={currentTabConfig.costUSD * 1.25}
-                          latencyMs={currentTabConfig.latencyMs}
-                          variant="pill"
-                        />
-                      </div>
+                    <div className="space-y-0.5 border-l border-slate-200 dark:border-zinc-800 pl-2">
+                      <span className="text-[9px] uppercase tracking-wider text-slate-400 dark:text-zinc-500 font-sans font-semibold block">
+                        Customer Charge
+                      </span>
+                      <span className="font-bold text-indigo-600 dark:text-indigo-400">
+                        \${(calculatedCostUSD * Number(marginMultiplier)).toFixed(4)}
+                      </span>
                     </div>
-                  )}
-                </div>
-              )}
-
-              {/* Image Output Preview */}
-              {activeTab === 'image' && (
-                <div className="space-y-2">
-                  <div className="relative rounded-xl overflow-hidden border border-slate-200 dark:border-zinc-800 shadow-md group">
-                    <img
-                      src="https://images.unsplash.com/photo-1530595467537-0b5996c41f2d?w=800&auto=format&fit=crop&q=80"
-                      alt="Teddy bear hiking in mountains"
-                      className="w-full h-44 object-cover group-hover:scale-105 transition duration-500"
-                    />
-                    {vibezCheckEnabled && (
-                      <div className="absolute bottom-2 left-2 right-2">
-                        <VibezReceipt
-                          model={
-                            runtime === 'custom'
-                              ? 'your-model-id'
-                              : currentTabConfig.modelString
-                          }
-                          tokens={1000}
-                          costUSD={0.04}
-                          variant="pill"
-                        />
-                      </div>
-                    )}
-                  </div>
-                  {vibezCheckEnabled && (
-                    <div className="p-2.5 rounded-lg bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-[11px] font-mono flex items-center justify-between">
-                      <span className="text-slate-500 dark:text-zinc-400">Fixed Image Fee:</span>
-                      <span className="text-lime-600 dark:text-lime-400 font-bold">$0.04000 USD</span>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Speech Output Preview */}
-              {activeTab === 'speech' && (
-                <div className="bg-white dark:bg-[#18181f] border border-slate-200 dark:border-zinc-800 rounded-2xl p-4 space-y-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-zinc-800 flex items-center justify-center p-1.5 border border-slate-200 dark:border-zinc-700">
-                      <LobeIcon name="elevenlabs" size={16} />
-                    </div>
-                    <div className="flex-1">
-                      <div className="text-xs font-semibold text-slate-800 dark:text-zinc-200 flex items-center gap-1.5">
-                        <span>elevenlabs/multilingual-v2</span>
-                      </div>
-                      <div className="text-[10px] text-slate-500 dark:text-zinc-500">2.4 seconds • 48kHz audio</div>
+                    <div className="space-y-0.5 border-l border-slate-200 dark:border-zinc-800 pl-2">
+                      <span className="text-[9px] uppercase tracking-wider text-emerald-600 dark:text-emerald-400 font-sans font-semibold block">
+                        Contribution
+                      </span>
+                      <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                        +\${(calculatedCostUSD * (Number(marginMultiplier) - 1)).toFixed(4)}
+                      </span>
                     </div>
                   </div>
 
-                  {vibezCheckEnabled && (
-                    <div className="pt-2 border-t border-slate-200 dark:border-zinc-800">
-                      <VibezReceipt
-                        model={
-                          runtime === 'custom'
-                            ? 'your-model-id'
-                            : currentTabConfig.modelString
-                        }
-                        tokens={56}
-                        costUSD={0.0035}
-                        variant="pill"
-                      />
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {(activeTab === 'transcription' || activeTab === 'video') && (
-                <div className="bg-white dark:bg-[#18181f] border border-slate-200 dark:border-zinc-800 rounded-2xl p-4 space-y-3">
-                  <div className="flex items-center gap-2">
-                    <LobeIcon
-                      name={activeTab === 'transcription' ? 'openai' : 'luma-color'}
-                      size={16}
-                    />
-                    <span className="text-xs font-semibold text-slate-800 dark:text-zinc-200">
-                      {activeTab === 'transcription' ? 'openai/whisper-1' : 'luma/ray-2'}
+                  {/* Business Status Badges */}
+                  <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                    <span className="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
+                      ✓ Within spend limit
+                    </span>
+                    <span className="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-500/20">
+                      ✓ Metered
+                    </span>
+                    <span className="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-700 dark:text-purple-400 border border-purple-500/20">
+                      ✓ Billable
                     </span>
                   </div>
 
-                  <p className="text-xs text-slate-700 dark:text-zinc-300">
-                    {activeTab === 'transcription'
-                      ? '“Audio stream transcription finalized with 99.4% accuracy.”'
-                      : '1080p 60fps neural video rendering complete.'}
-                  </p>
-
-                  {vibezCheckEnabled && (
-                    <div className="pt-2 border-t border-slate-200 dark:border-zinc-800">
-                      <VibezReceipt
-                        model={
-                          runtime === 'custom'
-                            ? 'your-model-id'
-                            : currentTabConfig.modelString
-                        }
-                        tokens={activeTab === 'transcription' ? 240 : 5000}
-                        costUSD={activeTab === 'transcription' ? 0.006 : 0.25}
-                        variant="pill"
-                      />
-                    </div>
-                  )}
+                  {/* Token Measurement & Receipt */}
+                  <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-zinc-800/60 text-[11px] font-mono">
+                    <span className="text-slate-500 dark:text-zinc-400">
+                      {currentPreset.tokens} tokens • {currentPreset.latencyMs}ms TTFT
+                    </span>
+                    <VibezReceipt
+                      model={currentPreset.modelId}
+                      tokens={currentPreset.tokens}
+                      costUSD={calculatedCostUSD}
+                      latencyMs={currentPreset.latencyMs}
+                      variant="pill"
+                    />
+                  </div>
                 </div>
-              )}
-            </>
-          )}
-        </div>
 
-        {/* Model & Latency indicator matching currentTabConfig */}
-        <div className="mt-3 pt-2.5 border-t border-slate-200 dark:border-zinc-800/80 flex items-center justify-between text-[11px] text-slate-500 dark:text-zinc-500">
-          <span className="inline-flex items-center gap-1.5 font-mono">
-                <LobeIcon
-                  name={
-                    runtime === 'custom'
-                      ? 'lobehub'
-                      : runtime === 'gateway'
-                      ? 'vercel'
-                      : currentTabConfig.iconName
-                  }
-                  size={14}
-                />
+                {/* Tab 1: Chatbot Telemetry HUD */}
+                {activeTab === 'chatbot' && (
+                  <div className="bg-white dark:bg-[#18181f] border border-slate-200/90 dark:border-zinc-800 rounded-2xl p-4 text-xs text-slate-800 dark:text-zinc-200 leading-relaxed space-y-3 shadow-xs animate-in fade-in duration-200 font-mono text-[11px]">
+                    <div className="flex items-center justify-between pb-1.5 border-b border-slate-200/80 dark:border-zinc-800/80 font-sans">
+                      <div className="flex items-center gap-2">
+                        <Bot className="w-3.5 h-3.5 text-sky-500" />
+                        <span className="font-semibold text-slate-900 dark:text-white text-xs">
+                          Streaming Token & Cost Inspection
+                        </span>
+                      </div>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-600 dark:text-sky-400 font-mono font-medium">
+                        Zero Retention (ZDR)
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 pt-1">
+                      <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-zinc-900/80 border border-slate-200/70 dark:border-zinc-800/70 space-y-0.5">
+                        <span className="text-[10px] text-slate-500 dark:text-zinc-400">Wholesale Unit Cost</span>
+                        <p className="font-bold text-slate-900 dark:text-white text-xs">${currentPreset.costUSD.toFixed(5)} USD</p>
+                      </div>
+                      <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-zinc-900/80 border border-slate-200/70 dark:border-zinc-800/70 space-y-0.5">
+                        <span className="text-[10px] text-slate-500 dark:text-zinc-400">Added Latency</span>
+                        <p className="font-bold text-emerald-600 dark:text-emerald-400 text-xs">0.00ms (Offline Index)</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Tab 2: Tools & Sessions */}
+                {activeTab === 'tools-session' && (
+                  <div className="bg-white dark:bg-[#18181f] border border-slate-200/90 dark:border-zinc-800 rounded-2xl p-4 text-xs text-slate-800 dark:text-zinc-200 leading-relaxed space-y-3 shadow-xs animate-in fade-in duration-200">
+                    <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-zinc-800">
+                      <div className="flex items-center gap-2">
+                        <Terminal className="w-3.5 h-3.5 text-purple-500" />
+                        <span className="font-semibold text-slate-900 dark:text-white text-xs">
+                          Agent Session & Tool Call Latency
+                        </span>
+                      </div>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 font-mono font-medium">
+                        sessionBudgetUSD: $2.00
+                      </span>
+                    </div>
+
+                    <div className="space-y-1.5 font-mono text-[11px]">
+                      <div className="flex items-center justify-between text-slate-700 dark:text-zinc-300 p-2 rounded-lg bg-slate-50 dark:bg-zinc-900/60 border border-slate-200/60 dark:border-zinc-800/60">
+                        <span className="flex items-center gap-1.5">
+                          <Search className="w-3 h-3 text-purple-500" />
+                          <span>webSearch (searchTool)</span>
+                        </span>
+                        <span>42ms • {Math.round(currentPreset.tokens * 0.4)} tok • $0.01000 USD</span>
+                      </div>
+                      <div className="flex items-center justify-between text-slate-700 dark:text-zinc-300 p-2 rounded-lg bg-slate-50 dark:bg-zinc-900/60 border border-slate-200/60 dark:border-zinc-800/60">
+                        <span className="flex items-center gap-1.5">
+                          <Terminal className="w-3 h-3 text-purple-500" />
+                          <span>calculator (calcTool)</span>
+                        </span>
+                        <span>12ms • {Math.round(currentPreset.tokens * 0.2)} tok • $0.00500 USD</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between text-[11px] font-mono pt-1 text-slate-500 dark:text-zinc-400">
+                      <span>Aggregated Workflow Spend:</span>
+                      <span className="font-bold text-slate-900 dark:text-white">
+                        ${(currentPreset.costUSD + 0.015).toFixed(5)} / $2.00000 USD
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Tab 3: Spend Limit */}
+                {activeTab === 'spend-limit' && (
+                  <div className="bg-white dark:bg-[#18181f] border border-slate-200/90 dark:border-zinc-800 rounded-2xl p-4 text-xs text-slate-800 dark:text-zinc-200 leading-relaxed space-y-3 shadow-xs animate-in fade-in duration-200">
+                    <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-zinc-800">
+                      <div className="flex items-center gap-2">
+                        <ShieldAlert className="w-3.5 h-3.5 text-amber-500" />
+                        <span className="font-semibold text-slate-900 dark:text-white text-xs">
+                          Circuit Breaker (maxCostPerCallUSD)
+                        </span>
+                      </div>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 font-mono font-medium">
+                        Trip Wire: $0.500 USD
+                      </span>
+                    </div>
+
+                    <div className="p-3 rounded-xl bg-slate-50 dark:bg-zinc-900/80 border border-slate-200/80 dark:border-zinc-800 space-y-2">
+                      <div className="flex items-center justify-between font-mono text-[11px]">
+                        <span className="text-slate-500 dark:text-zinc-400">Current Loop Spend:</span>
+                        <span className="font-bold text-slate-900 dark:text-white">
+                          ${simulatedCost.toFixed(4)} <span className="font-normal text-slate-400">/ $0.5000 USD</span>
+                        </span>
+                      </div>
+                      <div className="w-full bg-slate-200 dark:bg-zinc-700 h-2 rounded-full overflow-hidden">
+                        <div
+                          className="bg-amber-500 h-2 rounded-full transition-all duration-300"
+                          style={{
+                            width: `${Math.min(100, Math.max(3, (simulatedCost / 0.5) * 100)).toFixed(1)}%`,
+                          }}
+                        />
+                      </div>
+                      <div className="flex justify-between text-[10px] font-mono text-slate-400 dark:text-zinc-500">
+                        <span>{Math.min(100, (simulatedCost / 0.5) * 100).toFixed(1)}% limit reached</span>
+                        <span className="text-emerald-600 dark:text-emerald-400 font-medium">Auto-terminates runaway loops</span>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={handleSimulateLoop}
+                      disabled={isSimulatingLoop}
+                      className="w-full py-1.5 px-3 rounded-xl border border-rose-300 dark:border-rose-900/50 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-rose-700 dark:text-rose-300 font-medium text-[11px] transition cursor-pointer flex items-center justify-center gap-1.5"
+                    >
+                      <RotateCcw className={`w-3 h-3 ${isSimulatingLoop ? 'animate-spin' : ''}`} />
+                      <span>{isSimulatingLoop ? 'Spurting Tokens...' : 'Simulate Runaway Loop (Severed at $0.50)'}</span>
+                    </button>
+                  </div>
+                )}
+
+                {/* Tab 4: Database */}
+                {activeTab === 'database' && (
+                  <div className="bg-white dark:bg-[#18181f] border border-slate-200/90 dark:border-zinc-800 rounded-2xl p-4 text-xs text-slate-800 dark:text-zinc-200 leading-relaxed space-y-3 shadow-xs animate-in fade-in duration-200">
+                    <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-zinc-800">
+                      <div className="flex items-center gap-2">
+                        <Database className="w-3.5 h-3.5 text-emerald-500" />
+                        <span className="font-semibold text-slate-900 dark:text-white text-xs">
+                          vibezcheck.supabase(supabase)
+                        </span>
+                      </div>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-mono font-medium">
+                        Table: public.vibez_usage
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between text-[11px] font-mono">
+                      <span className="text-slate-500 dark:text-zinc-400">Customer Wallet Balance:</span>
+                      <span className="text-emerald-600 dark:text-emerald-400 font-bold text-xs">
+                        ${supabaseBalance.toFixed(4)} USD
+                      </span>
+                    </div>
+
+                    <div className="rounded-xl border border-slate-200/80 dark:border-zinc-800 overflow-hidden bg-slate-50/70 dark:bg-zinc-900/70 font-mono text-[10px]">
+                      <div className="grid grid-cols-12 gap-1 px-2.5 py-1.5 bg-slate-200/50 dark:bg-zinc-800/60 font-semibold text-slate-600 dark:text-zinc-400 border-b border-slate-200/60 dark:border-zinc-800/60">
+                        <span className="col-span-3">row_id</span>
+                        <span className="col-span-3">customer</span>
+                        <span className="col-span-2">tokens</span>
+                        <span className="col-span-2">cost</span>
+                        <span className="col-span-2 text-right">status</span>
+                      </div>
+                      <div className="divide-y divide-slate-200/50 dark:divide-zinc-800/50">
+                        {supabaseRows.map((row) => (
+                          <div
+                            key={row.id}
+                            className="grid grid-cols-12 gap-1 px-2.5 py-1.5 items-center hover:bg-emerald-500/5 transition"
+                          >
+                            <span className="col-span-3 text-slate-700 dark:text-zinc-300">{row.id}</span>
+                            <span className="col-span-3 text-indigo-600 dark:text-indigo-400">{row.customerId}</span>
+                            <span className="col-span-2 text-slate-600 dark:text-zinc-400">{row.tokens}</span>
+                            <span className="col-span-2 text-emerald-600 dark:text-emerald-400 font-semibold">
+                              ${row.costUSD.toFixed(4)}
+                            </span>
+                            <span className="col-span-2 text-right text-emerald-600 dark:text-emerald-400 font-medium">
+                              201 OK
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={handleSimulateSupabase}
+                      disabled={supabaseSyncing}
+                      className="w-full py-1.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-[11px] transition shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
+                    >
+                      <Database className="w-3 h-3" />
+                      <span>{supabaseSyncing ? 'Writing SQL...' : 'Debit Customer Wallet in SQL Ledger'}</span>
+                    </button>
+                  </div>
+                )}
+
+                {/* Tab 5: Stripe & Metronome */}
+                {activeTab === 'stripe-metronome' && (
+                  <div className="bg-white dark:bg-[#18181f] border border-slate-200/90 dark:border-zinc-800 rounded-2xl p-4 text-xs text-slate-800 dark:text-zinc-200 leading-relaxed space-y-3 shadow-xs animate-in fade-in duration-200">
+                    <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-zinc-800">
+                      <div className="flex items-center gap-2">
+                        <CreditCard className="w-3.5 h-3.5 text-indigo-500" />
+                        <span className="font-semibold text-slate-900 dark:text-white text-xs">
+                          pricing: &#123; margin: {marginMultiplier} &#125; & vibezcheck.metronome()
+                        </span>
+                      </div>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-mono font-medium">
+                        +{marginPercent}% Profit Markup
+                      </span>
+                    </div>
+
+                    {/* Margin Slider */}
+                    <div className="p-3 rounded-xl bg-slate-50 dark:bg-zinc-900/80 border border-slate-200/80 dark:border-zinc-800 space-y-2">
+                      <div className="flex items-center justify-between font-mono text-[11px]">
+                        <span className="text-slate-600 dark:text-zinc-400">Profit Margin Multiplier:</span>
+                        <span className="font-bold text-emerald-600 dark:text-emerald-400 text-xs">
+                          margin: {marginMultiplier} (+{marginPercent}%)
+                        </span>
+                      </div>
+                      <input
+                        type="range"
+                        min={10}
+                        max={100}
+                        step={5}
+                        value={marginPercent}
+                        onChange={(e) => setMarginPercent(Number(e.target.value))}
+                        className="w-full h-1.5 bg-slate-200 dark:bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+                      />
+                      <div className="flex justify-between text-[10px] font-mono text-slate-400 dark:text-zinc-500">
+                        <span>1.10 (+10%)</span>
+                        <span>1.30 (+30% Standard)</span>
+                        <span>2.00 (+100% Premium)</span>
+                      </div>
+                    </div>
+
+                    {/* Metronome Ingestion Stream Box */}
+                    <div className="p-3 rounded-xl bg-slate-50 dark:bg-zinc-900/80 border border-slate-200/80 dark:border-zinc-800 space-y-1.5 font-mono text-[11px]">
+                      <div className="flex items-center justify-between pb-1 border-b border-slate-200/60 dark:border-zinc-800/60">
+                        <span className="text-slate-500 dark:text-zinc-400">Metronome Event:</span>
+                        <span className="text-slate-800 dark:text-zinc-200 font-bold">{lastTxnId}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-500 dark:text-zinc-400">API Sink:</span>
+                        <span className="text-indigo-600 dark:text-indigo-400 font-semibold">POST /v1/ingest</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-500 dark:text-zinc-400">Billed to Customer:</span>
+                        <span className="text-emerald-600 dark:text-emerald-400 font-bold">
+                          ${calculatedCostUSD.toFixed(5)} USD
+                        </span>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={handleSimulateMetronome}
+                      disabled={metronomeSyncing}
+                      className="w-full py-1.5 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-[11px] transition shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
+                    >
+                      <Zap className={`w-3 h-3 ${metronomeSyncing ? 'animate-spin' : ''}`} />
+                      <span>{metronomeSyncing ? 'Dispatching Event...' : 'Simulate Metronome Ingest (Event #' + metronomeEvents + ')'}</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Model & Latency indicator matching currentPreset */}
+            <div className="mt-3 pt-2.5 border-t border-slate-200 dark:border-zinc-800/80 flex items-center justify-between text-[11px] text-slate-500 dark:text-zinc-500">
+              <span className="inline-flex items-center gap-1.5 font-mono">
+                <LobeIcon name={currentPreset.iconName} size={14} />
                 <span>
-                  Model:{' '}
-                  {runtime === 'custom'
-                    ? activeTab === 'image'
-                      ? 'yourProvider.image("your-model-id")'
-                      : 'yourProvider("your-model-id")'
-                    : runtime === 'gateway'
-                    ? `"${currentTabConfig.modelString}"`
-                    : activeTab === 'image'
-                    ? `${currentTabConfig.providerFn}.image("${currentTabConfig.modelId}")`
-                    : `${currentTabConfig.providerFn}("${currentTabConfig.modelId}")`}
+                  Model: {currentPreset.providerFn}("{currentPreset.modelId}")
                 </span>
               </span>
-              <span className="font-mono text-[10px]">{currentTabConfig.latencyMs}ms latency</span>
+              <span className="font-mono text-[10px]">{currentPreset.latencyMs}ms latency</span>
             </div>
           </SandboxPreview>
         </SandboxBody>
       </Sandbox>
-
-      {/* ✦ Bottom Link (Matching Screenshot "See all supported LLM models ↗") */}
-      <div className="mt-4 flex justify-center">
-        <a
-          href="https://ai-sdk.dev/docs"
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex items-center gap-1.5 text-xs text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-100 transition font-medium"
-        >
-          <span>See all</span>
-          <span className="font-semibold text-slate-800 dark:text-zinc-200 hover:underline">supported LLM models</span>
-          <ExternalLink className="w-3.5 h-3.5" />
-        </a>
-      </div>
     </section>
   );
 }

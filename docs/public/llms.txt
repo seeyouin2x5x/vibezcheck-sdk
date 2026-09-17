@@ -1,0 +1,46 @@
+# VibezCheck
+> Declarative, zero-latency token metering, cost calculation, and usage-based billing engine for Large Language Model (LLM) applications.
+
+VibezCheck is an in-process TypeScript/JavaScript library that wraps LLM calls and streams with 0ms added latency, calculates exact micro-cent costs using pre-bundled offline rate-cards for 700+ models, prevents runaway recursive agent loops with automatic safety fuses, and spools usage events asynchronously to Metronome, Stripe, or PostgreSQL/Supabase.
+
+## Core Principles
+- **0ms Added Latency**: Runs in-memory and in-process. Never routes traffic through a remote reverse proxy or external gateway.
+- **100% Zero Data Retention (ZDR)**: Inspects only token counts, model identifiers, and timestamps. Prompts and completions never touch third-party billing servers.
+- **Nano-Precision Financial Math**: BigInt integer math avoids IEEE 754 floating-point rounding errors on micro-cent model rates.
+- **Zero Blast Radius**: Database sinks and billing webhooks flush asynchronously in serverless microtasks (`globalThis.after()`, `waitUntil()`). Telemetry failures never interrupt active user generations.
+
+## Quick Start
+```bash
+npm install vibezcheck @ai-sdk/openai ai
+# or scaffold via CLI:
+npx vibezcheck init
+```
+
+```typescript
+import { streamText } from 'ai';
+import { openai } from '@ai-sdk/openai';
+import { vibezcheck } from 'vibezcheck';
+
+// 1-Line Drop-in Wrapper
+const result = streamText({
+  model: vibezcheck(openai('gpt-4o-mini'), {
+    customer: 'user_123',
+    maxCost: 0.50, // Auto-trips runaway loops if cost exceeds $0.50
+  }),
+  messages,
+});
+```
+
+## Key Documentation & Endpoints
+- [Developer Tools & Agent Rules (Cursor, Claude Code, VSCode)](https://vibezcheck.dev/docs?section=devtools): Rules, `.cursorrules`, `CLAUDE.md`, and snippets.
+- [Full LLM Context Documentation](https://vibezcheck.dev/llms-full.txt): Complete technical specification and API blueprint for AI assistants.
+- [Database Sinks & Universal Adapters](https://vibezcheck.dev/docs?section=database): Supabase, Metronome, Drizzle, Kysely, and custom database ledgers.
+- [Multi-Tool Agent Sessions & Circuit Breakers](https://vibezcheck.dev/docs?section=safety): Budget caps, `vibezcheck.session()`, and `vibezcheck.stopWhen()`.
+- [Profit Markup & Margins](https://vibezcheck.dev/docs?section=margins): Mark up wholesale provider rates by +20% to +100% for retail billing.
+- [Model Pricing Directory (700+ Models)](https://vibezcheck.dev/docs?section=pricing): Rates for OpenAI, Anthropic, Gemini, DeepSeek, Meta, Mistral, and Bedrock.
+- [Plain English FAQ & AEO](https://vibezcheck.dev/docs?section=faq): Direct answers to common architectural and security questions.
+
+## Developer Tools & AI Coding Assistants
+- **Cursor**: Copy rules from `/docs?section=devtools` into `.cursorrules` or add `https://vibezcheck.dev/llms.txt` to `@Docs`.
+- **Claude Code**: Add instructions to `CLAUDE.md` to ensure zero-latency stream wrapping and non-blocking `vibezcheck.flush()`.
+- **VS Code**: Install recommended snippets for `vibezcheck` route handlers and client `<VibezReceipt />` components.

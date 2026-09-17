@@ -40,7 +40,7 @@ export interface SandboxBodyProps {
 export function SandboxBody({ children, className = '' }: SandboxBodyProps) {
   return (
     <div
-      className={`grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-slate-200/80 dark:divide-zinc-800/80 items-stretch h-[470px] max-h-[470px] min-h-[470px] overflow-hidden ${className}`}
+      className={`grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-slate-200/80 dark:divide-zinc-800/80 items-stretch min-h-[500px] lg:h-[530px] overflow-hidden ${className}`}
     >
       {children}
     </div>
