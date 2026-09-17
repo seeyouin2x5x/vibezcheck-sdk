@@ -5,10 +5,32 @@ export interface CalculateCostParams {
   model: string;
   inputTokens?: number;
   outputTokens?: number;
+  promptTokens?: number;
+  completionTokens?: number;
   reasoningTokens?: number;
   cachedTokens?: number;
   cacheWriteTokens?: number;
   markupMultiplier?: number;
+  markup?: number;
+  margin?: number;
+  minimumChargeUSD?: number;
+  customRate?: InlineRateConfig;
+}
+
+export interface TokenUsageInput {
+  inputTokens?: number;
+  outputTokens?: number;
+  promptTokens?: number;
+  completionTokens?: number;
+  reasoningTokens?: number;
+  cachedTokens?: number;
+  cacheWriteTokens?: number;
+}
+
+export interface CalculateCostOptions {
+  markupMultiplier?: number;
+  markup?: number;
+  margin?: number;
   minimumChargeUSD?: number;
   customRate?: InlineRateConfig;
 }
@@ -18,8 +40,43 @@ export interface CalculateCostParams {
  * 1 USD = 1,000,000,000 Nano-USD (10^9)
  * 1 token at $1.00 / 1M = $0.000001 = 1,000 Nano-USD
  * Prevents IEEE 754 floating point precision drift on micro-transactions.
+ *
+ * Supports both:
+ * 1. calculateCost('gpt-4o-mini', { promptTokens: 1240, completionTokens: 150 })
+ * 2. calculateCost({ model: 'gpt-4o-mini', inputTokens: 1240, outputTokens: 150 })
  */
-export function calculateCost(params: CalculateCostParams): InferenceCost {
+export function calculateCost(
+  modelOrParams: string | CalculateCostParams,
+  usage?: TokenUsageInput,
+  optionsOrMarkup?: number | CalculateCostOptions
+): InferenceCost {
+  let params: CalculateCostParams;
+
+  if (typeof modelOrParams === 'string') {
+    const opts =
+      typeof optionsOrMarkup === 'number'
+        ? { markupMultiplier: optionsOrMarkup }
+        : optionsOrMarkup || {};
+    params = {
+      model: modelOrParams,
+      inputTokens: usage?.inputTokens ?? usage?.promptTokens ?? 0,
+      outputTokens: usage?.outputTokens ?? usage?.completionTokens ?? 0,
+      reasoningTokens: usage?.reasoningTokens,
+      cachedTokens: usage?.cachedTokens,
+      cacheWriteTokens: usage?.cacheWriteTokens,
+      markupMultiplier: opts.markupMultiplier ?? opts.markup ?? opts.margin,
+      minimumChargeUSD: opts.minimumChargeUSD,
+      customRate: opts.customRate,
+    };
+  } else {
+    params = {
+      ...modelOrParams,
+      inputTokens: modelOrParams.inputTokens ?? modelOrParams.promptTokens ?? 0,
+      outputTokens: modelOrParams.outputTokens ?? modelOrParams.completionTokens ?? 0,
+      markupMultiplier:
+        modelOrParams.markupMultiplier ?? modelOrParams.markup ?? modelOrParams.margin,
+    };
+  }
   let rates: ModelPricingRates;
 
   if (params.customRate) {

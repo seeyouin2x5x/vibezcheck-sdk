@@ -326,6 +326,8 @@ export interface DatabaseAdapter {
 export interface PricingConfig {
   /** Profit margin multiplier (e.g. 1.5 = Cost + 50% profit margin automatically added) */
   margin?: number;
+  /** Retail markup multiplier (alias for margin, e.g. 1.3 = +30% markup) */
+  markup?: number;
   /** Minimum charge in USD for any single call (e.g. 0.01 = at least 1 cent) */
   minimumChargeUSD?: number;
 }

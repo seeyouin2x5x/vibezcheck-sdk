@@ -16,6 +16,8 @@ export interface WithBillingOptions extends CircuitBreakerOptions {
   customer?: CustomerParam;
   /** Direct customer ID */
   customerId?: string;
+  /** Thread or conversation identifier for session attribution */
+  threadId?: string;
   /** Profit margin & minimum charge configuration */
   pricing?: PricingConfig;
   /** 1-line inline pricing rate card */
@@ -197,7 +199,7 @@ export function withBilling<T extends object>(
 
     // Calculate cost with profit margin & minimum charge & custom rates
     const cost = calculateUsageCost(modelId, usage, {
-      markupMultiplier: options.pricing?.margin,
+      markupMultiplier: options.pricing?.margin ?? options.pricing?.markup,
       minimumChargeUSD: options.pricing?.minimumChargeUSD,
       customRate: options.rate,
     });
@@ -244,6 +246,7 @@ export function withBilling<T extends object>(
     const mergedMetadata: Record<string, string | number | boolean> = {
       ...customerMetadata,
       ...options.metadata,
+      ...(options.threadId ? { threadId: options.threadId } : {}),
       ...extraMeta,
     };
 

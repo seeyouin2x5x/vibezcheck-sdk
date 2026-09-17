@@ -1,6 +1,7 @@
 import type { CustomerParam, UsageEvent } from '../types';
 import { VibezCircuitBreakerError } from '../types';
 import { withBilling, type WithBillingOptions } from '../ai-sdk/with-billing';
+import { createVibezModel } from '../ai-sdk/declarative';
 
 export interface AgentSessionOptions {
   customer?: CustomerParam;
@@ -37,10 +38,10 @@ export class AgentSession {
   /**
    * Returns an AI model instance bound to this agent session with cumulative budget enforcement
    */
-  model<T extends object>(modelOrId: T, modelOptions: WithBillingOptions = {}): T {
+  model<T = any>(modelOrId: any, modelOptions: WithBillingOptions = {}): T {
     const session = this;
 
-    return withBilling(modelOrId, {
+    return createVibezModel(modelOrId, {
       ...modelOptions,
       customer: this.customer,
       pricing: modelOptions.pricing || this.options.pricing,
@@ -156,17 +157,25 @@ export class AgentSession {
    */
   tools<T extends Record<string, any>>(
     toolsRecord: T,
-    options: { costPerActionUSD?: number; costs?: Record<string, number> } = {}
-  ): T {
-    const defaultCost = options.costPerActionUSD ?? 0.005;
+    options:
+      | { costPerActionUSD?: number; costs?: Record<string, number> }
+      | Record<string, { costUSD: number } | number | any> = {}
+  ): { [K in keyof T]: T[K] & { costUSD: number } } {
+    const defaultCost = (options as any).costPerActionUSD ?? 0.005;
     const instrumented: Record<string, any> = {};
 
     for (const [name, toolDef] of Object.entries(toolsRecord)) {
-      const costUSD = options.costs?.[name] ?? defaultCost;
+      let costUSD = defaultCost;
+      if (options && 'costs' in options && (options as any).costs?.[name] !== undefined) {
+        costUSD = (options as any).costs[name];
+      } else if (options && name in options) {
+        const val = (options as any)[name];
+        costUSD = typeof val === 'number' ? val : (val?.costUSD ?? defaultCost);
+      }
       instrumented[name] = this.wrapTool(toolDef, { name, costUSD });
     }
 
-    return instrumented as T;
+    return instrumented as { [K in keyof T]: T[K] & { costUSD: number } };
   }
 
   /**

@@ -17,7 +17,7 @@ export class VibezMeter {
   private markupMultiplier?: number;
 
   constructor(options: MeterOptions = {}) {
-    this.markupMultiplier = options.pricing?.margin ?? options.markupMultiplier;
+    this.markupMultiplier = options.pricing?.margin ?? options.pricing?.markup ?? options.markupMultiplier;
     this.batcher = new MeterBatcher(options);
   }
 

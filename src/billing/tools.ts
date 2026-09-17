@@ -94,23 +94,31 @@ export function wrapTool<T = any>(
  */
 export function instrumentToolKit<T extends Record<string, any>>(
   tools: T,
-  options: {
-    customer?: string;
-    costPerActionUSD?: number;
-    session?: AgentSession;
-    costs?: Record<string, number>;
-  } = {}
+  options:
+    | {
+        customer?: string;
+        costPerActionUSD?: number;
+        session?: AgentSession;
+        costs?: Record<string, number>;
+      }
+    | Record<string, { costUSD: number } | number | any> = {}
 ): { [K in keyof T]: T[K] & { costUSD: number } } {
   const instrumented: Record<string, any> = {};
-  const cost = options.costPerActionUSD ?? 0.005;
+  const cost = (options as any).costPerActionUSD ?? 0.005;
 
   for (const [toolName, toolDef] of Object.entries(tools)) {
-    const actionCost = options.costs?.[toolName] ?? cost;
+    let actionCost = cost;
+    if (options && 'costs' in options && (options as any).costs?.[toolName] !== undefined) {
+      actionCost = (options as any).costs[toolName];
+    } else if (options && toolName in options) {
+      const val = (options as any)[toolName];
+      actionCost = typeof val === 'number' ? val : (val?.costUSD ?? cost);
+    }
     instrumented[toolName] = wrapTool({
       name: toolName,
       costUSD: actionCost,
       tool: toolDef,
-      session: options.session,
+      session: (options as any).session,
     });
   }
 

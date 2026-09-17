@@ -20,7 +20,7 @@
     "react-dom": "^19.0.0",
     "stripe": "^17.7.0",
     "tailwind-merge": "^2.6.0",
-    "vibezcheck": "^0.5.11"
+    "vibezcheck": "^0.5.12"
   },
   "devDependencies": {
     "@types/node": "^22.10.5",
