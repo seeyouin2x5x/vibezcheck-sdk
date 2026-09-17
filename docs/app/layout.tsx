@@ -3,142 +3,89 @@ import { Analytics } from '@vercel/analytics/next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://vibezcheck.dev'),
+  metadataBase: new URL('https://vibezcheck.app'),
   title: {
-    default: 'VibezCheck — Zero-Latency AI Cost Metering, FinOps & Safety Fuse for LLMs',
+    default: 'VibezCheck — AI Cost Monitoring & LLM Usage Metering',
     template: '%s | VibezCheck',
   },
   description:
-    'In-process token cost calculator, circuit breaker, and usage-based billing engine for Next.js, Vercel AI SDK, and autonomous agents. 0ms added latency, 100% Zero Data Retention, pre-bundled rates for 700+ models.',
-  keywords: [
-    'AI FinOps',
-    'LLM token cost calculator',
-    'Vercel AI SDK metering',
-    'stop runaway agent loops',
-    'Metronome AI billing',
-    'Stripe token billing',
-    'Claude 3.7 reasoning tokens',
-    'DeepSeek R1 pricing',
-    'OpenAI o1 token pricing',
-    'prompt caching discounts',
-    'AI circuit breaker',
-    'Zero Data Retention AI',
-    'llms.txt',
-    'cursorrules AI SDK',
-  ],
-  authors: [{ name: 'VibezCheck Team', url: 'https://vibezcheck.dev' }],
-  creator: 'VibezCheck',
-  publisher: 'VibezCheck',
+    'Track AI usage and calculate LLM costs in real dollars. VibezCheck adds TypeScript AI cost monitoring, token metering, spend limits, and usage events.',
   alternates: {
-    canonical: 'https://vibezcheck.dev',
+    canonical: 'https://vibezcheck.app/',
     types: {
-      'text/plain': 'https://vibezcheck.dev/llms.txt',
+      'text/plain': 'https://vibezcheck.app/llms.txt',
     },
+  },
+  robots: {
+    index: true,
+    follow: true,
+    'max-image-preview': 'large',
+    'max-snippet': -1,
+    'max-video-preview': -1,
   },
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://vibezcheck.dev',
+    url: 'https://vibezcheck.app/',
     siteName: 'VibezCheck',
-    title: 'VibezCheck — Zero-Latency AI Cost Metering, FinOps & Safety Fuse for LLMs',
+    title: 'VibezCheck — Know What Every AI Request Costs',
     description:
-      'Measure every token, calculate exact real-time costs, and stream usage to Metronome or your database with 0ms added latency and 100% Zero Data Retention.',
+      'AI cost monitoring and LLM usage metering for developers. Measure costs, control AI spending, and connect usage to revenue.',
     images: [
       {
         url: '/release-v055.jpg',
         width: 1200,
         height: 630,
-        alt: 'VibezCheck AI FinOps & Zero-Latency Token Metering',
+        alt: 'VibezCheck — AI Cost Monitoring & LLM Usage Metering',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'VibezCheck — Zero-Latency AI Cost Metering, FinOps & Safety Fuse for LLMs',
+    title: 'VibezCheck — Know What Every AI Request Costs',
     description:
-      'In-process token cost calculator, circuit breaker, and usage-based billing engine for Next.js and Vercel AI SDK.',
+      'AI cost monitoring, LLM usage metering, and spending controls for developers.',
     images: ['/release-v055.jpg'],
     creator: '@vibezcheck',
   },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-    },
-  },
 };
 
-// JSON-LD Structured Data for AEO (Answer Engine Optimization)
-const jsonLd = {
+// JSON-LD Structured Data for AEO & Entity Graph (Spec Sections 19 & 37)
+const jsonLdGraph = {
   '@context': 'https://schema.org',
   '@graph': [
     {
-      '@type': 'SoftwareApplication',
-      '@id': 'https://vibezcheck.dev/#software',
+      '@type': 'Organization',
+      '@id': 'https://vibezcheck.app/#organization',
       name: 'VibezCheck',
-      url: 'https://vibezcheck.dev',
-      applicationCategory: 'DeveloperApplication',
-      operatingSystem: 'Node.js, Bun, Edge Runtimes',
-      softwareVersion: '0.5.10',
-      license: 'https://opensource.org/licenses/MIT',
-      description:
-        'Zero-latency token metering, profit margin, and usage-based billing engine for Large Language Model applications and Vercel AI SDK.',
-      offers: {
-        '@type': 'Offer',
-        price: '0.00',
-        priceCurrency: 'USD',
-      },
-      featureList: [
-        '0ms Added Streaming Latency',
-        '100% Zero Data Retention (ZDR)',
-        'Automatic Runaway Agent Circuit Breaker',
-        'Offline Rate Cards for 700+ Models',
-        'Native Metronome and Supabase Ledgers',
-        'Reasoning Token and Prompt Cache Awareness',
+      url: 'https://vibezcheck.app/',
+      logo: 'https://vibezcheck.app/release-v055.jpg',
+      email: 'yt@vibezcheck.app',
+      sameAs: [
+        'https://www.npmjs.com/package/vibezcheck',
+        'https://github.com/seeyouin2x5x/vibezcheck-sdk',
       ],
     },
     {
-      '@type': 'FAQPage',
-      '@id': 'https://vibezcheck.dev/#faq',
-      mainEntity: [
-        {
-          '@type': 'Question',
-          name: 'What is VibezCheck?',
-          acceptedAnswer: {
-            '@type': 'Answer',
-            text: 'VibezCheck is an in-process TypeScript/JavaScript library for Large Language Model (LLM) applications. It tracks token usage, calculates real-time micro-cent costs, prevents runaway recursive agent loops with safety fuses, and spools usage events to Metronome, Stripe, or PostgreSQL/Supabase with 0ms added streaming latency.',
-          },
-        },
-        {
-          '@type': 'Question',
-          name: 'Does VibezCheck add latency to AI streaming responses?',
-          acceptedAnswer: {
-            '@type': 'Answer',
-            text: 'No. VibezCheck adds 0ms of latency because it executes in-process inside your application runtime (Node.js, Bun, Edge) rather than routing through an external proxy server. All telemetry is flushed asynchronously in background microtasks.',
-          },
-        },
-        {
-          '@type': 'Question',
-          name: 'How does VibezCheck stop runaway agent loops?',
-          acceptedAnswer: {
-            '@type': 'Answer',
-            text: 'VibezCheck includes an automatic circuit breaker via maxCost and vibezcheck.stopWhen(session, budgetUSD). If an autonomous agent enters an infinite loop or exceeds its allocated dollar limit, VibezCheck instantly severs the stream to prevent surprise bills.',
-          },
-        },
-        {
-          '@type': 'Question',
-          name: 'Does VibezCheck store or read user prompts?',
-          acceptedAnswer: {
-            '@type': 'Answer',
-            text: 'No. VibezCheck operates with 100% Zero Data Retention (ZDR). It only inspects token numbers, model IDs, and timestamps. User prompts and AI completions are never saved, stored, or sent to external telemetry servers.',
-          },
-        },
-      ],
+      '@type': 'WebSite',
+      '@id': 'https://vibezcheck.app/#website',
+      url: 'https://vibezcheck.app/',
+      name: 'VibezCheck',
+      publisher: {
+        '@id': 'https://vibezcheck.app/#organization',
+      },
+    },
+    {
+      '@type': 'SoftwareSourceCode',
+      '@id': 'https://vibezcheck.app/#software',
+      name: 'VibezCheck',
+      description:
+        'TypeScript SDK for AI cost monitoring, LLM usage metering, cost calculation, and AI spending limits.',
+      codeRepository: 'https://github.com/seeyouin2x5x/vibezcheck-sdk',
+      programmingLanguage: 'TypeScript',
+      runtimePlatform: 'Node.js',
+      license: 'https://opensource.org/licenses/MIT',
+      url: 'https://vibezcheck.app/',
     },
   ],
 };
@@ -149,14 +96,32 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="light">
+    <html lang="en" className="dark" suppressHydrationWarning>
       <head>
         <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var saved = localStorage.getItem('theme');
+                  if (saved === 'light') {
+                    document.documentElement.classList.remove('dark');
+                    document.documentElement.classList.add('light');
+                  } else {
+                    document.documentElement.classList.add('dark');
+                    document.documentElement.classList.remove('light');
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+        <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdGraph) }}
         />
       </head>
-      <body className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased transition-colors duration-200">
+      <body className="min-h-screen bg-[#0c0d10] text-slate-900 dark:text-zinc-100 antialiased transition-colors duration-200">
         {children}
         <Analytics />
       </body>

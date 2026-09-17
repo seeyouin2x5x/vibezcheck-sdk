@@ -45,7 +45,7 @@ export interface AiSdkShowcaseProps {
   onAudienceChange?: (tab: 'humans' | 'agents' | 'calculator') => void;
   onProviderPkgChange?: (pkg: string) => void;
   onCorePkgChange?: (pkg: string) => void;
-  cmdTab?: 'cli' | 'core' | 'ai-sdk';
+  cmdTab?: 'cli' | 'core' | 'ai-sdk' | 'install' | 'init';
 }
 
 export interface ModelPreset {

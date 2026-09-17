@@ -2,7 +2,7 @@
 Version: 0.5.10
 Package: vibezcheck
 Repository: https://github.com/seeyouin2x5x/vibezcheck-sdk.git
-Website: https://vibezcheck.dev
+Website: https://vibezcheck.app
 Standard: llms.txt (Full Technical Reference)
 
 ---
