@@ -244,60 +244,60 @@ Calculated via VibezCheck (https://vibezcheck.app/llm-cost-calculator?model=${se
   };
 
   return (
-    <main className="min-h-screen flex flex-col justify-between bg-[#0c0d10] text-zinc-100">
+    <main className="min-h-screen flex flex-col justify-between bg-slate-50 dark:bg-[#0c0d10] text-slate-900 dark:text-zinc-100 transition-colors duration-200">
       <Header />
 
       <article className="flex-1 max-w-5xl mx-auto px-4 pt-28 pb-20 w-full space-y-14">
         {/* Breadcrumb */}
-        <nav aria-label="Breadcrumb" className="text-xs font-mono text-zinc-500 flex items-center gap-2">
-          <Link href="/" className="hover:text-zinc-300">Home</Link>
+        <nav aria-label="Breadcrumb" className="text-xs font-mono text-slate-500 dark:text-zinc-500 flex items-center gap-2">
+          <Link href="/" className="hover:text-slate-800 dark:hover:text-zinc-300">Home</Link>
           <span>/</span>
-          <span className="text-emerald-400">LLM Cost Calculator</span>
+          <span className="text-emerald-600 dark:text-emerald-400">LLM Cost Calculator</span>
         </nav>
 
         {/* Header & Above-the-Fold Answer (Spec Section 11) */}
         <header className="space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-mono text-emerald-400">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-mono text-emerald-600 dark:text-emerald-400 font-medium">
             REAL-TIME TOKEN ECONOMICS
           </div>
-          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-white">
+          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-slate-950 dark:text-white">
             LLM Cost Calculator
           </h1>
           {/* Direct AEO Answer Box */}
-          <div className="p-5 rounded-2xl bg-zinc-900/80 border border-zinc-800 text-sm text-zinc-300 leading-relaxed">
-            <strong className="text-white">An LLM cost calculator</strong> estimates the dollar cost of an AI request from the model&apos;s pricing rates and its token usage. VibezCheck provides a model-aware calculator that runs locally from its bundled pricing catalog with BigInt nano-cent math.
+          <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900/80 border border-slate-200 dark:border-zinc-800 text-sm text-slate-700 dark:text-zinc-300 leading-relaxed shadow-xs">
+            <strong className="text-slate-950 dark:text-white">An LLM cost calculator</strong> estimates the dollar cost of an AI request from the model&apos;s pricing rates and its token usage. VibezCheck provides a model-aware calculator that runs locally from its bundled pricing catalog with BigInt nano-cent math.
           </div>
         </header>
 
         {/* Calculator Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Left Column: Inputs (7 cols) */}
-          <div className="lg:col-span-7 rounded-2xl border border-zinc-800 bg-zinc-900/60 p-6 space-y-6">
+          <div className="lg:col-span-7 rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 p-6 space-y-6 shadow-xs">
             {/* Model Selector */}
             <div className="space-y-2">
-              <label className="block text-xs font-semibold text-zinc-300 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-zinc-300 uppercase tracking-wider">
                 Select Model
               </label>
               <div className="relative">
                 <select
                   value={selectedId}
                   onChange={(e) => setSelectedId(e.target.value)}
-                  className="w-full appearance-none px-4 py-3 rounded-xl bg-zinc-800 border border-zinc-700 text-white font-medium text-sm focus:outline-none focus:border-emerald-500 transition cursor-pointer pr-10"
+                  className="w-full appearance-none px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-slate-900 dark:text-white font-medium text-sm focus:outline-none focus:border-emerald-500 transition cursor-pointer pr-10"
                 >
                   {CATALOG.map((m) => (
-                    <option key={m.id} value={m.id} className="bg-zinc-900 text-white">
+                    <option key={m.id} value={m.id} className="bg-white dark:bg-zinc-900 text-slate-900 dark:text-white">
                       {m.name} ({m.provider}) — ${m.inputPer1M.toFixed(2)}/1M in · ${m.outputPer1M.toFixed(2)}/1M out
                     </option>
                   ))}
                 </select>
-                <ChevronDown className="w-4 h-4 text-zinc-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <ChevronDown className="w-4 h-4 text-slate-400 dark:text-zinc-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               </div>
             </div>
 
             {/* Input Tokens */}
             <div className="space-y-2">
               <div className="flex items-center justify-between text-xs">
-                <span className="font-semibold text-zinc-300">Input Tokens (Prompt)</span>
+                <span className="font-semibold text-slate-800 dark:text-zinc-300">Input Tokens (Prompt)</span>
                 <span className="font-mono text-emerald-400 font-bold">{inputTokens.toLocaleString()} tok</span>
               </div>
               <input
@@ -370,10 +370,10 @@ Calculated via VibezCheck (https://vibezcheck.app/llm-cost-calculator?model=${se
             </div>
 
             {/* Markup Multiplier for Retail Pricing */}
-            <div className="space-y-2 pt-2 border-t border-zinc-800/80">
+            <div className="space-y-2 pt-2 border-t border-slate-200 dark:border-zinc-800/80">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-zinc-400">Customer Markup Multiplier</span>
-                <span className="font-mono text-indigo-400 font-bold">{markupMultiplier.toFixed(2)}× (+{Math.round((markupMultiplier - 1) * 100)}%)</span>
+                <span className="text-slate-600 dark:text-zinc-400">Customer Markup Multiplier</span>
+                <span className="font-mono text-indigo-600 dark:text-indigo-400 font-bold">{markupMultiplier.toFixed(2)}× (+{Math.round((markupMultiplier - 1) * 100)}%)</span>
               </div>
               <input
                 type="range"
@@ -382,54 +382,54 @@ Calculated via VibezCheck (https://vibezcheck.app/llm-cost-calculator?model=${se
                 step={0.05}
                 value={markupMultiplier}
                 onChange={(e) => setMarkupMultiplier(Number(e.target.value))}
-                className="w-full h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                className="w-full h-1.5 bg-slate-200 dark:bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
               />
             </div>
           </div>
 
           {/* Right Column: Calculated Outputs & Actions (5 cols) */}
-          <div className="lg:col-span-5 rounded-2xl border border-zinc-800 bg-zinc-900/90 p-6 space-y-6 sticky top-24">
-            <div className="flex items-center justify-between pb-4 border-b border-zinc-800">
+          <div className="lg:col-span-5 rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/90 p-6 space-y-6 sticky top-24 shadow-sm">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-zinc-800">
               <div className="flex items-center gap-2">
                 <LobeIcon name={currentModel.icon} size={20} alt={currentModel.name} />
-                <span className="font-bold text-sm text-white">{currentModel.name}</span>
+                <span className="font-bold text-sm text-slate-950 dark:text-white">{currentModel.name}</span>
               </div>
-              <span className="text-[11px] font-mono text-zinc-400">{currentModel.provider}</span>
+              <span className="text-[11px] font-mono text-slate-500 dark:text-zinc-400">{currentModel.provider}</span>
             </div>
 
             {/* Breakdown Items */}
             <div className="space-y-2.5 font-mono text-xs">
-              <div className="flex items-center justify-between text-zinc-400">
+              <div className="flex items-center justify-between text-slate-600 dark:text-zinc-400">
                 <span>Input Cost:</span>
-                <span className="text-zinc-200">${calculations.inputCost.toFixed(6)}</span>
+                <span className="text-slate-900 dark:text-zinc-200">${calculations.inputCost.toFixed(6)}</span>
               </div>
               {cachedTokens > 0 && (
-                <div className="flex items-center justify-between text-emerald-400">
+                <div className="flex items-center justify-between text-emerald-600 dark:text-emerald-400 font-medium">
                   <span>Cache Savings:</span>
                   <span>-${calculations.cacheSavings.toFixed(6)}</span>
                 </div>
               )}
-              <div className="flex items-center justify-between text-zinc-400">
+              <div className="flex items-center justify-between text-slate-600 dark:text-zinc-400">
                 <span>Output Cost:</span>
-                <span className="text-zinc-200">${calculations.standardOutputCost.toFixed(6)}</span>
+                <span className="text-slate-900 dark:text-zinc-200">${calculations.standardOutputCost.toFixed(6)}</span>
               </div>
 
-              <div className="pt-3 border-t border-zinc-800 flex items-center justify-between">
-                <span className="font-semibold text-zinc-300">Total Provider Cost:</span>
-                <span className="font-bold text-base text-emerald-400">
+              <div className="pt-3 border-t border-slate-200 dark:border-zinc-800 flex items-center justify-between">
+                <span className="font-semibold text-slate-800 dark:text-zinc-300">Total Provider Cost:</span>
+                <span className="font-bold text-base text-emerald-600 dark:text-emerald-400">
                   ${calculations.totalProviderCost.toFixed(6)} USD
                 </span>
               </div>
 
               {/* Retail Billed Price */}
-              <div className="p-3.5 rounded-xl bg-indigo-950/30 border border-indigo-500/30 space-y-1 mt-3">
-                <div className="flex items-center justify-between text-indigo-300 font-semibold text-xs">
+              <div className="p-3.5 rounded-xl bg-indigo-50/80 dark:bg-indigo-950/30 border border-indigo-200/80 dark:border-indigo-500/30 space-y-1 mt-3">
+                <div className="flex items-center justify-between text-indigo-900 dark:text-indigo-300 font-semibold text-xs">
                   <span>Customer Billed Price:</span>
-                  <span className="text-white text-sm font-bold">${calculations.customerPrice.toFixed(6)}</span>
+                  <span className="text-slate-950 dark:text-white text-sm font-bold">${calculations.customerPrice.toFixed(6)}</span>
                 </div>
-                <div className="flex items-center justify-between text-[11px] text-zinc-400">
+                <div className="flex items-center justify-between text-[11px] text-slate-600 dark:text-zinc-400">
                   <span>Gross Profit:</span>
-                  <span className="text-emerald-400">+${calculations.grossProfit.toFixed(6)} ({calculations.grossMarginPercent.toFixed(1)}% margin)</span>
+                  <span className="text-emerald-700 dark:text-emerald-400 font-medium">+${calculations.grossProfit.toFixed(6)} ({calculations.grossMarginPercent.toFixed(1)}% margin)</span>
                 </div>
               </div>
             </div>
@@ -439,27 +439,27 @@ Calculated via VibezCheck (https://vibezcheck.app/llm-cost-calculator?model=${se
               <button
                 type="button"
                 onClick={handleCopyResult}
-                className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-white hover:bg-zinc-100 text-slate-950 font-bold text-xs transition cursor-pointer"
+                className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:hover:bg-zinc-100 dark:text-slate-950 font-bold text-xs transition cursor-pointer shadow-xs"
               >
-                {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                 <span>{copied ? 'Copied' : 'Copy Result'}</span>
               </button>
               <button
                 type="button"
                 onClick={handleShareUrl}
                 title="Share calculation URL"
-                className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs transition cursor-pointer"
+                className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-200 text-xs transition cursor-pointer"
               >
-                {shareCopied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Share2 className="w-3.5 h-3.5" />}
+                {shareCopied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Share2 className="w-3.5 h-3.5" />}
                 <span>{shareCopied ? 'Link Copied' : 'Share'}</span>
               </button>
             </div>
 
             {/* Pricing Verification & Disclaimer */}
-            <div className="pt-3 border-t border-zinc-800/80 text-[11px] text-zinc-500 space-y-1">
+            <div className="pt-3 border-t border-slate-200 dark:border-zinc-800/80 text-[11px] text-slate-500 dark:text-zinc-500 space-y-1">
               <div className="flex items-center justify-between">
                 <span>Verified rate card:</span>
-                <span className="font-mono text-zinc-400">2026-09-17</span>
+                <span className="font-mono text-slate-700 dark:text-zinc-400">2026-09-17</span>
               </div>
               <div className="flex items-center justify-between">
                 <span>Pricing source:</span>
@@ -467,13 +467,13 @@ Calculated via VibezCheck (https://vibezcheck.app/llm-cost-calculator?model=${se
                   href={currentModel.sourceUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-emerald-400 hover:underline flex items-center gap-1"
+                  className="text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1 font-medium"
                 >
                   <span>{currentModel.pricingSource}</span>
                   <ExternalLink className="w-2.5 h-2.5" />
                 </a>
               </div>
-              <p className="pt-1 text-[10px] text-zinc-600 leading-normal">
+              <p className="pt-1 text-[10px] text-slate-500 dark:text-zinc-600 leading-normal">
                 Provider pricing shown here was verified against public vendor rate cards. Confirm against provider sources for regional or batch discounts.
               </p>
             </div>
@@ -481,44 +481,44 @@ Calculated via VibezCheck (https://vibezcheck.app/llm-cost-calculator?model=${se
         </div>
 
         {/* Formula-Based FAQ Section (Spec Section 11) */}
-        <section className="space-y-6 pt-10 border-t border-zinc-800">
-          <h2 className="text-2xl font-bold text-white">
+        <section className="space-y-6 pt-10 border-t border-slate-200 dark:border-zinc-800">
+          <h2 className="text-2xl font-bold text-slate-950 dark:text-white">
             Common Cost Calculations & Formulas
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs sm:text-sm">
-            <div className="p-5 rounded-xl bg-zinc-900/50 border border-zinc-800 space-y-2">
-              <div className="font-bold text-white">How much does 1,000 GPT tokens cost?</div>
-              <p className="text-zinc-400 leading-relaxed">
+            <div className="p-5 rounded-xl bg-white dark:bg-zinc-900/50 border border-slate-200 dark:border-zinc-800 space-y-2 shadow-2xs">
+              <div className="font-bold text-slate-950 dark:text-white">How much does 1,000 GPT tokens cost?</div>
+              <p className="text-slate-600 dark:text-zinc-400 leading-relaxed">
                 For <strong>GPT-4o-mini</strong>: 1,000 input tokens cost $0.00015, and 1,000 output tokens cost $0.00060. A standard 1k in / 300 out exchange costs <strong>$0.00033 USD</strong>.
               </p>
-              <div className="font-mono text-[11px] text-emerald-400 bg-zinc-950 p-2 rounded">
+              <div className="font-mono text-[11px] text-emerald-700 dark:text-emerald-400 bg-slate-100 dark:bg-zinc-950 p-2 rounded">
                 Cost = (1,000 × $0.15/1M) + (300 × $0.60/1M) = $0.00033
               </div>
             </div>
 
-            <div className="p-5 rounded-xl bg-zinc-900/50 border border-zinc-800 space-y-2">
-              <div className="font-bold text-white">How much does 1 Million tokens cost?</div>
-              <p className="text-zinc-400 leading-relaxed">
+            <div className="p-5 rounded-xl bg-white dark:bg-zinc-900/50 border border-slate-200 dark:border-zinc-800 space-y-2 shadow-2xs">
+              <div className="font-bold text-slate-950 dark:text-white">How much does 1 Million tokens cost?</div>
+              <p className="text-slate-600 dark:text-zinc-400 leading-relaxed">
                 DeepSeek R1 input costs $0.55/1M, Claude 3.5 Sonnet costs $3.00/1M, and GPT-4o costs $2.50/1M. Prompt caching discounts lower repetitive input costs by up to 90%.
               </p>
-              <div className="font-mono text-[11px] text-emerald-400 bg-zinc-950 p-2 rounded">
+              <div className="font-mono text-[11px] text-emerald-700 dark:text-emerald-400 bg-slate-100 dark:bg-zinc-950 p-2 rounded">
                 Effective Input = (Uncached × Rate) + (Cached × DiscountedRate)
               </div>
             </div>
 
-            <div className="p-5 rounded-xl bg-zinc-900/50 border border-zinc-800 space-y-2">
-              <div className="font-bold text-white">How do you calculate OpenAI token cost?</div>
-              <p className="text-zinc-400 leading-relaxed">
+            <div className="p-5 rounded-xl bg-white dark:bg-zinc-900/50 border border-slate-200 dark:border-zinc-800 space-y-2 shadow-2xs">
+              <div className="font-bold text-slate-950 dark:text-white">How do you calculate OpenAI token cost?</div>
+              <p className="text-slate-600 dark:text-zinc-400 leading-relaxed">
                 Multiply prompt tokens by the model input rate, cached tokens by the cache rate, and completion tokens by output rate:
               </p>
-              <div className="font-mono text-[11px] text-emerald-400 bg-zinc-950 p-2 rounded">
+              <div className="font-mono text-[11px] text-emerald-700 dark:text-emerald-400 bg-slate-100 dark:bg-zinc-950 p-2 rounded">
                 Total = (Prompt/1M × $2.50) + (Completion/1M × $10.00)
               </div>
             </div>
 
-            <div className="p-5 rounded-xl bg-zinc-900/50 border border-zinc-800 space-y-2">
-              <div className="font-bold text-white">How much does an AI agent run cost?</div>
-              <p className="text-zinc-400 leading-relaxed">
+            <div className="p-5 rounded-xl bg-white dark:bg-zinc-900/50 border border-slate-200 dark:border-zinc-800 space-y-2 shadow-2xs">
+              <div className="font-bold text-slate-950 dark:text-white">How much does an AI agent run cost?</div>
+              <p className="text-slate-600 dark:text-zinc-400 leading-relaxed">
                 An autonomous agent making 8 LLM calls with 3 tool executions typically uses ~24,000 prompt tokens and ~3,500 output tokens, costing between <strong>$0.04 and $0.35 USD</strong> depending on the model tier.
               </p>
             </div>
@@ -526,16 +526,16 @@ Calculated via VibezCheck (https://vibezcheck.app/llm-cost-calculator?model=${se
         </section>
 
         {/* Integration Callout */}
-        <div className="p-6 rounded-2xl bg-zinc-900/70 border border-zinc-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="p-6 rounded-2xl bg-white dark:bg-zinc-900/70 border border-slate-200 dark:border-zinc-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs">
           <div>
-            <div className="font-bold text-white text-base">Calculate costs automatically in code</div>
-            <p className="text-xs text-zinc-400">
+            <div className="font-bold text-slate-950 dark:text-white text-base">Calculate costs automatically in code</div>
+            <p className="text-xs text-slate-600 dark:text-zinc-400">
               VibezCheck executes this financial formula in-process with 0ms added latency.
             </p>
           </div>
           <Link
             href="/docs?section=quickstart"
-            className="px-4 py-2 rounded-xl bg-white hover:bg-zinc-100 text-slate-950 text-xs font-bold transition whitespace-nowrap"
+            className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:hover:bg-zinc-100 dark:text-slate-950 text-xs font-bold transition whitespace-nowrap shadow-xs"
           >
             Start measuring →
           </Link>

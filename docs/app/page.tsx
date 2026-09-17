@@ -59,7 +59,7 @@ export default function Home() {
   };
 
   return (
-    <main className="relative min-h-screen flex flex-col justify-between bg-[#0c0d10] text-slate-900 dark:text-zinc-100 transition-colors duration-200">
+    <main className="relative min-h-screen flex flex-col justify-between bg-slate-50 dark:bg-[#0c0d10] text-slate-900 dark:text-zinc-100 transition-colors duration-200">
       {/* Top Navigation Header */}
       <Header />
 
@@ -68,37 +68,43 @@ export default function Home() {
         {/* Section 1 — Hero (Spec Sections 4.1 & 54) */}
         <section className="text-center max-w-2xl mx-auto mt-6 mb-8 space-y-4">
           {/* Eyebrow */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/10 dark:bg-emerald-400/10 border border-emerald-500/20 text-xs font-mono font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
-            ✦ VIBEZCHECK · THE COST LAYER FOR AI APPLICATIONS
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-slate-100 dark:bg-zinc-800/80 border border-slate-200 dark:border-zinc-700 text-xs font-mono font-medium text-slate-600 dark:text-zinc-300">
+            Local metering · Async reporting · Zero prompt retention
           </div>
 
           {/* H1 */}
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-950 dark:text-zinc-50 leading-[1.08]">
-            Know what every AI request costs.
+            Know What Your AI Users Cost You.
           </h1>
 
           {/* Subheadline */}
           <p className="text-base sm:text-lg text-slate-600 dark:text-zinc-300 leading-relaxed font-normal max-w-xl mx-auto">
-            Measure AI usage in real dollars, control runaway AI spending, and connect model costs to customers, features, and revenue.
+            Track the real cost of every AI request, prevent runaway usage, and charge users based on actual consumption.
           </p>
+
+          <div className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 space-y-1 max-w-lg mx-auto leading-relaxed">
+            <p className="font-semibold text-slate-800 dark:text-zinc-200">AI usage is becoming a line item. Treat it like one.</p>
+            <p>Every message, agent run, document, and tool call has a cost.</p>
+            <p>VibezCheck turns raw AI usage into something your business can measure, control, and monetize.</p>
+          </div>
 
           {/* CTAs */}
           <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
             <Link
               href="/docs?section=quickstart"
-              className="inline-flex items-center px-5 py-2.5 rounded-xl bg-white text-slate-950 text-sm font-semibold hover:bg-slate-100 transition shadow-xs cursor-pointer"
+              className="inline-flex items-center px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-zinc-100 text-white dark:text-slate-950 text-sm font-semibold transition shadow-xs cursor-pointer"
             >
-              Get started →
+              Start measuring →
             </Link>
             <Link
-              href="/docs"
-              className="inline-flex items-center px-5 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-zinc-800 text-sm font-medium transition cursor-pointer"
+              href="#demo"
+              className="inline-flex items-center px-5 py-2.5 rounded-xl bg-white hover:bg-slate-50 dark:bg-zinc-900 dark:hover:bg-zinc-800 text-slate-800 dark:text-zinc-200 border border-slate-200 dark:border-zinc-800 text-sm font-medium transition cursor-pointer shadow-2xs"
             >
-              Read the docs →
+              View demo →
             </Link>
             <Link
               href="/llm-cost-calculator"
-              className="inline-flex items-center px-5 py-2.5 rounded-xl bg-emerald-950/40 hover:bg-emerald-900/50 text-emerald-300 border border-emerald-800/40 text-sm font-medium transition cursor-pointer"
+              className="inline-flex items-center px-5 py-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40 text-sm font-medium transition cursor-pointer"
             >
               Cost Calculator
             </Link>

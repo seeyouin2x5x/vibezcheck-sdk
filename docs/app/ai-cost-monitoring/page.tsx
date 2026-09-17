@@ -30,34 +30,34 @@ export const metadata: Metadata = {
 
 export default function AiCostMonitoringPage() {
   return (
-    <main className="min-h-screen flex flex-col justify-between bg-[#0c0d10] text-zinc-100">
+    <main className="min-h-screen flex flex-col justify-between bg-slate-50 dark:bg-[#0c0d10] text-slate-900 dark:text-zinc-100 transition-colors duration-200">
       <Header />
 
       <article className="flex-1 max-w-4xl mx-auto px-4 pt-28 pb-20 w-full space-y-16">
         {/* Breadcrumb */}
-        <nav aria-label="Breadcrumb" className="text-xs font-mono text-zinc-500 flex items-center gap-2">
-          <Link href="/" className="hover:text-zinc-300">Home</Link>
+        <nav aria-label="Breadcrumb" className="text-xs font-mono text-slate-500 dark:text-zinc-500 flex items-center gap-2">
+          <Link href="/" className="hover:text-slate-800 dark:hover:text-zinc-300">Home</Link>
           <span>/</span>
-          <span className="text-emerald-400">AI Cost Monitoring</span>
+          <span className="text-emerald-600 dark:text-emerald-400">AI Cost Monitoring</span>
         </nav>
 
         {/* Hero & Opening AEO Answer (Spec Section 10) */}
         <header className="space-y-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-mono text-emerald-400">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-mono text-emerald-600 dark:text-emerald-400 font-medium">
             IN-PROCESS AI FINOPS
           </div>
-          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
+          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-slate-950 dark:text-white leading-tight">
             AI cost monitoring that runs inside your application.
           </h1>
           {/* Opening AEO Answer Box */}
-          <div className="p-5 rounded-2xl bg-zinc-900/80 border border-zinc-800 text-sm sm:text-base text-zinc-200 leading-relaxed">
-            <strong className="text-white">AI cost monitoring</strong> is the process of measuring the provider cost of AI model requests and associating that cost with the application action that caused it. VibezCheck provides this measurement in-process for TypeScript applications.
+          <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900/80 border border-slate-200 dark:border-zinc-800 text-sm sm:text-base text-slate-700 dark:text-zinc-200 leading-relaxed shadow-xs">
+            <strong className="text-slate-950 dark:text-white">AI cost monitoring</strong> is the process of measuring the provider cost of AI model requests and associating that cost with the application action that caused it. VibezCheck provides this measurement in-process for TypeScript applications.
           </div>
         </header>
 
         {/* What AI Cost Monitoring Should Tell You */}
         <section className="space-y-6">
-          <h2 className="text-2xl font-bold text-white">
+          <h2 className="text-2xl font-bold text-slate-950 dark:text-white">
             What AI cost monitoring should tell you
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -69,12 +69,12 @@ export default function AiCostMonitoringPage() {
               { q: 'How much did this agent session spend?', a: 'Measure cumulative multi-turn costs across recursive agent loops and tool calls.' },
               { q: 'Can the request exceed its budget?', a: 'Enforce hard caps in the execution path before costs spiral into unexpected cloud invoices.' },
             ].map((item) => (
-              <div key={item.q} className="p-5 rounded-xl bg-zinc-900/50 border border-zinc-800 space-y-1.5">
-                <div className="font-semibold text-sm text-emerald-400 flex items-center gap-2">
+              <div key={item.q} className="p-5 rounded-xl bg-white dark:bg-zinc-900/50 border border-slate-200 dark:border-zinc-800 space-y-1.5 shadow-2xs">
+                <div className="font-semibold text-sm text-emerald-600 dark:text-emerald-400 flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-500" />
                   <span>{item.q}</span>
                 </div>
-                <p className="text-xs text-zinc-400 leading-relaxed pl-6">
+                <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed pl-6">
                   {item.a}
                 </p>
               </div>
@@ -83,19 +83,19 @@ export default function AiCostMonitoringPage() {
         </section>
 
         {/* Why Token Counts Are Not Enough */}
-        <section className="space-y-4 p-7 rounded-2xl bg-zinc-900/70 border border-zinc-800">
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <Cpu className="w-5 h-5 text-amber-400" />
+        <section className="space-y-4 p-7 rounded-2xl bg-white dark:bg-zinc-900/70 border border-slate-200 dark:border-zinc-800 shadow-xs">
+          <h2 className="text-xl font-bold text-slate-950 dark:text-white flex items-center gap-2">
+            <Cpu className="w-5 h-5 text-amber-500" />
             <span>Why token counts are not enough</span>
           </h2>
-          <div className="text-xs sm:text-sm text-zinc-300 space-y-3 leading-relaxed">
+          <div className="text-xs sm:text-sm text-slate-700 dark:text-zinc-300 space-y-3 leading-relaxed">
             <p>
               Token counts are raw engineering units. A million tokens of DeepSeek R1 cost $0.55, while a million output tokens of OpenAI o1 cost $60.00.
             </p>
             <p>
               Furthermore, modern providers introduce complex rate structures: prompt cache discounts (50% to 90% cheaper), reasoning tokens billed at output rates, and multimodal tokens. Without model-aware financial math, raw token counters cannot tell you whether a user interaction was profitable or bankrupting.
             </p>
-            <div className="pt-2 font-mono text-xs text-emerald-400">
+            <div className="pt-2 font-mono text-xs text-emerald-600 dark:text-emerald-400 font-medium">
               VibezCheck translates tokens + model rates + discounts → real dollars.
             </div>
           </div>
@@ -103,15 +103,15 @@ export default function AiCostMonitoringPage() {
 
         {/* Track Cost by Customer */}
         <section className="space-y-5">
-          <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-            <Users className="w-5 h-5 text-indigo-400" />
+          <h2 className="text-2xl font-bold text-slate-950 dark:text-white flex items-center gap-2">
+            <Users className="w-5 h-5 text-indigo-500" />
             <span>Track cost by customer & tenant</span>
           </h2>
-          <p className="text-xs sm:text-sm text-zinc-400">
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-zinc-400">
             Attach identifiers in the application path. Every telemetry event carries full organizational context for granular ledger reporting:
           </p>
 
-          <div className="rounded-xl border border-zinc-800 bg-[#0d0e12] overflow-hidden p-5 font-mono text-xs text-zinc-200 leading-relaxed">
+          <div className="rounded-xl border border-slate-800 bg-[#0d0e12] overflow-hidden p-5 font-mono text-xs text-zinc-200 leading-relaxed">
             <pre>
 {`import { streamText } from 'ai';
 import { openai } from '@ai-sdk/openai';
@@ -133,24 +133,24 @@ const result = streamText({
 
         {/* Control Runaway Spend */}
         <section className="space-y-4">
-          <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-            <ShieldCheck className="w-5 h-5 text-amber-400" />
+          <h2 className="text-2xl font-bold text-slate-950 dark:text-white flex items-center gap-2">
+            <ShieldCheck className="w-5 h-5 text-amber-500" />
             <span>Control runaway spend</span>
           </h2>
-          <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
-            Autonomous agents and recursive tool loops can generate hundreds of API requests in seconds. VibezCheck stops runaway loops with in-process limits like <code className="font-mono text-xs bg-zinc-800 px-1 py-0.5 rounded text-amber-300">maxCostPerCallUSD</code> and multi-step session ceilings:
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-zinc-400 leading-relaxed">
+            Autonomous agents and recursive tool loops can generate hundreds of API requests in seconds. VibezCheck stops runaway loops with in-process limits like <code className="font-mono text-xs bg-slate-200 dark:bg-zinc-800 px-1 py-0.5 rounded text-amber-700 dark:text-amber-300">maxCostPerCallUSD</code> and multi-step session ceilings:
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-            <div className="p-5 rounded-xl bg-zinc-900/50 border border-zinc-800 space-y-2">
-              <div className="font-bold text-sm text-white">Request-Level Fuse</div>
-              <p className="text-xs text-zinc-400">
+            <div className="p-5 rounded-xl bg-white dark:bg-zinc-900/50 border border-slate-200 dark:border-zinc-800 space-y-2 shadow-2xs">
+              <div className="font-bold text-sm text-slate-950 dark:text-white">Request-Level Fuse</div>
+              <p className="text-xs text-slate-600 dark:text-zinc-400">
                 Instantly terminates model calls that exceed your allocated dollar ceiling.
               </p>
             </div>
-            <div className="p-5 rounded-xl bg-zinc-900/50 border border-zinc-800 space-y-2">
-              <div className="font-bold text-sm text-white">Agent Session Budget</div>
-              <p className="text-xs text-zinc-400">
+            <div className="p-5 rounded-xl bg-white dark:bg-zinc-900/50 border border-slate-200 dark:border-zinc-800 space-y-2 shadow-2xs">
+              <div className="font-bold text-sm text-slate-950 dark:text-white">Agent Session Budget</div>
+              <p className="text-xs text-slate-600 dark:text-zinc-400">
                 Tracks cumulative spend across model and tool invocations with a hard stop.
               </p>
             </div>
@@ -158,26 +158,26 @@ const result = streamText({
         </section>
 
         {/* Connect Cost to Billing */}
-        <section className="p-6 rounded-2xl border border-zinc-800 bg-zinc-900/50 space-y-4">
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-emerald-400" />
+        <section className="p-6 rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 space-y-4 shadow-xs">
+          <h2 className="text-xl font-bold text-slate-950 dark:text-white flex items-center gap-2">
+            <TrendingUp className="w-5 h-5 text-emerald-500" />
             <span>Connect cost to billing</span>
           </h2>
-          <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed">
+          <p className="text-xs sm:text-sm text-slate-700 dark:text-zinc-300 leading-relaxed">
             Once your application measures provider cost, you can feed those events into Stripe, Metronome, or your billing database to monetize AI usage.
           </p>
           <div className="flex flex-wrap items-center gap-4 pt-2">
             <Link
               href="/ai-usage-based-billing"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-400 hover:text-emerald-300"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-500"
             >
               <span>Explore AI usage-based billing</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
-            <span className="text-zinc-600">·</span>
+            <span className="text-slate-300 dark:text-zinc-600">·</span>
             <Link
               href="/llm-cost-calculator"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-300 hover:text-white"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-zinc-300 hover:text-slate-950 dark:hover:text-white"
             >
               <span>Try LLM Cost Calculator</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -186,17 +186,17 @@ const result = streamText({
         </section>
 
         {/* Bottom CTA */}
-        <div className="text-center pt-8 border-t border-zinc-800 space-y-4">
-          <h3 className="text-2xl font-bold text-white">
+        <div className="text-center pt-8 border-t border-slate-200 dark:border-zinc-800 space-y-4">
+          <h3 className="text-2xl font-bold text-slate-950 dark:text-white">
             Start measuring AI cost today
           </h3>
-          <p className="text-xs sm:text-sm text-zinc-400">
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-zinc-400">
             One line to wrap your model. Zero added latency. Zero proxy hop.
           </p>
           <div className="pt-2">
             <Link
               href="/docs?section=quickstart"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white text-slate-950 text-sm font-bold hover:bg-slate-100 transition shadow-xs"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-950 text-sm font-bold transition shadow-xs"
             >
               Start measuring AI cost →
             </Link>

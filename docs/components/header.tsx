@@ -5,7 +5,7 @@ import { Moon, Sun, Search, ChevronDown, ShieldCheck, ArrowRight } from 'lucide-
 import { SearchModal } from './search-modal';
 
 export function Header() {
-  const [isDark, setIsDark] = useState(true);
+  const [isDark, setIsDark] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMac, setIsMac] = useState(true);
   const [activeMenu, setActiveMenu] = useState<'product' | 'developers' | 'resources' | null>(null);
@@ -13,14 +13,14 @@ export function Header() {
   useEffect(() => {
     setIsMac(typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.userAgent));
     const saved = typeof window !== 'undefined' ? localStorage.getItem('theme') : null;
-    if (saved === 'light') {
-      document.documentElement.classList.remove('dark');
-      document.documentElement.classList.add('light');
-      setIsDark(false);
-    } else {
+    if (saved === 'dark') {
       document.documentElement.classList.add('dark');
       document.documentElement.classList.remove('light');
       setIsDark(true);
+    } else {
+      document.documentElement.classList.remove('dark');
+      document.documentElement.classList.add('light');
+      setIsDark(false);
     }
   }, []);
 

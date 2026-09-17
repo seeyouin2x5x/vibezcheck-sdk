@@ -1,4 +1,4 @@
-﻿import type { Metadata } from 'next';
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Header } from '@/components/header';
 import { FooterSection } from '@/components/footer-section';
@@ -63,7 +63,7 @@ export default function AiAgentCostPage() {
   };
 
   return (
-    <main className="min-h-screen flex flex-col justify-between bg-[#0c0d10] text-zinc-100">
+    <main className="min-h-screen flex flex-col justify-between bg-slate-50 dark:bg-[#0c0d10] text-slate-900 dark:text-zinc-100 transition-colors duration-200">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
@@ -72,40 +72,40 @@ export default function AiAgentCostPage() {
 
       <article className="flex-1 max-w-4xl mx-auto px-4 pt-28 pb-20 w-full space-y-16">
         {/* Breadcrumb */}
-        <nav aria-label="Breadcrumb" className="text-xs font-mono text-zinc-500 flex items-center gap-2">
-          <Link href="/" className="hover:text-zinc-300">Home</Link>
+        <nav aria-label="Breadcrumb" className="text-xs font-mono text-slate-500 dark:text-zinc-500 flex items-center gap-2">
+          <Link href="/" className="hover:text-slate-800 dark:hover:text-zinc-300">Home</Link>
           <span>/</span>
-          <span className="text-emerald-400">AI Agent Cost</span>
+          <span className="text-emerald-600 dark:text-emerald-400">AI Agent Cost</span>
         </nav>
 
         {/* Hero & Opening AEO Answer (Spec Section 13) */}
         <header className="space-y-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-mono text-emerald-400">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-mono text-emerald-600 dark:text-emerald-400 font-medium">
             MULTI-TURN AI COST INTELLIGENCE
           </div>
-          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
+          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-slate-950 dark:text-white leading-tight">
             Track and control AI agent costs.
           </h1>
           {/* Opening Direct Answer Box */}
-          <div className="p-5 rounded-2xl bg-zinc-900/80 border border-zinc-800 text-sm sm:text-base text-zinc-200 leading-relaxed">
-            <strong className="text-white">AI agent costs</strong> are the cumulative expenses incurred across multiple model invocations, tool executions, vector searches, and reasoning steps required to fulfill a single task. Unlike single-turn chatbots, agents can make dozens of iterative LLM calls in a loop. VibezCheck tracks agent sessions end-to-end, attributing costs across all turns and enforcing session-level spending limits.
+          <div className="p-5 rounded-2xl bg-white dark:bg-zinc-900/80 border border-slate-200 dark:border-zinc-800 text-sm sm:text-base text-slate-700 dark:text-zinc-200 leading-relaxed shadow-xs">
+            <strong className="text-slate-950 dark:text-white">AI agent costs</strong> are the cumulative expenses incurred across multiple model invocations, tool executions, vector searches, and reasoning steps required to fulfill a single task. Unlike single-turn chatbots, agents can make dozens of iterative LLM calls in a loop. VibezCheck tracks agent sessions end-to-end, attributing costs across all turns and enforcing session-level spending limits.
           </div>
         </header>
 
         {/* Visual Workflow Diagram */}
         <section className="space-y-4">
-          <h2 className="text-xs font-mono uppercase tracking-widest text-zinc-400">
+          <h2 className="text-xs font-mono uppercase tracking-widest text-slate-500 dark:text-zinc-400 font-semibold">
             Agent Lifecycle Economics
           </h2>
-          <div className="p-5 rounded-2xl bg-zinc-950 border border-zinc-800/80 font-mono text-xs overflow-x-auto text-zinc-300">
+          <div className="p-5 rounded-2xl bg-slate-900 dark:bg-zinc-950 border border-slate-800 dark:border-zinc-800/80 font-mono text-xs overflow-x-auto text-zinc-300">
             <div className="flex flex-wrap items-center gap-2 text-zinc-400">
-              <span className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-white font-semibold">User Goal</span>
+              <span className="px-3 py-1.5 rounded-lg bg-zinc-800 border border-zinc-700 text-white font-semibold">User Goal</span>
               <span>→</span>
-              <span className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-emerald-400">LLM Reasoning (Turn 1)</span>
+              <span className="px-3 py-1.5 rounded-lg bg-zinc-800 border border-zinc-700 text-emerald-400">LLM Reasoning (Turn 1)</span>
               <span>→</span>
-              <span className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-indigo-400">Tool Execution ($0.01)</span>
+              <span className="px-3 py-1.5 rounded-lg bg-zinc-800 border border-zinc-700 text-indigo-400">Tool Execution ($0.01)</span>
               <span>→</span>
-              <span className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-emerald-400">LLM Evaluation (Turn 2)</span>
+              <span className="px-3 py-1.5 rounded-lg bg-zinc-800 border border-zinc-700 text-emerald-400">LLM Evaluation (Turn 2)</span>
               <span>→</span>
               <span className="px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 font-bold">Total Session Cost</span>
             </div>
@@ -114,8 +114,8 @@ export default function AiAgentCostPage() {
 
         {/* Why Agent Costs Spiral */}
         <section className="space-y-6">
-          <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-            <AlertTriangle className="w-5 h-5 text-amber-400" />
+          <h2 className="text-2xl font-bold text-slate-950 dark:text-white flex items-center gap-2">
+            <AlertTriangle className="w-5 h-5 text-amber-500" />
             <span>Why agent costs spiral out of control</span>
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -137,9 +137,9 @@ export default function AiAgentCostPage() {
                 desc: 'Traditional per-request timeouts do not stop multi-request workflows from quietly consuming $20.00+ on a single customer action.',
               },
             ].map((item) => (
-              <div key={item.title} className="p-5 rounded-xl bg-zinc-900/50 border border-zinc-800 space-y-2">
-                <div className="font-semibold text-sm text-white">{item.title}</div>
-                <p className="text-xs text-zinc-400 leading-relaxed">{item.desc}</p>
+              <div key={item.title} className="p-5 rounded-xl bg-white dark:bg-zinc-900/50 border border-slate-200 dark:border-zinc-800 space-y-2 shadow-2xs">
+                <div className="font-semibold text-sm text-slate-950 dark:text-white">{item.title}</div>
+                <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -148,12 +148,12 @@ export default function AiAgentCostPage() {
         {/* Multi-turn Code Example (Spec Section 13) */}
         <section className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-white">
+            <h2 className="text-2xl font-bold text-slate-950 dark:text-white">
               End-to-End Agent Tracking with Budget Fuses
             </h2>
-            <span className="text-xs font-mono text-emerald-400">TypeScript / AI SDK</span>
+            <span className="text-xs font-mono text-emerald-600 dark:text-emerald-400 font-medium">TypeScript / AI SDK</span>
           </div>
-          <div className="p-5 rounded-2xl bg-zinc-950 border border-zinc-800 font-mono text-xs overflow-x-auto leading-relaxed">
+          <div className="p-5 rounded-2xl bg-[#0d0e12] border border-slate-800 font-mono text-xs overflow-x-auto leading-relaxed">
             <pre className="text-zinc-300">
 {`import { streamText } from 'ai';
 import { vibezcheck } from 'vibezcheck';
@@ -200,37 +200,37 @@ console.log('Total Tokens:', session.getTotalTokens());`}
 
         {/* FAQ Section */}
         <section className="space-y-6 pt-4">
-          <h2 className="text-2xl font-bold text-white">
+          <h2 className="text-2xl font-bold text-slate-950 dark:text-white">
             Frequently Asked Questions
           </h2>
           <div className="space-y-4">
             {FAQ_ITEMS.map((item) => (
-              <div key={item.q} className="p-5 rounded-xl bg-zinc-900/40 border border-zinc-800/80 space-y-2">
-                <h3 className="text-sm font-semibold text-white">{item.q}</h3>
-                <p className="text-xs text-zinc-400 leading-relaxed">{item.a}</p>
+              <div key={item.q} className="p-5 rounded-xl bg-white dark:bg-zinc-900/40 border border-slate-200 dark:border-zinc-800/80 space-y-2 shadow-2xs">
+                <h3 className="text-sm font-semibold text-slate-950 dark:text-white">{item.q}</h3>
+                <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">{item.a}</p>
               </div>
             ))}
           </div>
         </section>
 
         {/* Bottom CTA */}
-        <div className="p-8 rounded-2xl bg-gradient-to-r from-emerald-950/40 to-zinc-900 border border-emerald-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+        <div className="p-8 rounded-2xl bg-gradient-to-r from-emerald-50 to-white dark:from-emerald-950/40 dark:to-zinc-900 border border-emerald-200 dark:border-emerald-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 shadow-xs">
           <div className="space-y-1">
-            <h3 className="text-lg font-bold text-white">Protect your autonomous agents against runaway spend</h3>
-            <p className="text-xs text-zinc-400">
+            <h3 className="text-lg font-bold text-slate-950 dark:text-white">Protect your autonomous agents against runaway spend</h3>
+            <p className="text-xs text-slate-600 dark:text-zinc-400">
               Install the zero-latency TypeScript SDK and add session budgets in under 3 minutes.
             </p>
           </div>
           <div className="flex items-center gap-3">
             <Link
               href="/llm-cost-calculator"
-              className="px-4 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-medium transition"
+              className="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-200 dark:border-zinc-700 text-xs font-medium transition shadow-2xs"
             >
               Cost Calculator
             </Link>
             <Link
               href="/docs?section=agent-budgeting"
-              className="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold transition flex items-center gap-1.5"
+              className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white dark:bg-emerald-500 dark:hover:bg-emerald-400 dark:text-slate-950 text-xs font-bold transition flex items-center gap-1.5 shadow-xs"
             >
               <span>Agent Documentation</span>
               <ArrowRight className="w-3.5 h-3.5" />
