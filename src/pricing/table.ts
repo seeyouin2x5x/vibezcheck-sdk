@@ -40,6 +40,10 @@ export const MODEL_PRICING_TABLE: Record<string, ModelPricingRates> = {
   'text-embedding-ada-002': { inputPer1M: 0.10, outputPer1M: 0.0 },
 
   // --- Anthropic (Modern & Extended Thinking) ---
+  'claude-haiku-5.5': { inputPer1M: 0.1, outputPer1M: 0.5, cachedInputPer1M: 0.01 },
+  'claude-sonnet-5.5': { inputPer1M: 2.0, outputPer1M: 10.0, cachedInputPer1M: 0.1 },
+  'claude-opus-5.5': { inputPer1M: 4.0, outputPer1M: 20.0, cachedInputPer1M: 0.2 },
+  'claude-opus-5.5-fast': { inputPer1M: 8.0, outputPer1M: 40.0, cachedInputPer1M: 0.4 },
   'claude-3-7-sonnet': { inputPer1M: 0.59, outputPer1M: 2.93, cachedInputPer1M: 0.3 },
   'claude-sonnet-5': { inputPer1M: 2.0, outputPer1M: 10.0, cachedInputPer1M: 0.3 },
   'claude-3-5-sonnet': { inputPer1M: 3.0, outputPer1M: 15.0, cachedInputPer1M: 0.3 },
@@ -56,6 +60,8 @@ export const MODEL_PRICING_TABLE: Record<string, ModelPricingRates> = {
   'claude-instant-1.2': { inputPer1M: 1.63, outputPer1M: 5.51 },
 
   // --- Google Gemini (Modern & Thoughts) ---
+  'gemini-3.8-flash': { inputPer1M: 0.75, outputPer1M: 3.75, cachedInputPer1M: 0.075 },
+  'gemini-nano-banana-2.1': { inputPer1M: 1.5, outputPer1M: 7.5, cachedInputPer1M: 0.15 },
   'gemini-3.7-flash': { inputPer1M: 0.75, outputPer1M: 3.75, cachedInputPer1M: 0.18 },
   'gemini-3.1-pro': { inputPer1M: 2.0, outputPer1M: 12.0, cachedInputPer1M: 0.5 },
   'gemini-3.5-flash': { inputPer1M: 1.5, outputPer1M: 9.0, cachedInputPer1M: 0.38 },
@@ -81,6 +87,7 @@ export const MODEL_PRICING_TABLE: Record<string, ModelPricingRates> = {
   'grok-beta': { inputPer1M: 5.0, outputPer1M: 15.0 },
 
   // --- Mistral ---
+  'mistral-large-4': { inputPer1M: 0.68, outputPer1M: 2.09, cachedInputPer1M: 0.07 },
   'mistral-large-3': { inputPer1M: 2.0, outputPer1M: 6.0 },
   'mistral-large-latest': { inputPer1M: 2.0, outputPer1M: 6.0 },
   'mistral-large-2411': { inputPer1M: 2.0, outputPer1M: 6.0 },
@@ -172,6 +179,9 @@ export const MODEL_ALIASES: Record<string, string> = {
   'sonnet-3.5': 'claude-3-5-sonnet',
   'haiku': 'claude-3-5-haiku',
   'haiku-3.5': 'claude-3-5-haiku',
+  'haiku-5.5': 'claude-haiku-5.5',
+  'sonnet-5.5': 'claude-sonnet-5.5',
+  'opus-5.5': 'claude-opus-5.5',
   'opus': 'claude-3-opus',
   'claude-2': 'claude-2.0',
   'claude-instant': 'claude-instant-1.2',
@@ -183,6 +193,7 @@ export const MODEL_ALIASES: Record<string, string> = {
   // Gemini Shorthands
   'flash': 'gemini-2.0-flash',
   'pro': 'gemini-1.5-pro',
+  'gemini-banana': 'gemini-nano-banana-2.1',
 
   // Meta / Groq Shorthands
   'llama-3.3-70b': 'llama-3.3-70b-versatile',

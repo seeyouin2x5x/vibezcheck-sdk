@@ -1,6 +1,6 @@
 {
   "name": "vibezcheck",
-  "version": "0.5.12",
+  "version": "0.5.13",
   "description": "The 1-line Token Metering & Cost Intelligence engine for LLMs. Track tokens, compute real-time dollar costs, protect agent loops, and stream financial telemetry with 0ms added latency.",
   "author": "VibezCheck <dev@vibezcheck.xyz> (https://vibezcheck.xyz)",
   "license": "MIT",
@@ -98,6 +98,7 @@
     "test": "jest --forceExit",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
+    "sync:manifest": "node scripts/sync-manifest.js",
     "prepublishOnly": "tsup"
   },
   "dependencies": {},

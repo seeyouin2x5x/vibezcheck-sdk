@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "version": "1.0.0",
-  "updatedAt": "2026-09-15T23:00:09.252Z",
+  "updatedAt": "2026-10-13T14:18:52.223Z",
   "source": "https://docs.stripe.com/billing/token-billing/ai-prices#pricing-table-prices-per-1m-tokens",
   "description": "Unified LLM pricing manifest combining Stripe Metronome Token Billing and Vercel AI Gateway rate cards",
   "models": [
@@ -2208,7 +2208,7 @@
       "inputPer1M": 0.3,
       "outputPer1M": 2.5,
       "currency": "USD",
-      "cachedInputPer1M": 0.07
+      "cachedInputPer1M": 0.075
     },
     "amazon/nova-2-lite": {
       "inputPer1M": 0.3,
@@ -2238,7 +2238,7 @@
       "currency": "USD"
     },
     "nova-micro": {
-      "inputPer1M": 0.04,
+      "inputPer1M": 0.035,
       "outputPer1M": 0.14,
       "currency": "USD"
     },
@@ -2836,7 +2836,7 @@
     },
     "trinity-large-thinking": {
       "inputPer1M": 0.25,
-      "outputPer1M": 0.9,
+      "outputPer1M": 0.8,
       "currency": "USD"
     },
     "arceeai/trinity-large-thinking": {
@@ -2887,10 +2887,9 @@
       "currency": "USD"
     },
     "deepseek-r1": {
-      "inputPer1M": 0.5,
-      "outputPer1M": 2.15,
-      "currency": "USD",
-      "cachedInputPer1M": 0.35
+      "inputPer1M": 1.35,
+      "outputPer1M": 5.4,
+      "currency": "USD"
     },
     "deepseek/deepseek-r1": {
       "inputPer1M": 1.35,
@@ -2924,10 +2923,10 @@
       "currency": "USD"
     },
     "deepseek-v3.1": {
-      "inputPer1M": 0.27,
-      "outputPer1M": 1,
+      "inputPer1M": 0.25,
+      "outputPer1M": 0.95,
       "currency": "USD",
-      "cachedInputPer1M": 0.14
+      "cachedInputPer1M": 0.13
     },
     "deepseek/deepseek-v3.1": {
       "inputPer1M": 0.25,
@@ -2981,10 +2980,9 @@
       "cachedInputPer1M": 0.14
     },
     "deepseek-v3.2": {
-      "inputPer1M": 0.27,
-      "outputPer1M": 0.4,
-      "currency": "USD",
-      "cachedInputPer1M": 0.13
+      "inputPer1M": 0.62,
+      "outputPer1M": 1.85,
+      "currency": "USD"
     },
     "deepseek/deepseek-v3.2": {
       "inputPer1M": 0.62,
@@ -3009,10 +3007,10 @@
       "cachedInputPer1M": 0.13
     },
     "deepseek-v4-flash-0731": {
-      "inputPer1M": 0.14,
-      "outputPer1M": 0.28,
+      "inputPer1M": 0.076,
+      "outputPer1M": 0.153,
       "currency": "USD",
-      "cachedInputPer1M": 0
+      "cachedInputPer1M": 0.014
     },
     "deepseek/deepseek-v4-flash-0731": {
       "inputPer1M": 0.076,
@@ -3021,10 +3019,10 @@
       "cachedInputPer1M": 0.014
     },
     "deepseek-v4-pro": {
-      "inputPer1M": 0.43,
-      "outputPer1M": 0.87,
+      "inputPer1M": 0.66,
+      "outputPer1M": 1.98,
       "currency": "USD",
-      "cachedInputPer1M": 0
+      "cachedInputPer1M": 0.022
     },
     "deepseek/deepseek-v4-pro": {
       "inputPer1M": 0.66,
@@ -3084,7 +3082,7 @@
       "inputPer1M": 0.3,
       "outputPer1M": 2.5,
       "currency": "USD",
-      "cachedInputPer1M": 0.07
+      "cachedInputPer1M": 0.03
     },
     "google/gemini-2.5-flash": {
       "inputPer1M": 0.3,
@@ -3111,9 +3109,9 @@
     },
     "gemini-2.5-flash-image": {
       "inputPer1M": 0.3,
-      "outputPer1M": 30,
+      "outputPer1M": 2.5,
       "currency": "USD",
-      "cachedInputPer1M": 0.07
+      "cachedInputPer1M": 0.03
     },
     "google/gemini-2.5-flash-image": {
       "inputPer1M": 0.3,
@@ -3155,7 +3153,7 @@
       "inputPer1M": 0.1,
       "outputPer1M": 0.4,
       "currency": "USD",
-      "cachedInputPer1M": 0.03
+      "cachedInputPer1M": 0.01
     },
     "google/gemini-2.5-flash-lite": {
       "inputPer1M": 0.1,
@@ -3179,7 +3177,7 @@
       "inputPer1M": 1.25,
       "outputPer1M": 10,
       "currency": "USD",
-      "cachedInputPer1M": 0.31
+      "cachedInputPer1M": 0.125
     },
     "google/gemini-2.5-pro": {
       "inputPer1M": 1.25,
@@ -3362,10 +3360,10 @@
       "cachedInputPer1M": 0.03
     },
     "gemini-3.6-flash": {
-      "inputPer1M": 1.5,
-      "outputPer1M": 7.5,
+      "inputPer1M": 0.75,
+      "outputPer1M": 3.75,
       "currency": "USD",
-      "cachedInputPer1M": 0.15
+      "cachedInputPer1M": 0.075
     },
     "google/gemini-3.6-flash": {
       "inputPer1M": 0.75,
@@ -3389,7 +3387,7 @@
       "inputPer1M": 0.75,
       "outputPer1M": 3.75,
       "currency": "USD",
-      "cachedInputPer1M": 0.07
+      "cachedInputPer1M": 0.075
     },
     "google/gemini-3.7-flash": {
       "inputPer1M": 0.75,
@@ -3410,9 +3408,10 @@
       "cachedInputPer1M": 0.07
     },
     "gemma-4-26b-a4b-it": {
-      "inputPer1M": 0.13,
-      "outputPer1M": 0.4,
-      "currency": "USD"
+      "inputPer1M": 0.15,
+      "outputPer1M": 0.6,
+      "currency": "USD",
+      "cachedInputPer1M": 0.015
     },
     "google/gemma-4-26b-a4b-it": {
       "inputPer1M": 0.15,
@@ -3471,7 +3470,8 @@
     "mercury-2": {
       "inputPer1M": 0.25,
       "outputPer1M": 0.75,
-      "currency": "USD"
+      "currency": "USD",
+      "cachedInputPer1M": 0.025
     },
     "inception-labs/mercury-2": {
       "inputPer1M": 0.25,
@@ -3504,7 +3504,7 @@
     },
     "mercury-coder-small": {
       "inputPer1M": 0.25,
-      "outputPer1M": 0.75,
+      "outputPer1M": 1,
       "currency": "USD"
     },
     "inception-labs/mercury-coder-small": {
@@ -3560,8 +3560,8 @@
       "cachedInputPer1M": 0.06
     },
     "llama-3.1-70b": {
-      "inputPer1M": 0.4,
-      "outputPer1M": 0.4,
+      "inputPer1M": 0.72,
+      "outputPer1M": 0.72,
       "currency": "USD"
     },
     "meta/llama-3.1-70b": {
@@ -3580,8 +3580,8 @@
       "currency": "USD"
     },
     "llama-3.1-8b": {
-      "inputPer1M": 0.02,
-      "outputPer1M": 0.05,
+      "inputPer1M": 0.22,
+      "outputPer1M": 0.22,
       "currency": "USD"
     },
     "meta/llama-3.1-8b": {
@@ -3677,8 +3677,8 @@
       "currency": "USD"
     },
     "llama-3.3-70b": {
-      "inputPer1M": 0.59,
-      "outputPer1M": 0.79,
+      "inputPer1M": 0.72,
+      "outputPer1M": 0.72,
       "currency": "USD"
     },
     "meta/llama-3.3-70b": {
@@ -3697,8 +3697,8 @@
       "currency": "USD"
     },
     "llama-4-maverick": {
-      "inputPer1M": 0.15,
-      "outputPer1M": 0.6,
+      "inputPer1M": 0.24,
+      "outputPer1M": 0.97,
       "currency": "USD"
     },
     "meta/llama-4-maverick": {
@@ -3717,8 +3717,8 @@
       "currency": "USD"
     },
     "llama-4-scout": {
-      "inputPer1M": 0.11,
-      "outputPer1M": 0.34,
+      "inputPer1M": 0.17,
+      "outputPer1M": 0.66,
       "currency": "USD"
     },
     "meta/llama-4-scout": {
@@ -3769,7 +3769,7 @@
       "inputPer1M": 0.1,
       "outputPer1M": 0.2,
       "currency": "USD",
-      "cachedInputPer1M": 0
+      "cachedInputPer1M": 0.002
     },
     "meta/muse-spark-1.2-contributor": {
       "inputPer1M": 0.1,
@@ -3781,7 +3781,8 @@
       "inputPer1M": 0.3,
       "outputPer1M": 1.2,
       "currency": "USD",
-      "cachedInputPer1M": 0.03
+      "cachedInputPer1M": 0.03,
+      "cacheWritePer1M": 0.375
     },
     "minimax/minimax-m2": {
       "inputPer1M": 0.3,
@@ -3794,7 +3795,8 @@
       "inputPer1M": 0.3,
       "outputPer1M": 1.2,
       "currency": "USD",
-      "cachedInputPer1M": 0.03
+      "cachedInputPer1M": 0.03,
+      "cacheWritePer1M": 0.375
     },
     "minimax/minimax-m2.1": {
       "inputPer1M": 0.3,
@@ -3818,7 +3820,8 @@
     "mistral-large-3": {
       "inputPer1M": 0.5,
       "outputPer1M": 1.5,
-      "currency": "USD"
+      "currency": "USD",
+      "cachedInputPer1M": 0.05
     },
     "mistral-ai/mistral-large-3": {
       "inputPer1M": 0.5,
@@ -3897,14 +3900,16 @@
       "currency": "USD"
     },
     "gpt-oss-120b": {
-      "inputPer1M": 0.15,
-      "outputPer1M": 0.6,
-      "currency": "USD"
+      "inputPer1M": 0.1,
+      "outputPer1M": 0.5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.1
     },
     "openai/gpt-oss-120b": {
       "inputPer1M": 0.1,
       "outputPer1M": 0.5,
-      "currency": "USD"
+      "currency": "USD",
+      "cachedInputPer1M": 0.1
     },
     "nebius/gpt-oss-120b": {
       "inputPer1M": 0.15,
@@ -3912,14 +3917,13 @@
       "currency": "USD"
     },
     "gpt-oss-20b": {
-      "inputPer1M": 0.07,
-      "outputPer1M": 0.3,
-      "currency": "USD",
-      "cachedInputPer1M": 0.04
+      "inputPer1M": 0.03,
+      "outputPer1M": 0.14,
+      "currency": "USD"
     },
     "openai/gpt-oss-20b": {
-      "inputPer1M": 0.05,
-      "outputPer1M": 0.2,
+      "inputPer1M": 0.03,
+      "outputPer1M": 0.14,
       "currency": "USD"
     },
     "bedrock/gpt-oss-20b": {
@@ -4004,13 +4008,13 @@
       "currency": "USD"
     },
     "alibaba/qwen-3-32b": {
-      "inputPer1M": 0.16,
-      "outputPer1M": 0.64,
+      "inputPer1M": 0.15,
+      "outputPer1M": 0.6,
       "currency": "USD"
     },
     "qwen-3-32b": {
-      "inputPer1M": 0.16,
-      "outputPer1M": 0.64,
+      "inputPer1M": 0.15,
+      "outputPer1M": 0.6,
       "currency": "USD"
     },
     "alibaba/qwen-3.6-max-preview": {
@@ -4038,16 +4042,16 @@
       "currency": "USD"
     },
     "alibaba/qwen3-coder": {
-      "inputPer1M": 1.5,
-      "outputPer1M": 7.5,
+      "inputPer1M": 0.22,
+      "outputPer1M": 1.8,
       "currency": "USD",
-      "cachedInputPer1M": 0.3
+      "cachedInputPer1M": 0.022
     },
     "qwen3-coder": {
-      "inputPer1M": 1.5,
-      "outputPer1M": 7.5,
+      "inputPer1M": 0.22,
+      "outputPer1M": 1.8,
       "currency": "USD",
-      "cachedInputPer1M": 0.3
+      "cachedInputPer1M": 0.022
     },
     "alibaba/qwen3-coder-30b-a3b": {
       "inputPer1M": 0.15,
@@ -4148,14 +4152,16 @@
       "currency": "USD"
     },
     "alibaba/qwen3-vl-instruct": {
-      "inputPer1M": 0.4,
-      "outputPer1M": 1.6,
-      "currency": "USD"
+      "inputPer1M": 0.2,
+      "outputPer1M": 0.88,
+      "currency": "USD",
+      "cachedInputPer1M": 0.11
     },
     "qwen3-vl-instruct": {
-      "inputPer1M": 0.4,
-      "outputPer1M": 1.6,
-      "currency": "USD"
+      "inputPer1M": 0.2,
+      "outputPer1M": 0.88,
+      "currency": "USD",
+      "cachedInputPer1M": 0.11
     },
     "alibaba/qwen3-vl-thinking": {
       "inputPer1M": 0.4,
@@ -4183,14 +4189,14 @@
     },
     "alibaba/qwen3.5-plus": {
       "inputPer1M": 0.4,
-      "outputPer1M": 2.5,
+      "outputPer1M": 2.4,
       "currency": "USD",
       "cachedInputPer1M": 0.04,
       "cacheWritePer1M": 0.5
     },
     "qwen3.5-plus": {
       "inputPer1M": 0.4,
-      "outputPer1M": 2.5,
+      "outputPer1M": 2.4,
       "currency": "USD",
       "cachedInputPer1M": 0.04,
       "cacheWritePer1M": 0.5
@@ -4305,15 +4311,13 @@
       "inputPer1M": 2,
       "outputPer1M": 6,
       "currency": "USD",
-      "cachedInputPer1M": 0.25,
-      "cacheWritePer1M": 2.5
+      "cachedInputPer1M": 0.25
     },
     "qwen3.8-max": {
       "inputPer1M": 2,
       "outputPer1M": 6,
       "currency": "USD",
-      "cachedInputPer1M": 0.25,
-      "cacheWritePer1M": 2.5
+      "cachedInputPer1M": 0.25
     },
     "alibaba/qwen3.8-max-0902": {
       "inputPer1M": 2,
@@ -4359,7 +4363,7 @@
     },
     "arcee-ai/trinity-large-thinking": {
       "inputPer1M": 0.25,
-      "outputPer1M": 0.9,
+      "outputPer1M": 0.8,
       "currency": "USD"
     },
     "bytedance/seed-1.6": {
@@ -4421,16 +4425,16 @@
       "cachedInputPer1M": 0.028
     },
     "deepseek/deepseek-v4-flash-vision-exp": {
-      "inputPer1M": 0.22,
-      "outputPer1M": 0.66,
+      "inputPer1M": 0.2156,
+      "outputPer1M": 0.6468,
       "currency": "USD",
-      "cachedInputPer1M": 0.007
+      "cachedInputPer1M": 0.0068
     },
     "deepseek-v4-flash-vision-exp": {
-      "inputPer1M": 0.22,
-      "outputPer1M": 0.66,
+      "inputPer1M": 0.2156,
+      "outputPer1M": 0.6468,
       "currency": "USD",
-      "cachedInputPer1M": 0.007
+      "cachedInputPer1M": 0.0068
     },
     "deepseek/deepseek-v4-pro-0813": {
       "inputPer1M": 0.66,
@@ -4445,16 +4449,16 @@
       "cachedInputPer1M": 0.066
     },
     "deepseek/deepseek-v4.1-flash": {
-      "inputPer1M": 0.15,
-      "outputPer1M": 0.6,
+      "inputPer1M": 0.3,
+      "outputPer1M": 1.2,
       "currency": "USD",
-      "cachedInputPer1M": 0.015
+      "cachedInputPer1M": 0.007
     },
     "deepseek-v4.1-flash": {
-      "inputPer1M": 0.15,
-      "outputPer1M": 0.6,
+      "inputPer1M": 0.3,
+      "outputPer1M": 1.2,
       "currency": "USD",
-      "cachedInputPer1M": 0.015
+      "cachedInputPer1M": 0.007
     },
     "google/gemini-3.1-flash-image": {
       "inputPer1M": 0.5,
@@ -4581,14 +4585,16 @@
       "cachedInputPer1M": 0.0042
     },
     "inclusionai/ling-3.0-flash-fin": {
-      "inputPer1M": 0,
-      "outputPer1M": 0,
-      "currency": "USD"
+      "inputPer1M": 0.075,
+      "outputPer1M": 0.22,
+      "currency": "USD",
+      "cachedInputPer1M": 0.015
     },
     "ling-3.0-flash-fin": {
-      "inputPer1M": 0,
-      "outputPer1M": 0,
-      "currency": "USD"
+      "inputPer1M": 0.075,
+      "outputPer1M": 0.22,
+      "currency": "USD",
+      "cachedInputPer1M": 0.015
     },
     "inclusionai/ling-3.0-flash-fin-free": {
       "inputPer1M": 0,
@@ -4601,14 +4607,16 @@
       "currency": "USD"
     },
     "inclusionai/ling-3.0-flash-sante": {
-      "inputPer1M": 0,
-      "outputPer1M": 0,
-      "currency": "USD"
+      "inputPer1M": 0.075,
+      "outputPer1M": 0.22,
+      "currency": "USD",
+      "cachedInputPer1M": 0.015
     },
     "ling-3.0-flash-sante": {
-      "inputPer1M": 0,
-      "outputPer1M": 0,
-      "currency": "USD"
+      "inputPer1M": 0.075,
+      "outputPer1M": 0.22,
+      "currency": "USD",
+      "cachedInputPer1M": 0.015
     },
     "inclusionai/ling-3.0-flash-sante-free": {
       "inputPer1M": 0,
@@ -4621,14 +4629,16 @@
       "currency": "USD"
     },
     "inclusionai/ling-3.0-flash-vl": {
-      "inputPer1M": 0,
-      "outputPer1M": 0,
-      "currency": "USD"
+      "inputPer1M": 0.075,
+      "outputPer1M": 0.22,
+      "currency": "USD",
+      "cachedInputPer1M": 0.015
     },
     "ling-3.0-flash-vl": {
-      "inputPer1M": 0,
-      "outputPer1M": 0,
-      "currency": "USD"
+      "inputPer1M": 0.075,
+      "outputPer1M": 0.22,
+      "currency": "USD",
+      "cachedInputPer1M": 0.015
     },
     "inclusionai/ling-3.0-flash-vl-free": {
       "inputPer1M": 0,
@@ -4853,13 +4863,13 @@
       "cachedInputPer1M": 0.15
     },
     "mistral/mistral-nemo": {
-      "inputPer1M": 0.04,
-      "outputPer1M": 0.17,
+      "inputPer1M": 0.029,
+      "outputPer1M": 0.03,
       "currency": "USD"
     },
     "mistral-nemo": {
-      "inputPer1M": 0.04,
-      "outputPer1M": 0.17,
+      "inputPer1M": 0.029,
+      "outputPer1M": 0.03,
       "currency": "USD"
     },
     "mistral/mistral-small": {
@@ -4899,14 +4909,12 @@
     "moonshotai/kimi-k2.5": {
       "inputPer1M": 0.6,
       "outputPer1M": 3,
-      "currency": "USD",
-      "cachedInputPer1M": 0.1
+      "currency": "USD"
     },
     "kimi-k2.5": {
       "inputPer1M": 0.6,
       "outputPer1M": 3,
-      "currency": "USD",
-      "cachedInputPer1M": 0.1
+      "currency": "USD"
     },
     "moonshotai/kimi-k2.6": {
       "inputPer1M": 0.95,
@@ -4924,13 +4932,13 @@
       "inputPer1M": 0.95,
       "outputPer1M": 4,
       "currency": "USD",
-      "cachedInputPer1M": 0.16
+      "cachedInputPer1M": 0.19
     },
     "kimi-k2.7-code": {
       "inputPer1M": 0.95,
       "outputPer1M": 4,
       "currency": "USD",
-      "cachedInputPer1M": 0.16
+      "cachedInputPer1M": 0.19
     },
     "moonshotai/kimi-k2.7-code-highspeed": {
       "inputPer1M": 1.9,
@@ -5547,32 +5555,32 @@
       "cacheWritePer1M": 0.5
     },
     "openai/gpt-5.6-sol": {
-      "inputPer1M": 2,
-      "outputPer1M": 10,
+      "inputPer1M": 4,
+      "outputPer1M": 20,
       "currency": "USD",
-      "cachedInputPer1M": 0.2,
-      "cacheWritePer1M": 2.5
+      "cachedInputPer1M": 0.4,
+      "cacheWritePer1M": 5
     },
     "gpt-5.6-sol": {
-      "inputPer1M": 2,
-      "outputPer1M": 10,
+      "inputPer1M": 4,
+      "outputPer1M": 20,
       "currency": "USD",
-      "cachedInputPer1M": 0.2,
-      "cacheWritePer1M": 2.5
+      "cachedInputPer1M": 0.4,
+      "cacheWritePer1M": 5
     },
     "openai/gpt-5.6-sol-fast": {
-      "inputPer1M": 4,
-      "outputPer1M": 20,
+      "inputPer1M": 8,
+      "outputPer1M": 40,
       "currency": "USD",
-      "cachedInputPer1M": 0.4,
-      "cacheWritePer1M": 5
+      "cachedInputPer1M": 0.8,
+      "cacheWritePer1M": 10
     },
     "gpt-5.6-sol-fast": {
-      "inputPer1M": 4,
-      "outputPer1M": 20,
+      "inputPer1M": 8,
+      "outputPer1M": 40,
       "currency": "USD",
-      "cachedInputPer1M": 0.4,
-      "cacheWritePer1M": 5
+      "cachedInputPer1M": 0.8,
+      "cacheWritePer1M": 10
     },
     "openai/gpt-5.6-terra": {
       "inputPer1M": 2,
@@ -5829,16 +5837,16 @@
       "cachedInputPer1M": 0.5
     },
     "poolside/laguna-s-2.1": {
-      "inputPer1M": 0.1,
-      "outputPer1M": 0.2,
+      "inputPer1M": 0.09,
+      "outputPer1M": 0.18,
       "currency": "USD",
-      "cachedInputPer1M": 0.01
+      "cachedInputPer1M": 0.009
     },
     "laguna-s-2.1": {
-      "inputPer1M": 0.1,
-      "outputPer1M": 0.2,
+      "inputPer1M": 0.09,
+      "outputPer1M": 0.18,
       "currency": "USD",
-      "cachedInputPer1M": 0.01
+      "cachedInputPer1M": 0.009
     },
     "poolside/laguna-s-2.1-free": {
       "inputPer1M": 0,
@@ -5989,13 +5997,13 @@
       "cachedInputPer1M": 0.17
     },
     "thinkingmachines/inkling-small": {
-      "inputPer1M": 0.5,
+      "inputPer1M": 0.45,
       "outputPer1M": 1.2,
       "currency": "USD",
       "cachedInputPer1M": 0.1
     },
     "inkling-small": {
-      "inputPer1M": 0.5,
+      "inputPer1M": 0.45,
       "outputPer1M": 1.2,
       "currency": "USD",
       "cachedInputPer1M": 0.1
@@ -6219,14 +6227,12 @@
     "zai/glm-4.7": {
       "inputPer1M": 0.6,
       "outputPer1M": 2.2,
-      "currency": "USD",
-      "cachedInputPer1M": 0.12
+      "currency": "USD"
     },
     "glm-4.7": {
       "inputPer1M": 0.6,
       "outputPer1M": 2.2,
-      "currency": "USD",
-      "cachedInputPer1M": 0.12
+      "currency": "USD"
     },
     "zai/glm-4.7-flash": {
       "inputPer1M": 0.07,
@@ -6297,16 +6303,16 @@
       "cachedInputPer1M": 0.16
     },
     "zai/glm-5.2-fast": {
-      "inputPer1M": 2.1,
-      "outputPer1M": 6.6,
+      "inputPer1M": 2.8,
+      "outputPer1M": 8.8,
       "currency": "USD",
-      "cachedInputPer1M": 0.21
+      "cachedInputPer1M": 0.56
     },
     "glm-5.2-fast": {
-      "inputPer1M": 2.1,
-      "outputPer1M": 6.6,
+      "inputPer1M": 2.8,
+      "outputPer1M": 8.8,
       "currency": "USD",
-      "cachedInputPer1M": 0.21
+      "cachedInputPer1M": 0.56
     },
     "zai/glm-5.3": {
       "inputPer1M": 1.4,
@@ -6355,6 +6361,1152 @@
       "outputPer1M": 4,
       "currency": "USD",
       "cachedInputPer1M": 0.24
+    },
+    "alibaba/qwen3.8-max-prime": {
+      "inputPer1M": 4,
+      "outputPer1M": 12,
+      "currency": "USD",
+      "cachedInputPer1M": 0.5,
+      "cacheWritePer1M": 5
+    },
+    "qwen3.8-max-prime": {
+      "inputPer1M": 4,
+      "outputPer1M": 12,
+      "currency": "USD",
+      "cachedInputPer1M": 0.5,
+      "cacheWritePer1M": 5
+    },
+    "alibaba/qwen3.8-omni-flash": {
+      "inputPer1M": 0.15,
+      "outputPer1M": 0.47,
+      "currency": "USD",
+      "cachedInputPer1M": 0.016
+    },
+    "qwen3.8-omni-flash": {
+      "inputPer1M": 0.15,
+      "outputPer1M": 0.47,
+      "currency": "USD",
+      "cachedInputPer1M": 0.016
+    },
+    "anthropic/claude-haiku-5.5": {
+      "inputPer1M": 0.1,
+      "outputPer1M": 0.5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.01,
+      "cacheWritePer1M": 0.125
+    },
+    "claude-haiku-5.5": {
+      "inputPer1M": 0.1,
+      "outputPer1M": 0.5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.01,
+      "cacheWritePer1M": 0.125
+    },
+    "anthropic/claude-opus-5.5": {
+      "inputPer1M": 4,
+      "outputPer1M": 20,
+      "currency": "USD",
+      "cachedInputPer1M": 0.2,
+      "cacheWritePer1M": 5
+    },
+    "claude-opus-5.5": {
+      "inputPer1M": 4,
+      "outputPer1M": 20,
+      "currency": "USD",
+      "cachedInputPer1M": 0.2,
+      "cacheWritePer1M": 5
+    },
+    "anthropic/claude-opus-5.5-fast": {
+      "inputPer1M": 8,
+      "outputPer1M": 40,
+      "currency": "USD",
+      "cachedInputPer1M": 0.4,
+      "cacheWritePer1M": 10
+    },
+    "claude-opus-5.5-fast": {
+      "inputPer1M": 8,
+      "outputPer1M": 40,
+      "currency": "USD",
+      "cachedInputPer1M": 0.4,
+      "cacheWritePer1M": 10
+    },
+    "anthropic/claude-sonnet-5.5": {
+      "inputPer1M": 2,
+      "outputPer1M": 10,
+      "currency": "USD",
+      "cachedInputPer1M": 0.1,
+      "cacheWritePer1M": 2.5
+    },
+    "claude-sonnet-5.5": {
+      "inputPer1M": 2,
+      "outputPer1M": 10,
+      "currency": "USD",
+      "cachedInputPer1M": 0.1,
+      "cacheWritePer1M": 2.5
+    },
+    "callstack/apex": {
+      "inputPer1M": 0.5,
+      "outputPer1M": 3,
+      "currency": "USD",
+      "cachedInputPer1M": 0.2
+    },
+    "apex": {
+      "inputPer1M": 0.5,
+      "outputPer1M": 3,
+      "currency": "USD",
+      "cachedInputPer1M": 0.2
+    },
+    "convaiinnovations/laya": {
+      "inputPer1M": 0,
+      "outputPer1M": 0,
+      "currency": "USD"
+    },
+    "laya": {
+      "inputPer1M": 0,
+      "outputPer1M": 0,
+      "currency": "USD"
+    },
+    "convaiinnovations/laya-free": {
+      "inputPer1M": 0,
+      "outputPer1M": 0,
+      "currency": "USD"
+    },
+    "laya-free": {
+      "inputPer1M": 0,
+      "outputPer1M": 0,
+      "currency": "USD"
+    },
+    "fireworks/ember-1": {
+      "inputPer1M": 3,
+      "outputPer1M": 15,
+      "currency": "USD",
+      "cachedInputPer1M": 0.3
+    },
+    "ember-1": {
+      "inputPer1M": 3,
+      "outputPer1M": 15,
+      "currency": "USD",
+      "cachedInputPer1M": 0.3
+    },
+    "google/gemini-3.8-flash-lite-tts": {
+      "inputPer1M": 0.5,
+      "outputPer1M": 6,
+      "currency": "USD"
+    },
+    "gemini-3.8-flash-lite-tts": {
+      "inputPer1M": 0.5,
+      "outputPer1M": 6,
+      "currency": "USD"
+    },
+    "google/gemini-3.8-flash-tts": {
+      "inputPer1M": 0.5,
+      "outputPer1M": 9,
+      "currency": "USD"
+    },
+    "gemini-3.8-flash-tts": {
+      "inputPer1M": 0.5,
+      "outputPer1M": 9,
+      "currency": "USD"
+    },
+    "google/gemini-nano-banana-2.1": {
+      "inputPer1M": 1.5,
+      "outputPer1M": 7.5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.15
+    },
+    "gemini-nano-banana-2.1": {
+      "inputPer1M": 1.5,
+      "outputPer1M": 7.5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.15
+    },
+    "inclusionai/ling-3.1-flash": {
+      "inputPer1M": 0,
+      "outputPer1M": 0,
+      "currency": "USD"
+    },
+    "ling-3.1-flash": {
+      "inputPer1M": 0,
+      "outputPer1M": 0,
+      "currency": "USD"
+    },
+    "inclusionai/ling-3.1-flash-free": {
+      "inputPer1M": 0,
+      "outputPer1M": 0,
+      "currency": "USD"
+    },
+    "ling-3.1-flash-free": {
+      "inputPer1M": 0,
+      "outputPer1M": 0,
+      "currency": "USD"
+    },
+    "inference-net/schematron-v2-small": {
+      "inputPer1M": 0.05,
+      "outputPer1M": 0.23,
+      "currency": "USD",
+      "cachedInputPer1M": 0.05
+    },
+    "schematron-v2-small": {
+      "inputPer1M": 0.05,
+      "outputPer1M": 0.23,
+      "currency": "USD",
+      "cachedInputPer1M": 0.05
+    },
+    "inference-net/schematron-v2-turbo": {
+      "inputPer1M": 0.03,
+      "outputPer1M": 0.15,
+      "currency": "USD",
+      "cachedInputPer1M": 0.03
+    },
+    "schematron-v2-turbo": {
+      "inputPer1M": 0.03,
+      "outputPer1M": 0.15,
+      "currency": "USD",
+      "cachedInputPer1M": 0.03
+    },
+    "liquid/d1": {
+      "inputPer1M": 0.04,
+      "outputPer1M": 0,
+      "currency": "USD"
+    },
+    "d1": {
+      "inputPer1M": 0.04,
+      "outputPer1M": 0,
+      "currency": "USD"
+    },
+    "meituan/longcat-2.5-preview": {
+      "inputPer1M": 0.3,
+      "outputPer1M": 1.2,
+      "currency": "USD",
+      "cachedInputPer1M": 0.006
+    },
+    "longcat-2.5-preview": {
+      "inputPer1M": 0.3,
+      "outputPer1M": 1.2,
+      "currency": "USD",
+      "cachedInputPer1M": 0.006
+    },
+    "mistral/mistral-large-4": {
+      "inputPer1M": 0.68,
+      "outputPer1M": 2.09,
+      "currency": "USD",
+      "cachedInputPer1M": 0.07
+    },
+    "mistral-large-4": {
+      "inputPer1M": 0.68,
+      "outputPer1M": 2.09,
+      "currency": "USD",
+      "cachedInputPer1M": 0.07
+    },
+    "mixedbread/toast-1": {
+      "inputPer1M": 0.3,
+      "outputPer1M": 0.72,
+      "currency": "USD",
+      "cachedInputPer1M": 0.036
+    },
+    "toast-1": {
+      "inputPer1M": 0.3,
+      "outputPer1M": 0.72,
+      "currency": "USD",
+      "cachedInputPer1M": 0.036
+    },
+    "openai/gpt-6-luna": {
+      "inputPer1M": 0.1,
+      "outputPer1M": 0.5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.01,
+      "cacheWritePer1M": 0.125
+    },
+    "gpt-6-luna": {
+      "inputPer1M": 0.1,
+      "outputPer1M": 0.5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.01,
+      "cacheWritePer1M": 0.125
+    },
+    "openai/gpt-6-luna-fast": {
+      "inputPer1M": 0.2,
+      "outputPer1M": 1,
+      "currency": "USD",
+      "cachedInputPer1M": 0.02,
+      "cacheWritePer1M": 0.25
+    },
+    "gpt-6-luna-fast": {
+      "inputPer1M": 0.2,
+      "outputPer1M": 1,
+      "currency": "USD",
+      "cachedInputPer1M": 0.02,
+      "cacheWritePer1M": 0.25
+    },
+    "openai/gpt-6-sol": {
+      "inputPer1M": 2,
+      "outputPer1M": 10,
+      "currency": "USD",
+      "cachedInputPer1M": 0.2,
+      "cacheWritePer1M": 2.5
+    },
+    "gpt-6-sol": {
+      "inputPer1M": 2,
+      "outputPer1M": 10,
+      "currency": "USD",
+      "cachedInputPer1M": 0.2,
+      "cacheWritePer1M": 2.5
+    },
+    "openai/gpt-6-sol-fast": {
+      "inputPer1M": 4,
+      "outputPer1M": 20,
+      "currency": "USD",
+      "cachedInputPer1M": 0.4,
+      "cacheWritePer1M": 5
+    },
+    "gpt-6-sol-fast": {
+      "inputPer1M": 4,
+      "outputPer1M": 20,
+      "currency": "USD",
+      "cachedInputPer1M": 0.4,
+      "cacheWritePer1M": 5
+    },
+    "openai/gpt-6.1-sol": {
+      "inputPer1M": 2,
+      "outputPer1M": 10,
+      "currency": "USD",
+      "cachedInputPer1M": 0.1,
+      "cacheWritePer1M": 2.5
+    },
+    "gpt-6.1-sol": {
+      "inputPer1M": 2,
+      "outputPer1M": 10,
+      "currency": "USD",
+      "cachedInputPer1M": 0.1,
+      "cacheWritePer1M": 2.5
+    },
+    "openai/gpt-6.1-sol-fast": {
+      "inputPer1M": 4,
+      "outputPer1M": 20,
+      "currency": "USD",
+      "cachedInputPer1M": 0.2,
+      "cacheWritePer1M": 5
+    },
+    "gpt-6.1-sol-fast": {
+      "inputPer1M": 4,
+      "outputPer1M": 20,
+      "currency": "USD",
+      "cachedInputPer1M": 0.2,
+      "cacheWritePer1M": 5
+    },
+    "perplexity/sonar": {
+      "inputPer1M": 0.25,
+      "outputPer1M": 2.5,
+      "currency": "USD",
+      "cacheWritePer1M": 0.0625
+    },
+    "sonar": {
+      "inputPer1M": 0.25,
+      "outputPer1M": 2.5,
+      "currency": "USD",
+      "cacheWritePer1M": 0.0625
+    },
+    "quiverai/arrow-2": {
+      "inputPer1M": 4,
+      "outputPer1M": 20,
+      "currency": "USD",
+      "cachedInputPer1M": 0.4,
+      "cacheWritePer1M": 5
+    },
+    "arrow-2": {
+      "inputPer1M": 4,
+      "outputPer1M": 20,
+      "currency": "USD",
+      "cachedInputPer1M": 0.4,
+      "cacheWritePer1M": 5
+    },
+    "quiverai/arrow-2-telos": {
+      "inputPer1M": 6,
+      "outputPer1M": 30,
+      "currency": "USD",
+      "cachedInputPer1M": 0.6,
+      "cacheWritePer1M": 7.5
+    },
+    "arrow-2-telos": {
+      "inputPer1M": 6,
+      "outputPer1M": 30,
+      "currency": "USD",
+      "cachedInputPer1M": 0.6,
+      "cacheWritePer1M": 7.5
+    },
+    "stealth/glyph-cluster": {
+      "inputPer1M": 0,
+      "outputPer1M": 0,
+      "currency": "USD"
+    },
+    "glyph-cluster": {
+      "inputPer1M": 0,
+      "outputPer1M": 0,
+      "currency": "USD"
+    },
+    "stepfun/step-5-preview": {
+      "inputPer1M": 1,
+      "outputPer1M": 2.7,
+      "currency": "USD",
+      "cachedInputPer1M": 0.05
+    },
+    "step-5-preview": {
+      "inputPer1M": 1,
+      "outputPer1M": 2.7,
+      "currency": "USD",
+      "cachedInputPer1M": 0.05
+    },
+    "typesafe-ai/jev": {
+      "inputPer1M": 0.042,
+      "outputPer1M": 0,
+      "currency": "USD"
+    },
+    "jev": {
+      "inputPer1M": 0.042,
+      "outputPer1M": 0,
+      "currency": "USD"
+    },
+    "spacexai/grok-4.7": {
+      "inputPer1M": 2,
+      "outputPer1M": 6,
+      "currency": "USD",
+      "cachedInputPer1M": 0.5
+    },
+    "grok-4.7": {
+      "inputPer1M": 2,
+      "outputPer1M": 6,
+      "currency": "USD",
+      "cachedInputPer1M": 0.5
+    },
+    "xiaomi/mimo-v2.6-flash": {
+      "inputPer1M": 0.14,
+      "outputPer1M": 0.28,
+      "currency": "USD",
+      "cachedInputPer1M": 0.0028
+    },
+    "mimo-v2.6-flash": {
+      "inputPer1M": 0.14,
+      "outputPer1M": 0.28,
+      "currency": "USD",
+      "cachedInputPer1M": 0.0028
+    },
+    "xiaomi/mimo-v2.6-pro": {
+      "inputPer1M": 0.435,
+      "outputPer1M": 0.87,
+      "currency": "USD",
+      "cachedInputPer1M": 0.0036
+    },
+    "mimo-v2.6-pro": {
+      "inputPer1M": 0.435,
+      "outputPer1M": 0.87,
+      "currency": "USD",
+      "cachedInputPer1M": 0.0036
+    },
+    "xiaomi/mimo-v2.6-pro-ultraspeed": {
+      "inputPer1M": 4.35,
+      "outputPer1M": 8.7,
+      "currency": "USD",
+      "cachedInputPer1M": 0.036
+    },
+    "mimo-v2.6-pro-ultraspeed": {
+      "inputPer1M": 4.35,
+      "outputPer1M": 8.7,
+      "currency": "USD",
+      "cachedInputPer1M": 0.036
+    },
+    "zai/glm-5.3-flashx": {
+      "inputPer1M": 0.37,
+      "outputPer1M": 1.25,
+      "currency": "USD",
+      "cachedInputPer1M": 0.075
+    },
+    "glm-5.3-flashx": {
+      "inputPer1M": 0.37,
+      "outputPer1M": 1.25,
+      "currency": "USD",
+      "cachedInputPer1M": 0.075
+    },
+    "anthropic/claude-fable-5-batch": {
+      "inputPer1M": 5,
+      "outputPer1M": 25,
+      "currency": "USD",
+      "cachedInputPer1M": 0.5,
+      "cacheWritePer1M": 6.25
+    },
+    "claude-fable-5-batch": {
+      "inputPer1M": 5,
+      "outputPer1M": 25,
+      "currency": "USD",
+      "cachedInputPer1M": 0.5,
+      "cacheWritePer1M": 6.25
+    },
+    "anthropic/claude-fable-5.1-batch": {
+      "inputPer1M": 5,
+      "outputPer1M": 25,
+      "currency": "USD",
+      "cachedInputPer1M": 0.125,
+      "cacheWritePer1M": 6.25
+    },
+    "claude-fable-5.1-batch": {
+      "inputPer1M": 5,
+      "outputPer1M": 25,
+      "currency": "USD",
+      "cachedInputPer1M": 0.125,
+      "cacheWritePer1M": 6.25
+    },
+    "anthropic/claude-haiku-4.5-batch": {
+      "inputPer1M": 0.5,
+      "outputPer1M": 2.5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.05,
+      "cacheWritePer1M": 0.625
+    },
+    "claude-haiku-4.5-batch": {
+      "inputPer1M": 0.5,
+      "outputPer1M": 2.5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.05,
+      "cacheWritePer1M": 0.625
+    },
+    "anthropic/claude-haiku-5.5-batch": {
+      "inputPer1M": 0.05,
+      "outputPer1M": 0.25,
+      "currency": "USD",
+      "cachedInputPer1M": 0.005,
+      "cacheWritePer1M": 0.0625
+    },
+    "claude-haiku-5.5-batch": {
+      "inputPer1M": 0.05,
+      "outputPer1M": 0.25,
+      "currency": "USD",
+      "cachedInputPer1M": 0.005,
+      "cacheWritePer1M": 0.0625
+    },
+    "anthropic/claude-opus-4.5-batch": {
+      "inputPer1M": 2.5,
+      "outputPer1M": 12.5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.25,
+      "cacheWritePer1M": 3.125
+    },
+    "claude-opus-4.5-batch": {
+      "inputPer1M": 2.5,
+      "outputPer1M": 12.5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.25,
+      "cacheWritePer1M": 3.125
+    },
+    "anthropic/claude-opus-4.6-batch": {
+      "inputPer1M": 2.5,
+      "outputPer1M": 12.5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.25,
+      "cacheWritePer1M": 3.125
+    },
+    "claude-opus-4.6-batch": {
+      "inputPer1M": 2.5,
+      "outputPer1M": 12.5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.25,
+      "cacheWritePer1M": 3.125
+    },
+    "anthropic/claude-opus-4.7-batch": {
+      "inputPer1M": 2.5,
+      "outputPer1M": 12.5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.25,
+      "cacheWritePer1M": 3.125
+    },
+    "claude-opus-4.7-batch": {
+      "inputPer1M": 2.5,
+      "outputPer1M": 12.5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.25,
+      "cacheWritePer1M": 3.125
+    },
+    "anthropic/claude-opus-4.8-batch": {
+      "inputPer1M": 2.5,
+      "outputPer1M": 12.5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.25,
+      "cacheWritePer1M": 3.125
+    },
+    "claude-opus-4.8-batch": {
+      "inputPer1M": 2.5,
+      "outputPer1M": 12.5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.25,
+      "cacheWritePer1M": 3.125
+    },
+    "anthropic/claude-opus-5-batch": {
+      "inputPer1M": 2.5,
+      "outputPer1M": 12.5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.25,
+      "cacheWritePer1M": 3.125
+    },
+    "claude-opus-5-batch": {
+      "inputPer1M": 2.5,
+      "outputPer1M": 12.5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.25,
+      "cacheWritePer1M": 3.125
+    },
+    "anthropic/claude-opus-5.5-batch": {
+      "inputPer1M": 2,
+      "outputPer1M": 10,
+      "currency": "USD",
+      "cachedInputPer1M": 0.1,
+      "cacheWritePer1M": 2.5
+    },
+    "claude-opus-5.5-batch": {
+      "inputPer1M": 2,
+      "outputPer1M": 10,
+      "currency": "USD",
+      "cachedInputPer1M": 0.1,
+      "cacheWritePer1M": 2.5
+    },
+    "anthropic/claude-sonnet-4.5-batch": {
+      "inputPer1M": 1.5,
+      "outputPer1M": 7.5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.15,
+      "cacheWritePer1M": 1.875
+    },
+    "claude-sonnet-4.5-batch": {
+      "inputPer1M": 1.5,
+      "outputPer1M": 7.5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.15,
+      "cacheWritePer1M": 1.875
+    },
+    "anthropic/claude-sonnet-4.6-batch": {
+      "inputPer1M": 1.5,
+      "outputPer1M": 7.5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.15,
+      "cacheWritePer1M": 1.875
+    },
+    "claude-sonnet-4.6-batch": {
+      "inputPer1M": 1.5,
+      "outputPer1M": 7.5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.15,
+      "cacheWritePer1M": 1.875
+    },
+    "anthropic/claude-sonnet-5-batch": {
+      "inputPer1M": 1,
+      "outputPer1M": 5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.1,
+      "cacheWritePer1M": 1.25
+    },
+    "claude-sonnet-5-batch": {
+      "inputPer1M": 1,
+      "outputPer1M": 5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.1,
+      "cacheWritePer1M": 1.25
+    },
+    "anthropic/claude-sonnet-5.5-batch": {
+      "inputPer1M": 1,
+      "outputPer1M": 5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.05,
+      "cacheWritePer1M": 1.25
+    },
+    "claude-sonnet-5.5-batch": {
+      "inputPer1M": 1,
+      "outputPer1M": 5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.05,
+      "cacheWritePer1M": 1.25
+    },
+    "deepseek/deepseek-v4.1-flash-fast": {
+      "inputPer1M": 0.6,
+      "outputPer1M": 2.4,
+      "currency": "USD",
+      "cachedInputPer1M": 0.014
+    },
+    "deepseek-v4.1-flash-fast": {
+      "inputPer1M": 0.6,
+      "outputPer1M": 2.4,
+      "currency": "USD",
+      "cachedInputPer1M": 0.014
+    },
+    "google/gemini-2.5-flash-batch": {
+      "inputPer1M": 0.15,
+      "outputPer1M": 1.25,
+      "currency": "USD",
+      "cachedInputPer1M": 0.03
+    },
+    "gemini-2.5-flash-batch": {
+      "inputPer1M": 0.15,
+      "outputPer1M": 1.25,
+      "currency": "USD",
+      "cachedInputPer1M": 0.03
+    },
+    "google/gemini-2.5-flash-lite-batch": {
+      "inputPer1M": 0.05,
+      "outputPer1M": 0.2,
+      "currency": "USD",
+      "cachedInputPer1M": 0.01
+    },
+    "gemini-2.5-flash-lite-batch": {
+      "inputPer1M": 0.05,
+      "outputPer1M": 0.2,
+      "currency": "USD",
+      "cachedInputPer1M": 0.01
+    },
+    "google/gemini-2.5-pro-batch": {
+      "inputPer1M": 0.625,
+      "outputPer1M": 5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.125
+    },
+    "gemini-2.5-pro-batch": {
+      "inputPer1M": 0.625,
+      "outputPer1M": 5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.125
+    },
+    "google/gemini-3-flash-batch": {
+      "inputPer1M": 0.25,
+      "outputPer1M": 1.5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.05
+    },
+    "gemini-3-flash-batch": {
+      "inputPer1M": 0.25,
+      "outputPer1M": 1.5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.05
+    },
+    "google/gemini-3.1-flash-lite-batch": {
+      "inputPer1M": 0.125,
+      "outputPer1M": 0.75,
+      "currency": "USD",
+      "cachedInputPer1M": 0.015
+    },
+    "gemini-3.1-flash-lite-batch": {
+      "inputPer1M": 0.125,
+      "outputPer1M": 0.75,
+      "currency": "USD",
+      "cachedInputPer1M": 0.015
+    },
+    "google/gemini-3.1-pro-preview-batch": {
+      "inputPer1M": 1,
+      "outputPer1M": 6,
+      "currency": "USD",
+      "cachedInputPer1M": 0.2
+    },
+    "gemini-3.1-pro-preview-batch": {
+      "inputPer1M": 1,
+      "outputPer1M": 6,
+      "currency": "USD",
+      "cachedInputPer1M": 0.2
+    },
+    "google/gemini-3.5-flash-batch": {
+      "inputPer1M": 0.75,
+      "outputPer1M": 4.5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.075
+    },
+    "gemini-3.5-flash-batch": {
+      "inputPer1M": 0.75,
+      "outputPer1M": 4.5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.075
+    },
+    "google/gemini-3.5-flash-lite-batch": {
+      "inputPer1M": 0.15,
+      "outputPer1M": 1.25,
+      "currency": "USD",
+      "cachedInputPer1M": 0.015
+    },
+    "gemini-3.5-flash-lite-batch": {
+      "inputPer1M": 0.15,
+      "outputPer1M": 1.25,
+      "currency": "USD",
+      "cachedInputPer1M": 0.015
+    },
+    "google/gemini-3.6-flash-batch": {
+      "inputPer1M": 0.375,
+      "outputPer1M": 1.875,
+      "currency": "USD",
+      "cachedInputPer1M": 0.0375
+    },
+    "gemini-3.6-flash-batch": {
+      "inputPer1M": 0.375,
+      "outputPer1M": 1.875,
+      "currency": "USD",
+      "cachedInputPer1M": 0.0375
+    },
+    "google/gemini-3.7-flash-batch": {
+      "inputPer1M": 0.375,
+      "outputPer1M": 1.875,
+      "currency": "USD",
+      "cachedInputPer1M": 0.0375
+    },
+    "gemini-3.7-flash-batch": {
+      "inputPer1M": 0.375,
+      "outputPer1M": 1.875,
+      "currency": "USD",
+      "cachedInputPer1M": 0.0375
+    },
+    "meta/muse-wonder-1.0": {
+      "inputPer1M": 4,
+      "outputPer1M": 20,
+      "currency": "USD",
+      "cachedInputPer1M": 0.2
+    },
+    "muse-wonder-1.0": {
+      "inputPer1M": 4,
+      "outputPer1M": 20,
+      "currency": "USD",
+      "cachedInputPer1M": 0.2
+    },
+    "microsoft/microsoft-decision-1": {
+      "inputPer1M": 0.042,
+      "outputPer1M": 0,
+      "currency": "USD"
+    },
+    "microsoft-decision-1": {
+      "inputPer1M": 0.042,
+      "outputPer1M": 0,
+      "currency": "USD"
+    },
+    "openai/gpt-4.1-batch": {
+      "inputPer1M": 1,
+      "outputPer1M": 4,
+      "currency": "USD",
+      "cachedInputPer1M": 0.25
+    },
+    "gpt-4.1-batch": {
+      "inputPer1M": 1,
+      "outputPer1M": 4,
+      "currency": "USD",
+      "cachedInputPer1M": 0.25
+    },
+    "openai/gpt-4.1-mini-batch": {
+      "inputPer1M": 0.2,
+      "outputPer1M": 0.8,
+      "currency": "USD",
+      "cachedInputPer1M": 0.05
+    },
+    "gpt-4.1-mini-batch": {
+      "inputPer1M": 0.2,
+      "outputPer1M": 0.8,
+      "currency": "USD",
+      "cachedInputPer1M": 0.05
+    },
+    "openai/gpt-4.1-nano-batch": {
+      "inputPer1M": 0.05,
+      "outputPer1M": 0.2,
+      "currency": "USD",
+      "cachedInputPer1M": 0.0125
+    },
+    "gpt-4.1-nano-batch": {
+      "inputPer1M": 0.05,
+      "outputPer1M": 0.2,
+      "currency": "USD",
+      "cachedInputPer1M": 0.0125
+    },
+    "openai/gpt-4o-batch": {
+      "inputPer1M": 1.25,
+      "outputPer1M": 5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.625
+    },
+    "gpt-4o-batch": {
+      "inputPer1M": 1.25,
+      "outputPer1M": 5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.625
+    },
+    "openai/gpt-4o-mini-batch": {
+      "inputPer1M": 0.075,
+      "outputPer1M": 0.3,
+      "currency": "USD",
+      "cachedInputPer1M": 0.0375
+    },
+    "gpt-4o-mini-batch": {
+      "inputPer1M": 0.075,
+      "outputPer1M": 0.3,
+      "currency": "USD",
+      "cachedInputPer1M": 0.0375
+    },
+    "openai/gpt-5-batch": {
+      "inputPer1M": 0.625,
+      "outputPer1M": 5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.0625
+    },
+    "gpt-5-batch": {
+      "inputPer1M": 0.625,
+      "outputPer1M": 5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.0625
+    },
+    "openai/gpt-5-mini-batch": {
+      "inputPer1M": 0.125,
+      "outputPer1M": 1,
+      "currency": "USD",
+      "cachedInputPer1M": 0.0125
+    },
+    "gpt-5-mini-batch": {
+      "inputPer1M": 0.125,
+      "outputPer1M": 1,
+      "currency": "USD",
+      "cachedInputPer1M": 0.0125
+    },
+    "openai/gpt-5-nano-batch": {
+      "inputPer1M": 0.025,
+      "outputPer1M": 0.2,
+      "currency": "USD",
+      "cachedInputPer1M": 0.0025
+    },
+    "gpt-5-nano-batch": {
+      "inputPer1M": 0.025,
+      "outputPer1M": 0.2,
+      "currency": "USD",
+      "cachedInputPer1M": 0.0025
+    },
+    "openai/gpt-5-pro-batch": {
+      "inputPer1M": 7.5,
+      "outputPer1M": 60,
+      "currency": "USD"
+    },
+    "gpt-5-pro-batch": {
+      "inputPer1M": 7.5,
+      "outputPer1M": 60,
+      "currency": "USD"
+    },
+    "openai/gpt-5.2-batch": {
+      "inputPer1M": 0.875,
+      "outputPer1M": 7,
+      "currency": "USD",
+      "cachedInputPer1M": 0.0875
+    },
+    "gpt-5.2-batch": {
+      "inputPer1M": 0.875,
+      "outputPer1M": 7,
+      "currency": "USD",
+      "cachedInputPer1M": 0.0875
+    },
+    "openai/gpt-5.4-batch": {
+      "inputPer1M": 1.25,
+      "outputPer1M": 7.5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.125
+    },
+    "gpt-5.4-batch": {
+      "inputPer1M": 1.25,
+      "outputPer1M": 7.5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.125
+    },
+    "openai/gpt-5.4-mini-batch": {
+      "inputPer1M": 0.375,
+      "outputPer1M": 2.25,
+      "currency": "USD",
+      "cachedInputPer1M": 0.0375
+    },
+    "gpt-5.4-mini-batch": {
+      "inputPer1M": 0.375,
+      "outputPer1M": 2.25,
+      "currency": "USD",
+      "cachedInputPer1M": 0.0375
+    },
+    "openai/gpt-5.4-nano-batch": {
+      "inputPer1M": 0.1,
+      "outputPer1M": 0.625,
+      "currency": "USD",
+      "cachedInputPer1M": 0.01
+    },
+    "gpt-5.4-nano-batch": {
+      "inputPer1M": 0.1,
+      "outputPer1M": 0.625,
+      "currency": "USD",
+      "cachedInputPer1M": 0.01
+    },
+    "openai/gpt-5.5-batch": {
+      "inputPer1M": 2.5,
+      "outputPer1M": 15,
+      "currency": "USD",
+      "cachedInputPer1M": 0.25
+    },
+    "gpt-5.5-batch": {
+      "inputPer1M": 2.5,
+      "outputPer1M": 15,
+      "currency": "USD",
+      "cachedInputPer1M": 0.25
+    },
+    "openai/gpt-5.5-pro-batch": {
+      "inputPer1M": 15,
+      "outputPer1M": 90,
+      "currency": "USD"
+    },
+    "gpt-5.5-pro-batch": {
+      "inputPer1M": 15,
+      "outputPer1M": 90,
+      "currency": "USD"
+    },
+    "openai/gpt-5.6-luna-batch": {
+      "inputPer1M": 0.1,
+      "outputPer1M": 0.6,
+      "currency": "USD",
+      "cachedInputPer1M": 0.01,
+      "cacheWritePer1M": 0.125
+    },
+    "gpt-5.6-luna-batch": {
+      "inputPer1M": 0.1,
+      "outputPer1M": 0.6,
+      "currency": "USD",
+      "cachedInputPer1M": 0.01,
+      "cacheWritePer1M": 0.125
+    },
+    "openai/gpt-5.6-sol-batch": {
+      "inputPer1M": 2,
+      "outputPer1M": 10,
+      "currency": "USD",
+      "cachedInputPer1M": 0.2,
+      "cacheWritePer1M": 2.5
+    },
+    "gpt-5.6-sol-batch": {
+      "inputPer1M": 2,
+      "outputPer1M": 10,
+      "currency": "USD",
+      "cachedInputPer1M": 0.2,
+      "cacheWritePer1M": 2.5
+    },
+    "openai/gpt-5.6-terra-batch": {
+      "inputPer1M": 1,
+      "outputPer1M": 6,
+      "currency": "USD",
+      "cachedInputPer1M": 0.1,
+      "cacheWritePer1M": 1.25
+    },
+    "gpt-5.6-terra-batch": {
+      "inputPer1M": 1,
+      "outputPer1M": 6,
+      "currency": "USD",
+      "cachedInputPer1M": 0.1,
+      "cacheWritePer1M": 1.25
+    },
+    "openai/gpt-6-astra-batch": {
+      "inputPer1M": 5,
+      "outputPer1M": 25,
+      "currency": "USD",
+      "cachedInputPer1M": 0.5,
+      "cacheWritePer1M": 6.25
+    },
+    "gpt-6-astra-batch": {
+      "inputPer1M": 5,
+      "outputPer1M": 25,
+      "currency": "USD",
+      "cachedInputPer1M": 0.5,
+      "cacheWritePer1M": 6.25
+    },
+    "openai/gpt-6-luna-batch": {
+      "inputPer1M": 0.05,
+      "outputPer1M": 0.25,
+      "currency": "USD",
+      "cachedInputPer1M": 0.005,
+      "cacheWritePer1M": 0.0625
+    },
+    "gpt-6-luna-batch": {
+      "inputPer1M": 0.05,
+      "outputPer1M": 0.25,
+      "currency": "USD",
+      "cachedInputPer1M": 0.005,
+      "cacheWritePer1M": 0.0625
+    },
+    "openai/gpt-6-sol-batch": {
+      "inputPer1M": 1,
+      "outputPer1M": 5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.1,
+      "cacheWritePer1M": 1.25
+    },
+    "gpt-6-sol-batch": {
+      "inputPer1M": 1,
+      "outputPer1M": 5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.1,
+      "cacheWritePer1M": 1.25
+    },
+    "openai/gpt-6.1-sol-batch": {
+      "inputPer1M": 1,
+      "outputPer1M": 5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.05,
+      "cacheWritePer1M": 1.25
+    },
+    "gpt-6.1-sol-batch": {
+      "inputPer1M": 1,
+      "outputPer1M": 5,
+      "currency": "USD",
+      "cachedInputPer1M": 0.05,
+      "cacheWritePer1M": 1.25
+    },
+    "scaledown/scaledown-classify-1": {
+      "inputPer1M": 0.05,
+      "outputPer1M": 0,
+      "currency": "USD"
+    },
+    "scaledown-classify-1": {
+      "inputPer1M": 0.05,
+      "outputPer1M": 0,
+      "currency": "USD"
+    },
+    "spacexai/grok-4.20-multi-agent-batch": {
+      "inputPer1M": 1,
+      "outputPer1M": 2,
+      "currency": "USD",
+      "cachedInputPer1M": 0.16
+    },
+    "grok-4.20-multi-agent-batch": {
+      "inputPer1M": 1,
+      "outputPer1M": 2,
+      "currency": "USD",
+      "cachedInputPer1M": 0.16
+    },
+    "spacexai/grok-4.20-non-reasoning-batch": {
+      "inputPer1M": 1,
+      "outputPer1M": 2,
+      "currency": "USD",
+      "cachedInputPer1M": 0.16
+    },
+    "grok-4.20-non-reasoning-batch": {
+      "inputPer1M": 1,
+      "outputPer1M": 2,
+      "currency": "USD",
+      "cachedInputPer1M": 0.16
+    },
+    "spacexai/grok-4.20-reasoning-batch": {
+      "inputPer1M": 1,
+      "outputPer1M": 2,
+      "currency": "USD",
+      "cachedInputPer1M": 0.16
+    },
+    "grok-4.20-reasoning-batch": {
+      "inputPer1M": 1,
+      "outputPer1M": 2,
+      "currency": "USD",
+      "cachedInputPer1M": 0.16
+    },
+    "spacexai/grok-4.3-batch": {
+      "inputPer1M": 1,
+      "outputPer1M": 2,
+      "currency": "USD",
+      "cachedInputPer1M": 0.16
+    },
+    "grok-4.3-batch": {
+      "inputPer1M": 1,
+      "outputPer1M": 2,
+      "currency": "USD",
+      "cachedInputPer1M": 0.16
     }
   },
   "sources": [
@@ -6412,36 +7564,8 @@
       "context_window": 128000,
       "max_tokens": 8192,
       "prices_per_1m": {
-        "input_token": 0.16,
-        "output_token": 0.64,
-        "cached_input": null,
-        "cached_write": null
-      }
-    },
-    {
-      "id": "alibaba/qwen-3.6-max-preview",
-      "name": "Qwen 3.6 Max Preview",
-      "owned_by": "alibaba",
-      "type": "language",
-      "context_window": 240000,
-      "max_tokens": 64000,
-      "prices_per_1m": {
-        "input_token": 1.3,
-        "output_token": 7.8,
-        "cached_input": 0.13,
-        "cached_write": 1.625
-      }
-    },
-    {
-      "id": "alibaba/qwen3-235b-a22b-thinking",
-      "name": "Qwen3 VL 235B A22B Thinking",
-      "owned_by": "alibaba",
-      "type": "language",
-      "context_window": 131072,
-      "max_tokens": 32768,
-      "prices_per_1m": {
-        "input_token": 0.4,
-        "output_token": 4,
+        "input_token": 0.15,
+        "output_token": 0.6,
         "cached_input": null,
         "cached_write": null
       }
@@ -6452,11 +7576,11 @@
       "owned_by": "alibaba",
       "type": "language",
       "context_window": 262144,
-      "max_tokens": 65536,
+      "max_tokens": 32768,
       "prices_per_1m": {
-        "input_token": 1.5,
-        "output_token": 7.5,
-        "cached_input": 0.3,
+        "input_token": 0.22,
+        "output_token": 1.8,
+        "cached_input": 0.022,
         "cached_write": null
       }
     },
@@ -6489,44 +7613,44 @@
       }
     },
     {
-      "id": "alibaba/qwen3-coder-plus",
-      "name": "Qwen3 Coder Plus",
+      "id": "alibaba/qwen3-embedding-0.6b",
+      "name": "Qwen3 Embedding 0.6B",
       "owned_by": "alibaba",
-      "type": "language",
-      "context_window": 1000000,
-      "max_tokens": 65536,
+      "type": "embedding",
+      "context_window": 32768,
+      "max_tokens": 32768,
       "prices_per_1m": {
-        "input_token": 1,
-        "output_token": 5,
-        "cached_input": 0.2,
+        "input_token": 0.01,
+        "output_token": null,
+        "cached_input": null,
         "cached_write": null
       }
     },
     {
-      "id": "alibaba/qwen3-max",
-      "name": "Qwen3 Max",
+      "id": "alibaba/qwen3-embedding-4b",
+      "name": "Qwen3 Embedding 4B",
       "owned_by": "alibaba",
-      "type": "language",
-      "context_window": 262144,
+      "type": "embedding",
+      "context_window": 32768,
       "max_tokens": 32768,
       "prices_per_1m": {
-        "input_token": 1.2,
-        "output_token": 6,
-        "cached_input": 0.24,
+        "input_token": 0.02,
+        "output_token": null,
+        "cached_input": null,
         "cached_write": null
       }
     },
     {
-      "id": "alibaba/qwen3-max-preview",
-      "name": "Qwen3 Max Preview",
+      "id": "alibaba/qwen3-embedding-8b",
+      "name": "Qwen3 Embedding 8B",
       "owned_by": "alibaba",
-      "type": "language",
-      "context_window": 262144,
+      "type": "embedding",
+      "context_window": 32768,
       "max_tokens": 32768,
       "prices_per_1m": {
-        "input_token": 1.2,
-        "output_token": 6,
-        "cached_input": 0.24,
+        "input_token": 0.01,
+        "output_token": null,
+        "cached_input": null,
         "cached_write": null
       }
     },
@@ -6549,8 +7673,8 @@
       "name": "Qwen3 Next 80B A3B Instruct",
       "owned_by": "alibaba",
       "type": "language",
-      "context_window": 131072,
-      "max_tokens": 32768,
+      "context_window": 262114,
+      "max_tokens": 262114,
       "prices_per_1m": {
         "input_token": 0.15,
         "output_token": 1.2,
@@ -6563,25 +7687,11 @@
       "name": "Qwen3 Next 80B A3B Thinking",
       "owned_by": "alibaba",
       "type": "language",
-      "context_window": 131072,
-      "max_tokens": 32768,
+      "context_window": 262144,
+      "max_tokens": 262144,
       "prices_per_1m": {
         "input_token": 0.15,
         "output_token": 1.2,
-        "cached_input": null,
-        "cached_write": null
-      }
-    },
-    {
-      "id": "alibaba/qwen3-vl-235b-a22b-instruct",
-      "name": "Qwen3 VL 235B A22B Instruct",
-      "owned_by": "alibaba",
-      "type": "language",
-      "context_window": 131072,
-      "max_tokens": 129024,
-      "prices_per_1m": {
-        "input_token": 0.4,
-        "output_token": 1.6,
         "cached_input": null,
         "cached_write": null
       }
@@ -6591,26 +7701,12 @@
       "name": "Qwen3 VL 235B A22B Instruct",
       "owned_by": "alibaba",
       "type": "language",
-      "context_window": 131072,
-      "max_tokens": 129024,
+      "context_window": 262144,
+      "max_tokens": 262144,
       "prices_per_1m": {
-        "input_token": 0.4,
-        "output_token": 1.6,
-        "cached_input": null,
-        "cached_write": null
-      }
-    },
-    {
-      "id": "alibaba/qwen3-vl-thinking",
-      "name": "Qwen3 VL 235B A22B Thinking",
-      "owned_by": "alibaba",
-      "type": "language",
-      "context_window": 131072,
-      "max_tokens": 32768,
-      "prices_per_1m": {
-        "input_token": 0.4,
-        "output_token": 4,
-        "cached_input": null,
+        "input_token": 0.2,
+        "output_token": 0.88,
+        "cached_input": 0.11,
         "cached_write": null
       }
     },
@@ -6637,7 +7733,7 @@
       "max_tokens": 64000,
       "prices_per_1m": {
         "input_token": 0.4,
-        "output_token": 2.5,
+        "output_token": 2.4,
         "cached_input": 0.04,
         "cached_write": 0.5
       }
@@ -6759,13 +7855,13 @@
       "name": "Qwen 3.8 Max",
       "owned_by": "alibaba",
       "type": "language",
-      "context_window": 1000000,
+      "context_window": 262144,
       "max_tokens": 128000,
       "prices_per_1m": {
         "input_token": 2,
         "output_token": 6,
         "cached_input": 0.25,
-        "cached_write": 2.5
+        "cached_write": null
       }
     },
     {
@@ -6780,6 +7876,174 @@
         "output_token": 6,
         "cached_input": 0.25,
         "cached_write": 2.5
+      }
+    },
+    {
+      "id": "alibaba/qwen3.8-max-prime",
+      "name": "Qwen 3.8 Max Prime",
+      "owned_by": "alibaba",
+      "type": "language",
+      "context_window": 1000000,
+      "max_tokens": 131072,
+      "prices_per_1m": {
+        "input_token": 4,
+        "output_token": 12,
+        "cached_input": 0.5,
+        "cached_write": 5
+      }
+    },
+    {
+      "id": "alibaba/qwen3.8-omni-flash",
+      "name": "Qwen 3.8 Omni Flash",
+      "owned_by": "alibaba",
+      "type": "language",
+      "context_window": 1000000,
+      "max_tokens": 131072,
+      "prices_per_1m": {
+        "input_token": 0.15,
+        "output_token": 0.47,
+        "cached_input": 0.016,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "alibaba/wan-v2.5-t2v-preview",
+      "name": "Wan v2.5 Text-to-Video Preview",
+      "owned_by": "alibaba",
+      "type": "video",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "alibaba/wan-v2.6-i2v",
+      "name": "Wan v2.6 Image-to-Video",
+      "owned_by": "alibaba",
+      "type": "video",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "alibaba/wan-v2.6-i2v-flash",
+      "name": "Wan v2.6 Image-to-Video Flash",
+      "owned_by": "alibaba",
+      "type": "video",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "alibaba/wan-v2.6-r2v",
+      "name": "Wan v2.6 Reference-to-Video",
+      "owned_by": "alibaba",
+      "type": "video",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "alibaba/wan-v2.6-r2v-flash",
+      "name": "Wan v2.6 Reference-to-Video Flash",
+      "owned_by": "alibaba",
+      "type": "video",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "alibaba/wan-v2.6-t2v",
+      "name": "Wan v2.6 Text-to-Video",
+      "owned_by": "alibaba",
+      "type": "video",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "alibaba/wan-v2.7-r2v",
+      "name": "Wan v2.7 Reference-to-Video",
+      "owned_by": "alibaba",
+      "type": "video",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "alibaba/wan-v2.7-t2v",
+      "name": "Wan v2.7 Text-to-Video",
+      "owned_by": "alibaba",
+      "type": "video",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "alibaba/wan-v3.0-video",
+      "name": "Wan v3.0 Video",
+      "owned_by": "alibaba",
+      "type": "video",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "alibaba/wan-v3.0-video-prime",
+      "name": "Wan v3.0 Video Prime",
+      "owned_by": "alibaba",
+      "type": "video",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
       }
     },
     {
@@ -6839,17 +8103,17 @@
       }
     },
     {
-      "id": "anthropic/claude-3-haiku",
-      "name": "Claude 3 Haiku",
-      "owned_by": "anthropic",
-      "type": "language",
-      "context_window": 200000,
-      "max_tokens": 4096,
+      "id": "amazon/titan-embed-text-v2",
+      "name": "Titan Text Embeddings V2",
+      "owned_by": "amazon",
+      "type": "embedding",
+      "context_window": null,
+      "max_tokens": null,
       "prices_per_1m": {
-        "input_token": 0.25,
-        "output_token": 1.25,
-        "cached_input": 0.03,
-        "cached_write": 0.3
+        "input_token": 0.02,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
       }
     },
     {
@@ -6867,6 +8131,20 @@
       }
     },
     {
+      "id": "anthropic/claude-fable-5-batch",
+      "name": "Claude Fable 5 (Batch)",
+      "owned_by": "anthropic",
+      "type": "language",
+      "context_window": 1000000,
+      "max_tokens": 128000,
+      "prices_per_1m": {
+        "input_token": 5,
+        "output_token": 25,
+        "cached_input": 0.5,
+        "cached_write": 6.25
+      }
+    },
+    {
       "id": "anthropic/claude-fable-5.1",
       "name": "Claude Fable 5.1",
       "owned_by": "anthropic",
@@ -6878,6 +8156,20 @@
         "output_token": 50,
         "cached_input": 0.25,
         "cached_write": 12.5
+      }
+    },
+    {
+      "id": "anthropic/claude-fable-5.1-batch",
+      "name": "Claude Fable 5.1 (Batch)",
+      "owned_by": "anthropic",
+      "type": "language",
+      "context_window": 1000000,
+      "max_tokens": 128000,
+      "prices_per_1m": {
+        "input_token": 5,
+        "output_token": 25,
+        "cached_input": 0.125,
+        "cached_write": 6.25
       }
     },
     {
@@ -6895,17 +8187,45 @@
       }
     },
     {
-      "id": "anthropic/claude-opus-4",
-      "name": "Claude Opus 4",
+      "id": "anthropic/claude-haiku-4.5-batch",
+      "name": "Claude Haiku 4.5 (Batch)",
       "owned_by": "anthropic",
       "type": "language",
       "context_window": 200000,
-      "max_tokens": 8192,
+      "max_tokens": 64000,
       "prices_per_1m": {
-        "input_token": 15,
-        "output_token": 75,
-        "cached_input": 1.5,
-        "cached_write": 18.75
+        "input_token": 0.5,
+        "output_token": 2.5,
+        "cached_input": 0.05,
+        "cached_write": 0.625
+      }
+    },
+    {
+      "id": "anthropic/claude-haiku-5.5",
+      "name": "Claude Haiku 5.5",
+      "owned_by": "anthropic",
+      "type": "language",
+      "context_window": 1000000,
+      "max_tokens": 128000,
+      "prices_per_1m": {
+        "input_token": 0.1,
+        "output_token": 0.5,
+        "cached_input": 0.01,
+        "cached_write": 0.125
+      }
+    },
+    {
+      "id": "anthropic/claude-haiku-5.5-batch",
+      "name": "Claude Haiku 5.5 (Batch)",
+      "owned_by": "anthropic",
+      "type": "language",
+      "context_window": 1000000,
+      "max_tokens": 128000,
+      "prices_per_1m": {
+        "input_token": 0.05,
+        "output_token": 0.25,
+        "cached_input": 0.005,
+        "cached_write": 0.0625
       }
     },
     {
@@ -6923,6 +8243,20 @@
       }
     },
     {
+      "id": "anthropic/claude-opus-4.5-batch",
+      "name": "Claude Opus 4.5 (Batch)",
+      "owned_by": "anthropic",
+      "type": "language",
+      "context_window": 200000,
+      "max_tokens": 64000,
+      "prices_per_1m": {
+        "input_token": 2.5,
+        "output_token": 12.5,
+        "cached_input": 0.25,
+        "cached_write": 3.125
+      }
+    },
+    {
       "id": "anthropic/claude-opus-4.6",
       "name": "Claude Opus 4.6",
       "owned_by": "anthropic",
@@ -6937,6 +8271,20 @@
       }
     },
     {
+      "id": "anthropic/claude-opus-4.6-batch",
+      "name": "Claude Opus 4.6 (Batch)",
+      "owned_by": "anthropic",
+      "type": "language",
+      "context_window": 1000000,
+      "max_tokens": 128000,
+      "prices_per_1m": {
+        "input_token": 2.5,
+        "output_token": 12.5,
+        "cached_input": 0.25,
+        "cached_write": 3.125
+      }
+    },
+    {
       "id": "anthropic/claude-opus-4.7",
       "name": "Claude Opus 4.7",
       "owned_by": "anthropic",
@@ -6948,6 +8296,20 @@
         "output_token": 25,
         "cached_input": 0.5,
         "cached_write": 6.25
+      }
+    },
+    {
+      "id": "anthropic/claude-opus-4.7-batch",
+      "name": "Claude Opus 4.7 (Batch)",
+      "owned_by": "anthropic",
+      "type": "language",
+      "context_window": 1000000,
+      "max_tokens": 128000,
+      "prices_per_1m": {
+        "input_token": 2.5,
+        "output_token": 12.5,
+        "cached_input": 0.25,
+        "cached_write": 3.125
       }
     },
     {
@@ -6979,6 +8341,20 @@
       }
     },
     {
+      "id": "anthropic/claude-opus-4.8-batch",
+      "name": "Claude Opus 4.8 (Batch)",
+      "owned_by": "anthropic",
+      "type": "language",
+      "context_window": 1000000,
+      "max_tokens": 128000,
+      "prices_per_1m": {
+        "input_token": 2.5,
+        "output_token": 12.5,
+        "cached_input": 0.25,
+        "cached_write": 3.125
+      }
+    },
+    {
       "id": "anthropic/claude-opus-5",
       "name": "Claude Opus 5",
       "owned_by": "anthropic",
@@ -7007,12 +8383,68 @@
       }
     },
     {
+      "id": "anthropic/claude-opus-5-batch",
+      "name": "Claude Opus 5 (Batch)",
+      "owned_by": "anthropic",
+      "type": "language",
+      "context_window": 1000000,
+      "max_tokens": 128000,
+      "prices_per_1m": {
+        "input_token": 2.5,
+        "output_token": 12.5,
+        "cached_input": 0.25,
+        "cached_write": 3.125
+      }
+    },
+    {
+      "id": "anthropic/claude-opus-5.5",
+      "name": "Claude Opus 5.5",
+      "owned_by": "anthropic",
+      "type": "language",
+      "context_window": 1000000,
+      "max_tokens": 128000,
+      "prices_per_1m": {
+        "input_token": 4,
+        "output_token": 20,
+        "cached_input": 0.2,
+        "cached_write": 5
+      }
+    },
+    {
+      "id": "anthropic/claude-opus-5.5-fast",
+      "name": "Claude Opus 5.5 (Fast)",
+      "owned_by": "anthropic",
+      "type": "language",
+      "context_window": 1000000,
+      "max_tokens": 128000,
+      "prices_per_1m": {
+        "input_token": 8,
+        "output_token": 40,
+        "cached_input": 0.4,
+        "cached_write": 10
+      }
+    },
+    {
+      "id": "anthropic/claude-opus-5.5-batch",
+      "name": "Claude Opus 5.5 (Batch)",
+      "owned_by": "anthropic",
+      "type": "language",
+      "context_window": 1000000,
+      "max_tokens": 128000,
+      "prices_per_1m": {
+        "input_token": 2,
+        "output_token": 10,
+        "cached_input": 0.1,
+        "cached_write": 2.5
+      }
+    },
+    {
       "id": "anthropic/claude-sonnet-4",
       "name": "Claude Sonnet 4",
       "owned_by": "anthropic",
       "type": "language",
       "context_window": 1000000,
-      "max_tokens": 8192,
+      "max_tokens": 64000,
       "prices_per_1m": {
         "input_token": 3,
         "output_token": 15,
@@ -7035,6 +8467,20 @@
       }
     },
     {
+      "id": "anthropic/claude-sonnet-4.5-batch",
+      "name": "Claude Sonnet 4.5 (Batch)",
+      "owned_by": "anthropic",
+      "type": "language",
+      "context_window": 1000000,
+      "max_tokens": 64000,
+      "prices_per_1m": {
+        "input_token": 1.5,
+        "output_token": 7.5,
+        "cached_input": 0.15,
+        "cached_write": 1.875
+      }
+    },
+    {
       "id": "anthropic/claude-sonnet-4.6",
       "name": "Claude Sonnet 4.6",
       "owned_by": "anthropic",
@@ -7046,6 +8492,20 @@
         "output_token": 15,
         "cached_input": 0.3,
         "cached_write": 3.75
+      }
+    },
+    {
+      "id": "anthropic/claude-sonnet-4.6-batch",
+      "name": "Claude Sonnet 4.6 (Batch)",
+      "owned_by": "anthropic",
+      "type": "language",
+      "context_window": 1000000,
+      "max_tokens": 128000,
+      "prices_per_1m": {
+        "input_token": 1.5,
+        "output_token": 7.5,
+        "cached_input": 0.15,
+        "cached_write": 1.875
       }
     },
     {
@@ -7063,6 +8523,48 @@
       }
     },
     {
+      "id": "anthropic/claude-sonnet-5-batch",
+      "name": "Claude Sonnet 5 (Batch)",
+      "owned_by": "anthropic",
+      "type": "language",
+      "context_window": 1000000,
+      "max_tokens": 128000,
+      "prices_per_1m": {
+        "input_token": 1,
+        "output_token": 5,
+        "cached_input": 0.1,
+        "cached_write": 1.25
+      }
+    },
+    {
+      "id": "anthropic/claude-sonnet-5.5",
+      "name": "Claude Sonnet 5.5",
+      "owned_by": "anthropic",
+      "type": "language",
+      "context_window": 1000000,
+      "max_tokens": 128000,
+      "prices_per_1m": {
+        "input_token": 2,
+        "output_token": 10,
+        "cached_input": 0.1,
+        "cached_write": 2.5
+      }
+    },
+    {
+      "id": "anthropic/claude-sonnet-5.5-batch",
+      "name": "Claude Sonnet 5.5 (Batch)",
+      "owned_by": "anthropic",
+      "type": "language",
+      "context_window": 1000000,
+      "max_tokens": 128000,
+      "prices_per_1m": {
+        "input_token": 1,
+        "output_token": 5,
+        "cached_input": 0.05,
+        "cached_write": 1.25
+      }
+    },
+    {
       "id": "arcee-ai/trinity-large-thinking",
       "name": "Trinity Large Thinking",
       "owned_by": "arcee-ai",
@@ -7071,7 +8573,175 @@
       "max_tokens": 80000,
       "prices_per_1m": {
         "input_token": 0.25,
-        "output_token": 0.9,
+        "output_token": 0.8,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "bfl/flux-2-flex",
+      "name": "FLUX.2 [flex]",
+      "owned_by": "bfl",
+      "type": "image",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "bfl/flux-2-klein-4b",
+      "name": "FLUX.2 [klein] 4B",
+      "owned_by": "bfl",
+      "type": "image",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "bfl/flux-2-klein-9b",
+      "name": "FLUX.2 [klein] 9B",
+      "owned_by": "bfl",
+      "type": "image",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "bfl/flux-2-max",
+      "name": "FLUX.2 [max]",
+      "owned_by": "bfl",
+      "type": "image",
+      "context_window": 67300,
+      "max_tokens": 67300,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "bfl/flux-2-pro",
+      "name": "FLUX.2 [pro]",
+      "owned_by": "bfl",
+      "type": "image",
+      "context_window": 67300,
+      "max_tokens": 67300,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "bfl/flux-3-image",
+      "name": "FLUX 3 Image",
+      "owned_by": "bfl",
+      "type": "image",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "bfl/flux-3-video",
+      "name": "Flux 3",
+      "owned_by": "bfl",
+      "type": "video",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "bfl/flux-kontext-max",
+      "name": "FLUX.1 Kontext Max",
+      "owned_by": "bfl",
+      "type": "image",
+      "context_window": 512,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "bfl/flux-kontext-pro",
+      "name": "FLUX.1 Kontext Pro",
+      "owned_by": "bfl",
+      "type": "image",
+      "context_window": 512,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "bfl/flux-pro-1.0-fill",
+      "name": "FLUX.1 Fill [pro]",
+      "owned_by": "bfl",
+      "type": "image",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "bfl/flux-pro-1.1",
+      "name": "FLUX1.1 [pro]",
+      "owned_by": "bfl",
+      "type": "image",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "bfl/flux-pro-1.1-ultra",
+      "name": "FLUX1.1 [pro] Ultra",
+      "owned_by": "bfl",
+      "type": "image",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
         "cached_input": null,
         "cached_write": null
       }
@@ -7119,6 +8789,174 @@
       }
     },
     {
+      "id": "bytedance/seedance-2.0",
+      "name": "Seedance 2.0",
+      "owned_by": "bytedance",
+      "type": "video",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "bytedance/seedance-2.0-fast",
+      "name": "Seedance 2.0 Fast",
+      "owned_by": "bytedance",
+      "type": "video",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "bytedance/seedance-2.0-mini",
+      "name": "Seedance 2.0 Mini",
+      "owned_by": "bytedance",
+      "type": "video",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "bytedance/seedance-2.5",
+      "name": "Seedance 2.5",
+      "owned_by": "bytedance",
+      "type": "video",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "bytedance/seedance-v1.0-pro",
+      "name": "Seedance v1.0 Pro",
+      "owned_by": "bytedance",
+      "type": "video",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "bytedance/seedance-v1.0-pro-fast",
+      "name": "Seedance v1.0 Pro Fast",
+      "owned_by": "bytedance",
+      "type": "video",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "bytedance/seedance-v1.5-pro",
+      "name": "Seedance v1.5 Pro",
+      "owned_by": "bytedance",
+      "type": "video",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "bytedance/seedream-4.0",
+      "name": "Seedream 4.0",
+      "owned_by": "bytedance",
+      "type": "image",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "bytedance/seedream-4.5",
+      "name": "Seedream 4.5",
+      "owned_by": "bytedance",
+      "type": "image",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "bytedance/seedream-5.0-lite",
+      "name": "Seedream 5.0 Lite",
+      "owned_by": "bytedance",
+      "type": "image",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "bytedance/seedream-5.0-pro",
+      "name": "Seedream 5.0 Pro",
+      "owned_by": "bytedance",
+      "type": "image",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 0.003,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "callstack/apex",
+      "name": "Apex",
+      "owned_by": "callstack",
+      "type": "language",
+      "context_window": 262144,
+      "max_tokens": 131072,
+      "prices_per_1m": {
+        "input_token": 0.5,
+        "output_token": 3,
+        "cached_input": 0.2,
+        "cached_write": null
+      }
+    },
+    {
       "id": "cohere/command-a",
       "name": "Command A",
       "owned_by": "cohere",
@@ -7128,6 +8966,118 @@
       "prices_per_1m": {
         "input_token": 2.5,
         "output_token": 10,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "cohere/embed-v4.0",
+      "name": "Embed v4.0",
+      "owned_by": "cohere",
+      "type": "embedding",
+      "context_window": 128000,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 0.12,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "cohere/embed-v5.0-fast",
+      "name": "Embed 5 Fast",
+      "owned_by": "cohere",
+      "type": "embedding",
+      "context_window": 128000,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 0.08,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "cohere/embed-v5.0-pro",
+      "name": "Embed 5 Pro",
+      "owned_by": "cohere",
+      "type": "embedding",
+      "context_window": 128000,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 0.12,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "cohere/rerank-v3.5",
+      "name": "Cohere Rerank 3.5",
+      "owned_by": "cohere",
+      "type": "reranking",
+      "context_window": 4096,
+      "max_tokens": 4096,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "cohere/rerank-v4-fast",
+      "name": "Cohere Rerank 4 Fast",
+      "owned_by": "cohere",
+      "type": "reranking",
+      "context_window": 32000,
+      "max_tokens": 32000,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "cohere/rerank-v4-pro",
+      "name": "Cohere Rerank 4 Pro",
+      "owned_by": "cohere",
+      "type": "reranking",
+      "context_window": 32000,
+      "max_tokens": 32000,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "convaiinnovations/laya",
+      "name": "Laya",
+      "owned_by": "convaiinnovations",
+      "type": "evaluation",
+      "context_window": 8192,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 0,
+        "output_token": 0,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "convaiinnovations/laya-free",
+      "name": "Laya (Free)",
+      "owned_by": "convaiinnovations",
+      "type": "evaluation",
+      "context_window": 8192,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 0,
+        "output_token": 0,
         "cached_input": null,
         "cached_write": null
       }
@@ -7157,20 +9107,6 @@
         "input_token": 0.25,
         "output_token": 0.95,
         "cached_input": 0.13,
-        "cached_write": null
-      }
-    },
-    {
-      "id": "deepseek/deepseek-v3.1-terminus",
-      "name": "DeepSeek V3.1 Terminus",
-      "owned_by": "deepseek",
-      "type": "language",
-      "context_window": 131072,
-      "max_tokens": 65536,
-      "prices_per_1m": {
-        "input_token": 0.27,
-        "output_token": 1,
-        "cached_input": 0.135,
         "cached_write": null
       }
     },
@@ -7238,9 +9174,9 @@
       "context_window": 1048576,
       "max_tokens": 1048576,
       "prices_per_1m": {
-        "input_token": 0.22,
-        "output_token": 0.66,
-        "cached_input": 0.007,
+        "input_token": 0.2156,
+        "output_token": 0.6468,
+        "cached_input": 0.0068,
         "cached_write": null
       }
     },
@@ -7277,12 +9213,96 @@
       "name": "DeepSeek V4.1 Flash",
       "owned_by": "deepseek",
       "type": "language",
-      "context_window": 1000000,
-      "max_tokens": 384000,
+      "context_window": 1048576,
+      "max_tokens": 32768,
       "prices_per_1m": {
-        "input_token": 0.15,
-        "output_token": 0.6,
-        "cached_input": 0.015,
+        "input_token": 0.3,
+        "output_token": 1.2,
+        "cached_input": 0.007,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "deepseek/deepseek-v4.1-flash-fast",
+      "name": "DeepSeek V4.1 Flash Fast",
+      "owned_by": "deepseek",
+      "type": "language",
+      "context_window": 1048576,
+      "max_tokens": 32768,
+      "prices_per_1m": {
+        "input_token": 0.6,
+        "output_token": 2.4,
+        "cached_input": 0.014,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "fireworks/ember-1",
+      "name": "Ember-1",
+      "owned_by": "fireworks",
+      "type": "language",
+      "context_window": 1048576,
+      "max_tokens": 1048576,
+      "prices_per_1m": {
+        "input_token": 3,
+        "output_token": 15,
+        "cached_input": 0.3,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "fish-audio/s1",
+      "name": "S1",
+      "owned_by": "fish-audio",
+      "type": "speech",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 15,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "fish-audio/s2-pro",
+      "name": "S2 Pro",
+      "owned_by": "fish-audio",
+      "type": "speech",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 15,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "fish-audio/s2.1-pro",
+      "name": "S2.1 Pro",
+      "owned_by": "fish-audio",
+      "type": "speech",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 15,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "fish-audio/transcribe-1",
+      "name": "Transcribe-1",
+      "owned_by": "fish-audio",
+      "type": "transcription",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 0.0001,
+        "output_token": null,
+        "cached_input": null,
         "cached_write": null
       }
     },
@@ -7292,10 +9312,24 @@
       "owned_by": "google",
       "type": "language",
       "context_window": 1000000,
-      "max_tokens": 65536,
+      "max_tokens": 65535,
       "prices_per_1m": {
         "input_token": 0.3,
         "output_token": 2.5,
+        "cached_input": 0.03,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "google/gemini-2.5-flash-batch",
+      "name": "Gemini 2.5 Flash (Batch)",
+      "owned_by": "google",
+      "type": "language",
+      "context_window": 1000000,
+      "max_tokens": 64000,
+      "prices_per_1m": {
+        "input_token": 0.15,
+        "output_token": 1.25,
         "cached_input": 0.03,
         "cached_write": null
       }
@@ -7306,7 +9340,7 @@
       "owned_by": "google",
       "type": "language",
       "context_window": 32768,
-      "max_tokens": 65536,
+      "max_tokens": 65535,
       "prices_per_1m": {
         "input_token": 0.3,
         "output_token": 2.5,
@@ -7320,10 +9354,24 @@
       "owned_by": "google",
       "type": "language",
       "context_window": 1048576,
-      "max_tokens": 65536,
+      "max_tokens": 65535,
       "prices_per_1m": {
         "input_token": 0.1,
         "output_token": 0.4,
+        "cached_input": 0.01,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "google/gemini-2.5-flash-lite-batch",
+      "name": "Gemini 2.5 Flash Lite (Batch)",
+      "owned_by": "google",
+      "type": "language",
+      "context_window": 1048576,
+      "max_tokens": 65535,
+      "prices_per_1m": {
+        "input_token": 0.05,
+        "output_token": 0.2,
         "cached_input": 0.01,
         "cached_write": null
       }
@@ -7334,10 +9382,24 @@
       "owned_by": "google",
       "type": "language",
       "context_window": 1048576,
-      "max_tokens": 65536,
+      "max_tokens": 65535,
       "prices_per_1m": {
         "input_token": 1.25,
         "output_token": 10,
+        "cached_input": 0.125,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "google/gemini-2.5-pro-batch",
+      "name": "Gemini 2.5 Pro (Batch)",
+      "owned_by": "google",
+      "type": "language",
+      "context_window": 1048576,
+      "max_tokens": 65535,
+      "prices_per_1m": {
+        "input_token": 0.625,
+        "output_token": 5,
         "cached_input": 0.125,
         "cached_write": null
       }
@@ -7352,6 +9414,20 @@
       "prices_per_1m": {
         "input_token": 0.5,
         "output_token": 3,
+        "cached_input": 0.05,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "google/gemini-3-flash-batch",
+      "name": "Gemini 3 Flash (Batch)",
+      "owned_by": "google",
+      "type": "language",
+      "context_window": 1000000,
+      "max_tokens": 64000,
+      "prices_per_1m": {
+        "input_token": 0.25,
+        "output_token": 1.5,
         "cached_input": 0.05,
         "cached_write": null
       }
@@ -7413,6 +9489,20 @@
       }
     },
     {
+      "id": "google/gemini-3.1-flash-lite-batch",
+      "name": "Gemini 3.1 Flash Lite (Batch)",
+      "owned_by": "google",
+      "type": "language",
+      "context_window": 1000000,
+      "max_tokens": 65000,
+      "prices_per_1m": {
+        "input_token": 0.125,
+        "output_token": 0.75,
+        "cached_input": 0.015,
+        "cached_write": null
+      }
+    },
+    {
       "id": "google/gemini-3.1-flash-lite-image",
       "name": "Gemini 3.1 Flash Lite Image (Nano Banana 2 Lite)",
       "owned_by": "google",
@@ -7441,6 +9531,20 @@
       }
     },
     {
+      "id": "google/gemini-3.1-pro-preview-batch",
+      "name": "Gemini 3.1 Pro Preview (Batch)",
+      "owned_by": "google",
+      "type": "language",
+      "context_window": 1000000,
+      "max_tokens": 64000,
+      "prices_per_1m": {
+        "input_token": 1,
+        "output_token": 6,
+        "cached_input": 0.2,
+        "cached_write": null
+      }
+    },
+    {
       "id": "google/gemini-3.5-flash",
       "name": "Gemini 3.5 Flash",
       "owned_by": "google",
@@ -7451,6 +9555,20 @@
         "input_token": 1.5,
         "output_token": 9,
         "cached_input": 0.15,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "google/gemini-3.5-flash-batch",
+      "name": "Gemini 3.5 Flash (Batch)",
+      "owned_by": "google",
+      "type": "language",
+      "context_window": 1000000,
+      "max_tokens": 64000,
+      "prices_per_1m": {
+        "input_token": 0.75,
+        "output_token": 4.5,
+        "cached_input": 0.075,
         "cached_write": null
       }
     },
@@ -7469,13 +9587,43 @@
       }
     },
     {
+      "id": "google/gemini-3.5-flash-lite-batch",
+      "name": "Gemini 3.5 Flash Lite (Batch)",
+      "owned_by": "google",
+      "type": "language",
+      "context_window": 1000000,
+      "max_tokens": 65000,
+      "prices_per_1m": {
+        "input_token": 0.15,
+        "output_token": 1.25,
+        "cached_input": 0.015,
+        "cached_write": null
+      }
+    },
+    {
       "id": "google/gemini-3.5-transcribe",
       "name": "Gemini 3.5 Transcribe",
       "owned_by": "google",
       "type": "transcription",
+      "context_window": null,
+      "max_tokens": null,
       "prices_per_1m": {
         "input_token": 2,
         "output_token": 12,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "google/gemini-3.5-transcribe-live",
+      "name": "Gemini 3.5 Transcribe Live",
+      "owned_by": "google",
+      "type": "transcription",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 0.0001,
+        "output_token": null,
         "cached_input": null,
         "cached_write": null
       }
@@ -7495,16 +9643,44 @@
       }
     },
     {
+      "id": "google/gemini-3.6-flash-batch",
+      "name": "Gemini 3.6 Flash (Batch)",
+      "owned_by": "google",
+      "type": "language",
+      "context_window": 1000000,
+      "max_tokens": 64000,
+      "prices_per_1m": {
+        "input_token": 0.375,
+        "output_token": 1.875,
+        "cached_input": 0.0375,
+        "cached_write": null
+      }
+    },
+    {
       "id": "google/gemini-3.7-flash",
       "name": "Gemini 3.7 Flash",
       "owned_by": "google",
       "type": "language",
       "context_window": 1000000,
-      "max_tokens": 65536,
+      "max_tokens": 65535,
       "prices_per_1m": {
         "input_token": 0.75,
         "output_token": 3.75,
         "cached_input": 0.075,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "google/gemini-3.7-flash-batch",
+      "name": "Gemini 3.7 Flash (Batch)",
+      "owned_by": "google",
+      "type": "language",
+      "context_window": 1000000,
+      "max_tokens": 65535,
+      "prices_per_1m": {
+        "input_token": 0.375,
+        "output_token": 1.875,
+        "cached_input": 0.0375,
         "cached_write": null
       }
     },
@@ -7514,7 +9690,7 @@
       "owned_by": "google",
       "type": "language",
       "context_window": 1000000,
-      "max_tokens": 65536,
+      "max_tokens": 65535,
       "prices_per_1m": {
         "input_token": 0.75,
         "output_token": 3.75,
@@ -7523,12 +9699,40 @@
       }
     },
     {
+      "id": "google/gemini-3.8-flash-lite-tts",
+      "name": "Gemini 3.8 Flash-Lite TTS",
+      "owned_by": "google",
+      "type": "speech",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 0.5,
+        "output_token": 6,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "google/gemini-3.8-flash-tts",
+      "name": "Gemini 3.8 Flash TTS",
+      "owned_by": "google",
+      "type": "speech",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 0.5,
+        "output_token": 9,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
       "id": "google/gemini-3.8-live",
       "name": "Gemini 3.8 Live",
       "owned_by": "google",
       "type": "realtime",
-      "context_window": 0,
-      "max_tokens": 0,
+      "context_window": null,
+      "max_tokens": null,
       "prices_per_1m": {
         "input_token": 0.75,
         "output_token": 4.5,
@@ -7541,12 +9745,54 @@
       "name": "Gemini 3.8 Live Extended Thinking",
       "owned_by": "google",
       "type": "realtime",
-      "context_window": 0,
-      "max_tokens": 0,
+      "context_window": null,
+      "max_tokens": null,
       "prices_per_1m": {
         "input_token": 0.75,
         "output_token": 4.5,
         "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "google/gemini-embedding-001",
+      "name": "Gemini Embedding 001",
+      "owned_by": "google",
+      "type": "embedding",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 0.15,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "google/gemini-embedding-2",
+      "name": "Gemini Embedding 2",
+      "owned_by": "google",
+      "type": "embedding",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 0.2,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "google/gemini-nano-banana-2.1",
+      "name": "Gemini Nano Banana 2.1",
+      "owned_by": "google",
+      "type": "language",
+      "context_window": 131072,
+      "max_tokens": 32768,
+      "prices_per_1m": {
+        "input_token": 1.5,
+        "output_token": 7.5,
+        "cached_input": 0.15,
         "cached_write": null
       }
     },
@@ -7588,6 +9834,118 @@
       "prices_per_1m": {
         "input_token": 0.14,
         "output_token": 0.4,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "google/text-embedding-005",
+      "name": "Text Embedding 005",
+      "owned_by": "google",
+      "type": "embedding",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 0.025,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "google/text-multilingual-embedding-002",
+      "name": "Text Multilingual Embedding 002",
+      "owned_by": "google",
+      "type": "embedding",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 0.025,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "google/veo-3.0-fast-generate-001",
+      "name": "Veo 3.0 Fast Generate",
+      "owned_by": "google",
+      "type": "video",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "google/veo-3.0-generate-001",
+      "name": "Veo 3.0",
+      "owned_by": "google",
+      "type": "video",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "google/veo-3.1-fast-generate-001",
+      "name": "Veo 3.1 Fast Generate",
+      "owned_by": "google",
+      "type": "video",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "google/veo-3.1-generate-001",
+      "name": "Veo 3.1",
+      "owned_by": "google",
+      "type": "video",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "google/veo-3.1-lite-generate-001",
+      "name": "Veo 3.1 Lite Generate",
+      "owned_by": "google",
+      "type": "video",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "heygen/heygen-video-1",
+      "name": "HeyGen Video",
+      "owned_by": "heygen",
+      "type": "video",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
         "cached_input": null,
         "cached_write": null
       }
@@ -7656,23 +10014,9 @@
       "context_window": 256000,
       "max_tokens": 32000,
       "prices_per_1m": {
-        "input_token": 0,
-        "output_token": 0,
-        "cached_input": null,
-        "cached_write": null
-      }
-    },
-    {
-      "id": "inclusionai/ling-3.0-flash-fin-free",
-      "name": "Ling 3.0 Flash Fin (Free)",
-      "owned_by": "inclusionai",
-      "type": "language",
-      "context_window": 256000,
-      "max_tokens": 32000,
-      "prices_per_1m": {
-        "input_token": 0,
-        "output_token": 0,
-        "cached_input": null,
+        "input_token": 0.075,
+        "output_token": 0.22,
+        "cached_input": 0.015,
         "cached_write": null
       }
     },
@@ -7684,23 +10028,9 @@
       "context_window": 256000,
       "max_tokens": 32000,
       "prices_per_1m": {
-        "input_token": 0,
-        "output_token": 0,
-        "cached_input": null,
-        "cached_write": null
-      }
-    },
-    {
-      "id": "inclusionai/ling-3.0-flash-sante-free",
-      "name": "Ling 3.0 Flash Sante (Free)",
-      "owned_by": "inclusionai",
-      "type": "language",
-      "context_window": 256000,
-      "max_tokens": 32000,
-      "prices_per_1m": {
-        "input_token": 0,
-        "output_token": 0,
-        "cached_input": null,
+        "input_token": 0.075,
+        "output_token": 0.22,
+        "cached_input": 0.015,
         "cached_write": null
       }
     },
@@ -7712,6 +10042,20 @@
       "context_window": 256000,
       "max_tokens": 32000,
       "prices_per_1m": {
+        "input_token": 0.075,
+        "output_token": 0.22,
+        "cached_input": 0.015,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "inclusionai/ling-3.1-flash",
+      "name": "Ling 3.1 Flash",
+      "owned_by": "inclusionai",
+      "type": "language",
+      "context_window": 262144,
+      "max_tokens": 32768,
+      "prices_per_1m": {
         "input_token": 0,
         "output_token": 0,
         "cached_input": null,
@@ -7719,16 +10063,44 @@
       }
     },
     {
-      "id": "inclusionai/ling-3.0-flash-vl-free",
-      "name": "Ling 3.0 Flash VL (Free)",
+      "id": "inclusionai/ling-3.1-flash-free",
+      "name": "Ling 3.1 Flash (Free)",
       "owned_by": "inclusionai",
       "type": "language",
-      "context_window": 256000,
-      "max_tokens": 32000,
+      "context_window": 262144,
+      "max_tokens": 32768,
       "prices_per_1m": {
         "input_token": 0,
         "output_token": 0,
         "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "inference-net/schematron-v2-small",
+      "name": "Schematron V2 Small",
+      "owned_by": "inference-net",
+      "type": "language",
+      "context_window": 128000,
+      "max_tokens": 4096,
+      "prices_per_1m": {
+        "input_token": 0.05,
+        "output_token": 0.23,
+        "cached_input": 0.05,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "inference-net/schematron-v2-turbo",
+      "name": "Schematron V2 Turbo",
+      "owned_by": "inference-net",
+      "type": "language",
+      "context_window": 128000,
+      "max_tokens": 8192,
+      "prices_per_1m": {
+        "input_token": 0.03,
+        "output_token": 0.15,
+        "cached_input": 0.03,
         "cached_write": null
       }
     },
@@ -7747,58 +10119,142 @@
       }
     },
     {
-      "id": "kwaipilot/kat-coder-air-v2.5",
-      "name": "Kat Coder Air V2.5",
-      "owned_by": "kwaipilot",
-      "type": "language",
-      "context_window": 256000,
-      "max_tokens": 80000,
+      "id": "klingai/kling-v2.5-turbo-i2v",
+      "name": "Kling v2.5 Turbo Image-to-Video",
+      "owned_by": "klingai",
+      "type": "video",
+      "context_window": null,
+      "max_tokens": null,
       "prices_per_1m": {
-        "input_token": 0.15,
-        "output_token": 0.6,
-        "cached_input": 0.03,
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
         "cached_write": null
       }
     },
     {
-      "id": "kwaipilot/kat-coder-pro-v1",
-      "name": "KAT-Coder-Pro V1",
-      "owned_by": "kwaipilot",
+      "id": "klingai/kling-v2.5-turbo-t2v",
+      "name": "Kling v2.5 Turbo Text-to-Video",
+      "owned_by": "klingai",
+      "type": "video",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "klingai/kling-v2.6-i2v",
+      "name": "Kling v2.6 Image-to-Video",
+      "owned_by": "klingai",
+      "type": "video",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "klingai/kling-v2.6-motion-control",
+      "name": "Kling v2.6 Motion Control",
+      "owned_by": "klingai",
+      "type": "video",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "klingai/kling-v2.6-t2v",
+      "name": "Kling v2.6 Text-to-Video",
+      "owned_by": "klingai",
+      "type": "video",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "klingai/kling-v3.0-i2v",
+      "name": "Kling v3.0 Image-to-Video",
+      "owned_by": "klingai",
+      "type": "video",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "klingai/kling-v3.0-motion-control",
+      "name": "Kling v3.0 Motion Control",
+      "owned_by": "klingai",
+      "type": "video",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "klingai/kling-v3.0-t2v",
+      "name": "Kling v3.0 Text-to-Video",
+      "owned_by": "klingai",
+      "type": "video",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "liquid/d1",
+      "name": "Liquid d1",
+      "owned_by": "liquid",
+      "type": "evaluation",
+      "context_window": 65536,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 0.04,
+        "output_token": 0,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "meituan/longcat-2.5-preview",
+      "name": "LongCat 2.5 Preview",
+      "owned_by": "meituan",
       "type": "language",
-      "context_window": 256000,
-      "max_tokens": 32000,
+      "context_window": 1048576,
+      "max_tokens": 131072,
       "prices_per_1m": {
         "input_token": 0.3,
         "output_token": 1.2,
-        "cached_input": 0.06,
-        "cached_write": null
-      }
-    },
-    {
-      "id": "kwaipilot/kat-coder-pro-v2",
-      "name": "Kat Coder Pro V2",
-      "owned_by": "kwaipilot",
-      "type": "language",
-      "context_window": 256000,
-      "max_tokens": 256000,
-      "prices_per_1m": {
-        "input_token": 0.3,
-        "output_token": 1.2,
-        "cached_input": 0.06,
-        "cached_write": null
-      }
-    },
-    {
-      "id": "kwaipilot/kat-coder-pro-v2.5",
-      "name": "Kat Coder Pro V2.5",
-      "owned_by": "kwaipilot",
-      "type": "language",
-      "context_window": 256000,
-      "max_tokens": 80000,
-      "prices_per_1m": {
-        "input_token": 0.74,
-        "output_token": 2.96,
-        "cached_input": 0.15,
+        "cached_input": 0.006,
         "cached_write": null
       }
     },
@@ -7887,6 +10343,20 @@
       }
     },
     {
+      "id": "meta/muse-image-1.0",
+      "name": "Muse Image 1.0",
+      "owned_by": "meta",
+      "type": "image",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
       "id": "meta/muse-spark-1.1",
       "name": "Muse Spark 1.1",
       "owned_by": "meta",
@@ -7953,6 +10423,146 @@
         "input_token": 0.1,
         "output_token": 0.2,
         "cached_input": 0.002,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "meta/muse-wonder-1.0",
+      "name": "Muse Wonder",
+      "owned_by": "meta",
+      "type": "language",
+      "context_window": 1048576,
+      "max_tokens": 1048576,
+      "prices_per_1m": {
+        "input_token": 4,
+        "output_token": 20,
+        "cached_input": 0.2,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "microsoft/mai-transcribe-2",
+      "name": "MAI-Transcribe 2",
+      "owned_by": "microsoft",
+      "type": "transcription",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 0,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "microsoft/mai-transcribe-2-streaming",
+      "name": "MAI-Transcribe-2-Streaming",
+      "owned_by": "microsoft",
+      "type": "transcription",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "microsoft/mai-voice-2",
+      "name": "MAI-Voice-2",
+      "owned_by": "microsoft",
+      "type": "speech",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 22,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "microsoft/mai-voice-2-flash",
+      "name": "MAI-Voice-2-Flash",
+      "owned_by": "microsoft",
+      "type": "speech",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 15,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "microsoft/mai-voice-2.1",
+      "name": "MAI-Voice-2.1",
+      "owned_by": "microsoft",
+      "type": "speech",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 22,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "microsoft/mai-voice-2.1-flash",
+      "name": "MAI-Voice-2.1-Flash",
+      "owned_by": "microsoft",
+      "type": "speech",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 15,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "microsoft/microsoft-decision-1",
+      "name": "Decision-1",
+      "owned_by": "microsoft",
+      "type": "evaluation",
+      "context_window": 32768,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 0.042,
+        "output_token": 0,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "minimax/minimax-h3",
+      "name": "MiniMax H3",
+      "owned_by": "minimax",
+      "type": "video",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "minimax/minimax-h3-max",
+      "name": "MiniMax H3 Max",
+      "owned_by": "minimax",
+      "type": "video",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
         "cached_write": null
       }
     },
@@ -8083,6 +10693,20 @@
       }
     },
     {
+      "id": "mistral/codestral-embed",
+      "name": "Codestral Embed",
+      "owned_by": "mistral",
+      "type": "embedding",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 0.15,
+        "output_token": null,
+        "cached_input": 0.015,
+        "cached_write": null
+      }
+    },
+    {
       "id": "mistral/ministral-14b",
       "name": "Ministral 14B",
       "owned_by": "mistral",
@@ -8125,6 +10749,20 @@
       }
     },
     {
+      "id": "mistral/mistral-embed",
+      "name": "Mistral Embed",
+      "owned_by": "mistral",
+      "type": "embedding",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 0.1,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
       "id": "mistral/mistral-large-3",
       "name": "Mistral Large 3",
       "owned_by": "mistral",
@@ -8135,6 +10773,20 @@
         "input_token": 0.5,
         "output_token": 1.5,
         "cached_input": 0.05,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "mistral/mistral-large-4",
+      "name": "Mistral Large 4",
+      "owned_by": "mistral",
+      "type": "language",
+      "context_window": 524288,
+      "max_tokens": 262144,
+      "prices_per_1m": {
+        "input_token": 0.68,
+        "output_token": 2.09,
+        "cached_input": 0.07,
         "cached_write": null
       }
     },
@@ -8157,11 +10809,11 @@
       "name": "Mistral Nemo 12B",
       "owned_by": "mistral",
       "type": "language",
-      "context_window": 60288,
-      "max_tokens": 16000,
+      "context_window": 131072,
+      "max_tokens": 131072,
       "prices_per_1m": {
-        "input_token": 0.04,
-        "output_token": 0.17,
+        "input_token": 0.029,
+        "output_token": 0.03,
         "cached_input": null,
         "cached_write": null
       }
@@ -8181,6 +10833,20 @@
       }
     },
     {
+      "id": "mixedbread/toast-1",
+      "name": "Toast 1",
+      "owned_by": "mixedbread",
+      "type": "language",
+      "context_window": 131000,
+      "max_tokens": 4000,
+      "prices_per_1m": {
+        "input_token": 0.3,
+        "output_token": 0.72,
+        "cached_input": 0.036,
+        "cached_write": null
+      }
+    },
+    {
       "id": "moonshotai/kimi-k2",
       "name": "Kimi K2 Instruct",
       "owned_by": "moonshotai",
@@ -8195,30 +10861,16 @@
       }
     },
     {
-      "id": "moonshotai/kimi-k2-thinking",
-      "name": "Kimi K2 Thinking",
-      "owned_by": "moonshotai",
-      "type": "language",
-      "context_window": 216144,
-      "max_tokens": 216144,
-      "prices_per_1m": {
-        "input_token": 0.47,
-        "output_token": 2,
-        "cached_input": 0.141,
-        "cached_write": null
-      }
-    },
-    {
       "id": "moonshotai/kimi-k2.5",
       "name": "Kimi K2.5",
       "owned_by": "moonshotai",
       "type": "language",
-      "context_window": 262114,
-      "max_tokens": 262114,
+      "context_window": 256000,
+      "max_tokens": 256000,
       "prices_per_1m": {
         "input_token": 0.6,
         "output_token": 3,
-        "cached_input": 0.1,
+        "cached_input": null,
         "cached_write": null
       }
     },
@@ -8246,7 +10898,7 @@
       "prices_per_1m": {
         "input_token": 0.95,
         "output_token": 4,
-        "cached_input": 0.16,
+        "cached_input": 0.19,
         "cached_write": null
       }
     },
@@ -8461,6 +11113,20 @@
       }
     },
     {
+      "id": "openai/gpt-4.1-batch",
+      "name": "GPT-4.1 (Batch)",
+      "owned_by": "openai",
+      "type": "language",
+      "context_window": 1047576,
+      "max_tokens": 32768,
+      "prices_per_1m": {
+        "input_token": 1,
+        "output_token": 4,
+        "cached_input": 0.25,
+        "cached_write": null
+      }
+    },
+    {
       "id": "openai/gpt-4.1-mini",
       "name": "GPT-4.1 mini",
       "owned_by": "openai",
@@ -8485,6 +11151,20 @@
         "input_token": 0.7,
         "output_token": 2.8,
         "cached_input": 0.175,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "openai/gpt-4.1-mini-batch",
+      "name": "GPT-4.1 mini (Batch)",
+      "owned_by": "openai",
+      "type": "language",
+      "context_window": 1047576,
+      "max_tokens": 32768,
+      "prices_per_1m": {
+        "input_token": 0.2,
+        "output_token": 0.8,
+        "cached_input": 0.05,
         "cached_write": null
       }
     },
@@ -8517,6 +11197,20 @@
       }
     },
     {
+      "id": "openai/gpt-4.1-nano-batch",
+      "name": "GPT-4.1 nano (Batch)",
+      "owned_by": "openai",
+      "type": "language",
+      "context_window": 1047576,
+      "max_tokens": 32768,
+      "prices_per_1m": {
+        "input_token": 0.05,
+        "output_token": 0.2,
+        "cached_input": 0.0125,
+        "cached_write": null
+      }
+    },
+    {
       "id": "openai/gpt-4o",
       "name": "GPT-4o",
       "owned_by": "openai",
@@ -8541,6 +11235,20 @@
         "input_token": 4.25,
         "output_token": 17,
         "cached_input": 2.125,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "openai/gpt-4o-batch",
+      "name": "GPT-4o (Batch)",
+      "owned_by": "openai",
+      "type": "language",
+      "context_window": 128000,
+      "max_tokens": 16384,
+      "prices_per_1m": {
+        "input_token": 1.25,
+        "output_token": 5,
+        "cached_input": 0.625,
         "cached_write": null
       }
     },
@@ -8573,10 +11281,26 @@
       }
     },
     {
+      "id": "openai/gpt-4o-mini-batch",
+      "name": "GPT-4o mini (Batch)",
+      "owned_by": "openai",
+      "type": "language",
+      "context_window": 128000,
+      "max_tokens": 16384,
+      "prices_per_1m": {
+        "input_token": 0.075,
+        "output_token": 0.3,
+        "cached_input": 0.0375,
+        "cached_write": null
+      }
+    },
+    {
       "id": "openai/gpt-4o-mini-transcribe",
       "name": "GPT-4o mini Transcribe",
       "owned_by": "openai",
       "type": "transcription",
+      "context_window": null,
+      "max_tokens": null,
       "prices_per_1m": {
         "input_token": 1.25,
         "output_token": 5,
@@ -8589,6 +11313,8 @@
       "name": "GPT-4o Transcribe",
       "owned_by": "openai",
       "type": "transcription",
+      "context_window": null,
+      "max_tokens": null,
       "prices_per_1m": {
         "input_token": 2.5,
         "output_token": 10,
@@ -8621,6 +11347,20 @@
         "input_token": 2.5,
         "output_token": 20,
         "cached_input": 0.25,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "openai/gpt-5-batch",
+      "name": "GPT-5 (Batch)",
+      "owned_by": "openai",
+      "type": "language",
+      "context_window": 400000,
+      "max_tokens": 128000,
+      "prices_per_1m": {
+        "input_token": 0.625,
+        "output_token": 5,
+        "cached_input": 0.0625,
         "cached_write": null
       }
     },
@@ -8667,6 +11407,20 @@
       }
     },
     {
+      "id": "openai/gpt-5-mini-batch",
+      "name": "GPT-5 mini (Batch)",
+      "owned_by": "openai",
+      "type": "language",
+      "context_window": 400000,
+      "max_tokens": 128000,
+      "prices_per_1m": {
+        "input_token": 0.125,
+        "output_token": 1,
+        "cached_input": 0.0125,
+        "cached_write": null
+      }
+    },
+    {
       "id": "openai/gpt-5-nano",
       "name": "GPT-5 nano",
       "owned_by": "openai",
@@ -8681,6 +11435,20 @@
       }
     },
     {
+      "id": "openai/gpt-5-nano-batch",
+      "name": "GPT-5 nano (Batch)",
+      "owned_by": "openai",
+      "type": "language",
+      "context_window": 400000,
+      "max_tokens": 128000,
+      "prices_per_1m": {
+        "input_token": 0.025,
+        "output_token": 0.2,
+        "cached_input": 0.0025,
+        "cached_write": null
+      }
+    },
+    {
       "id": "openai/gpt-5-pro",
       "name": "GPT-5 pro",
       "owned_by": "openai",
@@ -8690,6 +11458,20 @@
       "prices_per_1m": {
         "input_token": 15,
         "output_token": 120,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "openai/gpt-5-pro-batch",
+      "name": "GPT-5 pro (Batch)",
+      "owned_by": "openai",
+      "type": "language",
+      "context_window": 400000,
+      "max_tokens": 272000,
+      "prices_per_1m": {
+        "input_token": 7.5,
+        "output_token": 60,
         "cached_input": null,
         "cached_write": null
       }
@@ -8793,6 +11575,20 @@
       }
     },
     {
+      "id": "openai/gpt-5.2-batch",
+      "name": "GPT 5.2 (Batch)",
+      "owned_by": "openai",
+      "type": "language",
+      "context_window": 400000,
+      "max_tokens": 128000,
+      "prices_per_1m": {
+        "input_token": 0.875,
+        "output_token": 7,
+        "cached_input": 0.0875,
+        "cached_write": null
+      }
+    },
+    {
       "id": "openai/gpt-5.2-codex",
       "name": "GPT 5.2 Codex",
       "owned_by": "openai",
@@ -8877,6 +11673,20 @@
       }
     },
     {
+      "id": "openai/gpt-5.4-batch",
+      "name": "GPT 5.4 (Batch)",
+      "owned_by": "openai",
+      "type": "language",
+      "context_window": 1050000,
+      "max_tokens": 128000,
+      "prices_per_1m": {
+        "input_token": 1.25,
+        "output_token": 7.5,
+        "cached_input": 0.125,
+        "cached_write": null
+      }
+    },
+    {
       "id": "openai/gpt-5.4-mini",
       "name": "GPT 5.4 Mini",
       "owned_by": "openai",
@@ -8905,6 +11715,20 @@
       }
     },
     {
+      "id": "openai/gpt-5.4-mini-batch",
+      "name": "GPT 5.4 Mini (Batch)",
+      "owned_by": "openai",
+      "type": "language",
+      "context_window": 400000,
+      "max_tokens": 128000,
+      "prices_per_1m": {
+        "input_token": 0.375,
+        "output_token": 2.25,
+        "cached_input": 0.0375,
+        "cached_write": null
+      }
+    },
+    {
       "id": "openai/gpt-5.4-nano",
       "name": "GPT 5.4 Nano",
       "owned_by": "openai",
@@ -8915,6 +11739,20 @@
         "input_token": 0.2,
         "output_token": 1.25,
         "cached_input": 0.02,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "openai/gpt-5.4-nano-batch",
+      "name": "GPT 5.4 Nano (Batch)",
+      "owned_by": "openai",
+      "type": "language",
+      "context_window": 400000,
+      "max_tokens": 128000,
+      "prices_per_1m": {
+        "input_token": 0.1,
+        "output_token": 0.625,
+        "cached_input": 0.01,
         "cached_write": null
       }
     },
@@ -8961,6 +11799,20 @@
       }
     },
     {
+      "id": "openai/gpt-5.5-batch",
+      "name": "GPT 5.5 (Batch)",
+      "owned_by": "openai",
+      "type": "language",
+      "context_window": 1000000,
+      "max_tokens": 128000,
+      "prices_per_1m": {
+        "input_token": 2.5,
+        "output_token": 15,
+        "cached_input": 0.25,
+        "cached_write": null
+      }
+    },
+    {
       "id": "openai/gpt-5.5-pro",
       "name": "GPT 5.5 Pro",
       "owned_by": "openai",
@@ -8970,6 +11822,20 @@
       "prices_per_1m": {
         "input_token": 30,
         "output_token": 180,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "openai/gpt-5.5-pro-batch",
+      "name": "GPT 5.5 Pro (Batch)",
+      "owned_by": "openai",
+      "type": "language",
+      "context_window": 1000000,
+      "max_tokens": 128000,
+      "prices_per_1m": {
+        "input_token": 15,
+        "output_token": 90,
         "cached_input": null,
         "cached_write": null
       }
@@ -9003,6 +11869,20 @@
       }
     },
     {
+      "id": "openai/gpt-5.6-luna-batch",
+      "name": "GPT 5.6 Luna (Batch)",
+      "owned_by": "openai",
+      "type": "language",
+      "context_window": 1050000,
+      "max_tokens": 128000,
+      "prices_per_1m": {
+        "input_token": 0.1,
+        "output_token": 0.6,
+        "cached_input": 0.01,
+        "cached_write": 0.125
+      }
+    },
+    {
       "id": "openai/gpt-5.6-sol",
       "name": "GPT 5.6 Sol",
       "owned_by": "openai",
@@ -9010,10 +11890,10 @@
       "context_window": 1050000,
       "max_tokens": 128000,
       "prices_per_1m": {
-        "input_token": 2,
-        "output_token": 10,
-        "cached_input": 0.2,
-        "cached_write": 2.5
+        "input_token": 4,
+        "output_token": 20,
+        "cached_input": 0.4,
+        "cached_write": 5
       }
     },
     {
@@ -9024,10 +11904,24 @@
       "context_window": 1050000,
       "max_tokens": 128000,
       "prices_per_1m": {
-        "input_token": 4,
-        "output_token": 20,
-        "cached_input": 0.4,
-        "cached_write": 5
+        "input_token": 8,
+        "output_token": 40,
+        "cached_input": 0.8,
+        "cached_write": 10
+      }
+    },
+    {
+      "id": "openai/gpt-5.6-sol-batch",
+      "name": "GPT 5.6 Sol (Batch)",
+      "owned_by": "openai",
+      "type": "language",
+      "context_window": 1050000,
+      "max_tokens": 128000,
+      "prices_per_1m": {
+        "input_token": 2,
+        "output_token": 10,
+        "cached_input": 0.2,
+        "cached_write": 2.5
       }
     },
     {
@@ -9059,6 +11953,20 @@
       }
     },
     {
+      "id": "openai/gpt-5.6-terra-batch",
+      "name": "GPT 5.6 Terra (Batch)",
+      "owned_by": "openai",
+      "type": "language",
+      "context_window": 1050000,
+      "max_tokens": 128000,
+      "prices_per_1m": {
+        "input_token": 1,
+        "output_token": 6,
+        "cached_input": 0.1,
+        "cached_write": 1.25
+      }
+    },
+    {
       "id": "openai/gpt-6-astra",
       "name": "GPT-6 Astra",
       "owned_by": "openai",
@@ -9087,12 +11995,166 @@
       }
     },
     {
+      "id": "openai/gpt-6-astra-batch",
+      "name": "GPT-6 Astra (Batch)",
+      "owned_by": "openai",
+      "type": "language",
+      "context_window": 1050000,
+      "max_tokens": 128000,
+      "prices_per_1m": {
+        "input_token": 5,
+        "output_token": 25,
+        "cached_input": 0.5,
+        "cached_write": 6.25
+      }
+    },
+    {
+      "id": "openai/gpt-6-luna",
+      "name": "GPT-6 Luna",
+      "owned_by": "openai",
+      "type": "language",
+      "context_window": 1050000,
+      "max_tokens": 128000,
+      "prices_per_1m": {
+        "input_token": 0.1,
+        "output_token": 0.5,
+        "cached_input": 0.01,
+        "cached_write": 0.125
+      }
+    },
+    {
+      "id": "openai/gpt-6-luna-fast",
+      "name": "GPT-6 Luna (Fast)",
+      "owned_by": "openai",
+      "type": "language",
+      "context_window": 1050000,
+      "max_tokens": 128000,
+      "prices_per_1m": {
+        "input_token": 0.2,
+        "output_token": 1,
+        "cached_input": 0.02,
+        "cached_write": 0.25
+      }
+    },
+    {
+      "id": "openai/gpt-6-luna-batch",
+      "name": "GPT-6 Luna (Batch)",
+      "owned_by": "openai",
+      "type": "language",
+      "context_window": 1050000,
+      "max_tokens": 128000,
+      "prices_per_1m": {
+        "input_token": 0.05,
+        "output_token": 0.25,
+        "cached_input": 0.005,
+        "cached_write": 0.0625
+      }
+    },
+    {
+      "id": "openai/gpt-6-luna-decisions",
+      "name": "GPT-6 Luna Decisions",
+      "owned_by": "openai",
+      "type": "evaluation",
+      "context_window": 1050000,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 0.1,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "openai/gpt-6-sol",
+      "name": "GPT-6 Sol",
+      "owned_by": "openai",
+      "type": "language",
+      "context_window": 1050000,
+      "max_tokens": 128000,
+      "prices_per_1m": {
+        "input_token": 2,
+        "output_token": 10,
+        "cached_input": 0.2,
+        "cached_write": 2.5
+      }
+    },
+    {
+      "id": "openai/gpt-6-sol-fast",
+      "name": "GPT-6 Sol (Fast)",
+      "owned_by": "openai",
+      "type": "language",
+      "context_window": 1050000,
+      "max_tokens": 128000,
+      "prices_per_1m": {
+        "input_token": 4,
+        "output_token": 20,
+        "cached_input": 0.4,
+        "cached_write": 5
+      }
+    },
+    {
+      "id": "openai/gpt-6-sol-batch",
+      "name": "GPT-6 Sol (Batch)",
+      "owned_by": "openai",
+      "type": "language",
+      "context_window": 1050000,
+      "max_tokens": 128000,
+      "prices_per_1m": {
+        "input_token": 1,
+        "output_token": 5,
+        "cached_input": 0.1,
+        "cached_write": 1.25
+      }
+    },
+    {
+      "id": "openai/gpt-6.1-sol",
+      "name": "GPT-6.1 Sol",
+      "owned_by": "openai",
+      "type": "language",
+      "context_window": 1050000,
+      "max_tokens": 128000,
+      "prices_per_1m": {
+        "input_token": 2,
+        "output_token": 10,
+        "cached_input": 0.1,
+        "cached_write": 2.5
+      }
+    },
+    {
+      "id": "openai/gpt-6.1-sol-fast",
+      "name": "GPT-6.1 Sol (Fast)",
+      "owned_by": "openai",
+      "type": "language",
+      "context_window": 1050000,
+      "max_tokens": 128000,
+      "prices_per_1m": {
+        "input_token": 4,
+        "output_token": 20,
+        "cached_input": 0.2,
+        "cached_write": 5
+      }
+    },
+    {
+      "id": "openai/gpt-6.1-sol-batch",
+      "name": "GPT-6.1 Sol (Batch)",
+      "owned_by": "openai",
+      "type": "language",
+      "context_window": 1050000,
+      "max_tokens": 128000,
+      "prices_per_1m": {
+        "input_token": 1,
+        "output_token": 5,
+        "cached_input": 0.05,
+        "cached_write": 1.25
+      }
+    },
+    {
       "id": "openai/gpt-image-1",
       "name": "GPT Image 1",
       "owned_by": "openai",
       "type": "image",
-      "context_window": 0,
-      "max_tokens": 0,
+      "context_window": null,
+      "max_tokens": null,
       "prices_per_1m": {
         "input_token": 5,
         "output_token": 40,
@@ -9105,8 +12167,8 @@
       "name": "GPT Image 1 Mini",
       "owned_by": "openai",
       "type": "image",
-      "context_window": 0,
-      "max_tokens": 0,
+      "context_window": null,
+      "max_tokens": null,
       "prices_per_1m": {
         "input_token": 2,
         "output_token": 8,
@@ -9119,8 +12181,8 @@
       "name": "GPT Image 1.5",
       "owned_by": "openai",
       "type": "image",
-      "context_window": 0,
-      "max_tokens": 0,
+      "context_window": null,
+      "max_tokens": null,
       "prices_per_1m": {
         "input_token": 5,
         "output_token": 32,
@@ -9133,8 +12195,8 @@
       "name": "GPT Image 2",
       "owned_by": "openai",
       "type": "image",
-      "context_window": 0,
-      "max_tokens": 0,
+      "context_window": null,
+      "max_tokens": null,
       "prices_per_1m": {
         "input_token": 5,
         "output_token": 30,
@@ -9147,8 +12209,8 @@
       "name": "GPT Image 2.5 Flare",
       "owned_by": "openai",
       "type": "image",
-      "context_window": 0,
-      "max_tokens": 0,
+      "context_window": null,
+      "max_tokens": null,
       "prices_per_1m": {
         "input_token": 5,
         "output_token": 30,
@@ -9161,12 +12223,26 @@
       "name": "GPT Image 2.5 Sunburst",
       "owned_by": "openai",
       "type": "image",
-      "context_window": 0,
-      "max_tokens": 0,
+      "context_window": null,
+      "max_tokens": null,
       "prices_per_1m": {
         "input_token": 5,
         "output_token": 30,
         "cached_input": 1.25,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "openai/gpt-live-1",
+      "name": "GPT-Live 1",
+      "owned_by": "openai",
+      "type": "realtime",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
         "cached_write": null
       }
     },
@@ -9180,7 +12256,7 @@
       "prices_per_1m": {
         "input_token": 0.1,
         "output_token": 0.5,
-        "cached_input": null,
+        "cached_input": 0.1,
         "cached_write": null
       }
     },
@@ -9192,8 +12268,8 @@
       "context_window": 131072,
       "max_tokens": 8192,
       "prices_per_1m": {
-        "input_token": 0.05,
-        "output_token": 0.2,
+        "input_token": 0.03,
+        "output_token": 0.14,
         "cached_input": null,
         "cached_write": null
       }
@@ -9231,8 +12307,8 @@
       "name": "GPT-Realtime-1.5",
       "owned_by": "openai",
       "type": "realtime",
-      "context_window": 0,
-      "max_tokens": 0,
+      "context_window": null,
+      "max_tokens": null,
       "prices_per_1m": {
         "input_token": 4,
         "output_token": 16,
@@ -9245,8 +12321,8 @@
       "name": "gpt-realtime-2",
       "owned_by": "openai",
       "type": "realtime",
-      "context_window": 0,
-      "max_tokens": 0,
+      "context_window": null,
+      "max_tokens": null,
       "prices_per_1m": {
         "input_token": 4,
         "output_token": 24,
@@ -9273,12 +12349,26 @@
       "name": "GPT-Realtime mini",
       "owned_by": "openai",
       "type": "realtime",
-      "context_window": 0,
-      "max_tokens": 0,
+      "context_window": null,
+      "max_tokens": null,
       "prices_per_1m": {
         "input_token": 0.6,
         "output_token": 2.4,
         "cached_input": 0.06,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "openai/gpt-realtime-whisper",
+      "name": "gpt-realtime-whisper",
+      "owned_by": "openai",
+      "type": "transcription",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 0.0002,
+        "output_token": null,
+        "cached_input": null,
         "cached_write": null
       }
     },
@@ -9381,6 +12471,132 @@
       }
     },
     {
+      "id": "openai/text-embedding-3-large",
+      "name": "text-embedding-3-large",
+      "owned_by": "openai",
+      "type": "embedding",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 0.13,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "openai/text-embedding-3-small",
+      "name": "text-embedding-3-small",
+      "owned_by": "openai",
+      "type": "embedding",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 0.02,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "openai/text-embedding-ada-002",
+      "name": "text-embedding-ada-002",
+      "owned_by": "openai",
+      "type": "embedding",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 0.1,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "openai/tts-1",
+      "name": "TTS-1",
+      "owned_by": "openai",
+      "type": "speech",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 15,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "openai/tts-1-hd",
+      "name": "TTS-1 HD",
+      "owned_by": "openai",
+      "type": "speech",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 30,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "openai/whisper-1",
+      "name": "Whisper",
+      "owned_by": "openai",
+      "type": "transcription",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 0.0001,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "perplexity/pplx-embed-v1-0.6b",
+      "name": "Embed v1 0.6b",
+      "owned_by": "perplexity",
+      "type": "embedding",
+      "context_window": 32000,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 0.004,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "perplexity/pplx-embed-v1-4b",
+      "name": "Embed v1 4b",
+      "owned_by": "perplexity",
+      "type": "embedding",
+      "context_window": 32000,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 0.03,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "perplexity/sonar",
+      "name": "Sonar",
+      "owned_by": "perplexity",
+      "type": "language",
+      "context_window": 127000,
+      "max_tokens": 8000,
+      "prices_per_1m": {
+        "input_token": 0.25,
+        "output_token": 2.5,
+        "cached_input": null,
+        "cached_write": 0.0625
+      }
+    },
+    {
       "id": "poolside/laguna-s-2.1",
       "name": "Laguna S 2.1",
       "owned_by": "poolside",
@@ -9388,9 +12604,9 @@
       "context_window": 1000000,
       "max_tokens": 131072,
       "prices_per_1m": {
-        "input_token": 0.1,
-        "output_token": 0.2,
-        "cached_input": 0.01,
+        "input_token": 0.09,
+        "output_token": 0.18,
+        "cached_input": 0.009,
         "cached_write": null
       }
     },
@@ -9404,6 +12620,188 @@
       "prices_per_1m": {
         "input_token": 0,
         "output_token": 0,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "prodia/flux-fast-schnell",
+      "name": "Flux Schnell",
+      "owned_by": "prodia",
+      "type": "image",
+      "context_window": 512,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "quiverai/arrow-1.1",
+      "name": "Arrow 1.1",
+      "owned_by": "quiverai",
+      "type": "image",
+      "context_window": 131072,
+      "max_tokens": 131072,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "quiverai/arrow-2",
+      "name": "Arrow 2",
+      "owned_by": "quiverai",
+      "type": "language",
+      "context_window": 131072,
+      "max_tokens": 131072,
+      "prices_per_1m": {
+        "input_token": 4,
+        "output_token": 20,
+        "cached_input": 0.4,
+        "cached_write": 5
+      }
+    },
+    {
+      "id": "quiverai/arrow-2-telos",
+      "name": "Arrow 2 Telos",
+      "owned_by": "quiverai",
+      "type": "language",
+      "context_window": 131072,
+      "max_tokens": 131072,
+      "prices_per_1m": {
+        "input_token": 6,
+        "output_token": 30,
+        "cached_input": 0.6,
+        "cached_write": 7.5
+      }
+    },
+    {
+      "id": "recraft/recraft-v2",
+      "name": "Recraft V2",
+      "owned_by": "recraft",
+      "type": "image",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "recraft/recraft-v3",
+      "name": "Recraft V3",
+      "owned_by": "recraft",
+      "type": "image",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "recraft/recraft-v4",
+      "name": "Recraft V4",
+      "owned_by": "recraft",
+      "type": "image",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "recraft/recraft-v4-pro",
+      "name": "Recraft V4 Pro",
+      "owned_by": "recraft",
+      "type": "image",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "recraft/recraft-v4.1",
+      "name": "Recraft V4.1",
+      "owned_by": "recraft",
+      "type": "image",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "recraft/recraft-v4.1-flash",
+      "name": "Recraft V4.1 Flash",
+      "owned_by": "recraft",
+      "type": "image",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "recraft/recraft-v4.1-pro",
+      "name": "Recraft V4.1 Pro",
+      "owned_by": "recraft",
+      "type": "image",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "recraft/recraft-v4.1-utility",
+      "name": "Recraft V4.1 Utility",
+      "owned_by": "recraft",
+      "type": "image",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "recraft/recraft-v4.1-utility-pro",
+      "name": "Recraft V4.1 Utility Pro",
+      "owned_by": "recraft",
+      "type": "image",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
         "cached_input": null,
         "cached_write": null
       }
@@ -9465,16 +12863,30 @@
       }
     },
     {
-      "id": "stepfun/step-3.5-flash",
-      "name": "StepFun 3.5 Flash",
-      "owned_by": "stepfun",
-      "type": "language",
-      "context_window": 262114,
-      "max_tokens": 262114,
+      "id": "scaledown/scaledown-classify-1",
+      "name": "Classify-1",
+      "owned_by": "scaledown",
+      "type": "evaluation",
+      "context_window": null,
+      "max_tokens": null,
       "prices_per_1m": {
-        "input_token": 0.09,
-        "output_token": 0.3,
-        "cached_input": 0.02,
+        "input_token": 0.05,
+        "output_token": 0,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "stealth/glyph-cluster",
+      "name": "Glyph Cluster",
+      "owned_by": "stealth",
+      "type": "language",
+      "context_window": 256000,
+      "max_tokens": 256000,
+      "prices_per_1m": {
+        "input_token": 0,
+        "output_token": 0,
+        "cached_input": null,
         "cached_write": null
       }
     },
@@ -9489,6 +12901,20 @@
         "input_token": 0.2,
         "output_token": 1.15,
         "cached_input": 0.04,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "stepfun/step-5-preview",
+      "name": "Step 5 Preview",
+      "owned_by": "stepfun",
+      "type": "language",
+      "context_window": 1000000,
+      "max_tokens": 1000000,
+      "prices_per_1m": {
+        "input_token": 1,
+        "output_token": 2.7,
+        "cached_input": 0.05,
         "cached_write": null
       }
     },
@@ -9584,9 +13010,261 @@
       "context_window": 1000000,
       "max_tokens": 1000000,
       "prices_per_1m": {
-        "input_token": 0.5,
+        "input_token": 0.45,
         "output_token": 1.2,
         "cached_input": 0.1,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "topaz/proteus",
+      "name": "Proteus",
+      "owned_by": "topaz",
+      "type": "video",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "topaz/starlight-precise-2.6",
+      "name": "Starlight Precise 2.6",
+      "owned_by": "topaz",
+      "type": "video",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "topaz/wonder-3.5",
+      "name": "Wonder 3.5",
+      "owned_by": "topaz",
+      "type": "image",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "typesafe-ai/jev",
+      "name": "Jev",
+      "owned_by": "typesafe-ai",
+      "type": "evaluation",
+      "context_window": 32000,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 0.042,
+        "output_token": 0,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "voyage/rerank-2.5",
+      "name": "Voyage Rerank 2.5",
+      "owned_by": "voyage",
+      "type": "reranking",
+      "context_window": 32000,
+      "max_tokens": 32000,
+      "prices_per_1m": {
+        "input_token": 0.05,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "voyage/rerank-2.5-lite",
+      "name": "Voyage Rerank 2.5 Lite",
+      "owned_by": "voyage",
+      "type": "reranking",
+      "context_window": 32000,
+      "max_tokens": 32000,
+      "prices_per_1m": {
+        "input_token": 0.02,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "voyage/rerank-3",
+      "name": "Voyage Rerank 3",
+      "owned_by": "voyage",
+      "type": "reranking",
+      "context_window": 32000,
+      "max_tokens": 32000,
+      "prices_per_1m": {
+        "input_token": 0.05,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "voyage/rerank-3-lite",
+      "name": "Voyage Rerank 3 Lite",
+      "owned_by": "voyage",
+      "type": "reranking",
+      "context_window": 32000,
+      "max_tokens": 32000,
+      "prices_per_1m": {
+        "input_token": 0.02,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "voyage/voyage-3-large",
+      "name": "voyage-3-large",
+      "owned_by": "voyage",
+      "type": "embedding",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 0.18,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "voyage/voyage-3.5",
+      "name": "Voyage 3.5",
+      "owned_by": "voyage",
+      "type": "embedding",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 0.06,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "voyage/voyage-3.5-lite",
+      "name": "Voyage 3.5 Lite",
+      "owned_by": "voyage",
+      "type": "embedding",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 0.02,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "voyage/voyage-4",
+      "name": "Voyage 4",
+      "owned_by": "voyage",
+      "type": "embedding",
+      "context_window": 32000,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 0.06,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "voyage/voyage-4-large",
+      "name": "Voyage 4 Large",
+      "owned_by": "voyage",
+      "type": "embedding",
+      "context_window": 32000,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 0.12,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "voyage/voyage-4-lite",
+      "name": "Voyage 4 Lite",
+      "owned_by": "voyage",
+      "type": "embedding",
+      "context_window": 32000,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 0.02,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "voyage/voyage-code-2",
+      "name": "Voyage Code 2",
+      "owned_by": "voyage",
+      "type": "embedding",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 0.12,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "voyage/voyage-code-3",
+      "name": "Voyage Code 3",
+      "owned_by": "voyage",
+      "type": "embedding",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 0.18,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "voyage/voyage-finance-2",
+      "name": "Voyage Finance 2",
+      "owned_by": "voyage",
+      "type": "embedding",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 0.12,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "voyage/voyage-law-2",
+      "name": "Voyage Law 2",
+      "owned_by": "voyage",
+      "type": "embedding",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 0.12,
+        "output_token": null,
+        "cached_input": null,
         "cached_write": null
       }
     },
@@ -9633,6 +13311,20 @@
       }
     },
     {
+      "id": "spacexai/grok-4.20-multi-agent-batch",
+      "name": "Grok 4.20 Multi-Agent (Batch)",
+      "owned_by": "spacexai",
+      "type": "language",
+      "context_window": 2000000,
+      "max_tokens": 2000000,
+      "prices_per_1m": {
+        "input_token": 1,
+        "output_token": 2,
+        "cached_input": 0.16,
+        "cached_write": null
+      }
+    },
+    {
       "id": "spacexai/grok-4.20-multi-agent-beta",
       "name": "Grok 4.20 Multi Agent Beta",
       "owned_by": "spacexai",
@@ -9657,6 +13349,20 @@
         "input_token": 1.25,
         "output_token": 2.5,
         "cached_input": 0.2,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "spacexai/grok-4.20-non-reasoning-batch",
+      "name": "Grok 4.20 Non-Reasoning (Batch)",
+      "owned_by": "spacexai",
+      "type": "language",
+      "context_window": 2000000,
+      "max_tokens": 2000000,
+      "prices_per_1m": {
+        "input_token": 1,
+        "output_token": 2,
+        "cached_input": 0.16,
         "cached_write": null
       }
     },
@@ -9689,6 +13395,20 @@
       }
     },
     {
+      "id": "spacexai/grok-4.20-reasoning-batch",
+      "name": "Grok 4.20 Reasoning (Batch)",
+      "owned_by": "spacexai",
+      "type": "language",
+      "context_window": 2000000,
+      "max_tokens": 2000000,
+      "prices_per_1m": {
+        "input_token": 1,
+        "output_token": 2,
+        "cached_input": 0.16,
+        "cached_write": null
+      }
+    },
+    {
       "id": "spacexai/grok-4.20-reasoning-beta",
       "name": "Grok 4.20 Beta Reasoning",
       "owned_by": "spacexai",
@@ -9713,6 +13433,20 @@
         "input_token": 1.25,
         "output_token": 2.5,
         "cached_input": 0.2,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "spacexai/grok-4.3-batch",
+      "name": "Grok 4.3 (Batch)",
+      "owned_by": "spacexai",
+      "type": "language",
+      "context_window": 1000000,
+      "max_tokens": 1000000,
+      "prices_per_1m": {
+        "input_token": 1,
+        "output_token": 2,
+        "cached_input": 0.16,
         "cached_write": null
       }
     },
@@ -9745,6 +13479,20 @@
       }
     },
     {
+      "id": "spacexai/grok-4.7",
+      "name": "Grok 4.7",
+      "owned_by": "spacexai",
+      "type": "language",
+      "context_window": 500000,
+      "max_tokens": 500000,
+      "prices_per_1m": {
+        "input_token": 2,
+        "output_token": 6,
+        "cached_input": 0.5,
+        "cached_write": null
+      }
+    },
+    {
       "id": "spacexai/grok-build-0.1",
       "name": "Grok Build 0.1",
       "owned_by": "spacexai",
@@ -9755,6 +13503,132 @@
         "input_token": 1,
         "output_token": 2,
         "cached_input": 0.2,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "spacexai/grok-imagine-image",
+      "name": "Grok Imagine Image",
+      "owned_by": "spacexai",
+      "type": "image",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "spacexai/grok-imagine-image-2.0",
+      "name": "Grok Imagine Image 2.0",
+      "owned_by": "spacexai",
+      "type": "image",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "spacexai/grok-imagine-video",
+      "name": "Grok Imagine",
+      "owned_by": "spacexai",
+      "type": "video",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "spacexai/grok-imagine-video-1.5",
+      "name": "Grok Imagine Video 1.5",
+      "owned_by": "spacexai",
+      "type": "video",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "spacexai/grok-imagine-video-1.5-lite",
+      "name": "Grok Imagine Video 1.5 Lite",
+      "owned_by": "spacexai",
+      "type": "video",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "spacexai/grok-stt",
+      "name": "Grok STT",
+      "owned_by": "spacexai",
+      "type": "transcription",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 0,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "spacexai/grok-tts",
+      "name": "Grok TTS",
+      "owned_by": "spacexai",
+      "type": "speech",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": 15,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "spacexai/grok-voice-think-fast-1.0",
+      "name": "Grok Voice Think Fast 1.0",
+      "owned_by": "spacexai",
+      "type": "realtime",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "spacexai/grok-voice-think-fast-2.0",
+      "name": "Grok Voice Think Fast 2.0",
+      "owned_by": "spacexai",
+      "type": "realtime",
+      "context_window": null,
+      "max_tokens": null,
+      "prices_per_1m": {
+        "input_token": null,
+        "output_token": null,
+        "cached_input": null,
         "cached_write": null
       }
     },
@@ -9783,6 +13657,48 @@
         "input_token": 0.435,
         "output_token": 0.87,
         "cached_input": 0.0036,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "xiaomi/mimo-v2.6-flash",
+      "name": "MiMo V2.6 Flash",
+      "owned_by": "xiaomi",
+      "type": "language",
+      "context_window": 1048576,
+      "max_tokens": 131072,
+      "prices_per_1m": {
+        "input_token": 0.14,
+        "output_token": 0.28,
+        "cached_input": 0.0028,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "xiaomi/mimo-v2.6-pro",
+      "name": "MiMo V2.6 Pro",
+      "owned_by": "xiaomi",
+      "type": "language",
+      "context_window": 1048576,
+      "max_tokens": 131072,
+      "prices_per_1m": {
+        "input_token": 0.435,
+        "output_token": 0.87,
+        "cached_input": 0.0036,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "xiaomi/mimo-v2.6-pro-ultraspeed",
+      "name": "MiMo V2.6 Pro UltraSpeed",
+      "owned_by": "xiaomi",
+      "type": "language",
+      "context_window": 1048576,
+      "max_tokens": 131072,
+      "prices_per_1m": {
+        "input_token": 4.35,
+        "output_token": 8.7,
+        "cached_input": 0.036,
         "cached_write": null
       }
     },
@@ -9852,7 +13768,7 @@
       "prices_per_1m": {
         "input_token": 0.6,
         "output_token": 2.2,
-        "cached_input": 0.12,
+        "cached_input": null,
         "cached_write": null
       }
     },
@@ -9948,9 +13864,9 @@
       "context_window": 1000000,
       "max_tokens": 128000,
       "prices_per_1m": {
-        "input_token": 2.1,
-        "output_token": 6.6,
-        "cached_input": 0.21,
+        "input_token": 2.8,
+        "output_token": 8.8,
+        "cached_input": 0.56,
         "cached_write": null
       }
     },
@@ -9993,6 +13909,20 @@
         "input_token": 0.15,
         "output_token": 0.5,
         "cached_input": 0.03,
+        "cached_write": null
+      }
+    },
+    {
+      "id": "zai/glm-5.3-flashx",
+      "name": "GLM 5.3 FlashX",
+      "owned_by": "zai",
+      "type": "language",
+      "context_window": 1000000,
+      "max_tokens": 131072,
+      "prices_per_1m": {
+        "input_token": 0.37,
+        "output_token": 1.25,
+        "cached_input": 0.075,
         "cached_write": null
       }
     },
